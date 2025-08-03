@@ -1,4 +1,4 @@
-package com.main.app.Model;
+package com.main.app.model;
 
 public class Accessibility {
 }

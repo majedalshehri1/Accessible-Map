@@ -1,4 +1,4 @@
-package com.main.app.Controller;
+package com.main.app.controller;
 
 public class UserController {
 }
