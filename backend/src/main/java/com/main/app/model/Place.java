@@ -1,9 +1,7 @@
 package com.main.app.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.main.app.Enum.Category;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -32,7 +30,8 @@ public class Place {
     private String latitude;
 
     @NotNull
+    @Enumerated(EnumType.STRING)
     @Column(name = "place_category", nullable = false, length = Integer.MAX_VALUE)
-    private String placeCategory;
+    private Category placeCategory;
 
 }
