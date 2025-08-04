@@ -122,8 +122,8 @@ CREATE TABLE public.place (
     place_id integer NOT NULL,
     place_name character varying NOT NULL,
     longitude character varying NOT NULL,
-    latitude character varying[] NOT NULL,
-    place_catagory character varying NOT NULL
+    latitude character varying NOT NULL,
+    place_category character varying NOT NULL
 );
 
 
@@ -134,7 +134,7 @@ ALTER TABLE public.place OWNER TO postgres;
 -- Name: place_feauture; Type: TABLE; Schema: public; Owner: postgres
 --
 
-CREATE TABLE public.place_feauture (
+CREATE TABLE public.place_feature (
     id integer NOT NULL,
     place_id integer NOT NULL,
     accessibility_id integer NOT NULL,
@@ -142,14 +142,14 @@ CREATE TABLE public.place_feauture (
 );
 
 
-ALTER TABLE public.place_feauture OWNER TO postgres;
+ALTER TABLE public.place_feature OWNER TO postgres;
 
 --
 -- TOC entry 227 (class 1259 OID 24995)
 -- Name: place_feauture_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.place_feauture_id_seq
+CREATE SEQUENCE public.place_feature_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -158,7 +158,7 @@ CREATE SEQUENCE public.place_feauture_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE public.place_feauture_id_seq OWNER TO postgres;
+ALTER SEQUENCE public.place_feature_id_seq OWNER TO postgres;
 
 --
 -- TOC entry 4944 (class 0 OID 0)
@@ -166,7 +166,7 @@ ALTER SEQUENCE public.place_feauture_id_seq OWNER TO postgres;
 -- Name: place_feauture_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.place_feauture_id_seq OWNED BY public.place_feauture.id;
+ALTER SEQUENCE public.place_feature_id_seq OWNED BY public.place_feature.id;
 
 
 --
@@ -238,63 +238,45 @@ ALTER SEQUENCE public.review_review_id_seq OWNED BY public.review.review_id;
 -- TOC entry 220 (class 1259 OID 24950)
 -- Name: token; Type: TABLE; Schema: public; Owner: postgres
 --
-
 CREATE TABLE public.token (
-    token_id integer NOT NULL,
-    user_id bigint NOT NULL,
-    jwt_token character varying(255) NOT NULL,
-    issued_at timestamp with time zone,
-    expires_at timestamp with time zone NOT NULL,
-    is_revoked boolean
+                              token_id SERIAL PRIMARY KEY,
+                              jti VARCHAR(255) UNIQUE NOT NULL,
+                              token_type VARCHAR(20) NOT NULL,
+                              user_id BIGINT NOT NULL,
+                              issued_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                              expires_at TIMESTAMP WITH TIME ZONE NOT NULL,
+                              revoked BOOLEAN DEFAULT false,
+                              CONSTRAINT fk_token_user FOREIGN KEY (user_id)
+                                  REFERENCES public."user"(user_id) ON DELETE CASCADE
 );
 
-
 ALTER TABLE public.token OWNER TO postgres;
+CREATE INDEX idx_token_user ON public.token(user_id);
+
 
 --
 -- TOC entry 219 (class 1259 OID 24949)
 -- Name: token_token_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.token_token_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.token_token_id_seq OWNER TO postgres;
-
---
--- TOC entry 4947 (class 0 OID 0)
--- Dependencies: 219
--- Name: token_token_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
-ALTER SEQUENCE public.token_token_id_seq OWNED BY public.token.token_id;
 
 
 --
 -- TOC entry 218 (class 1259 OID 24941)
 -- Name: user; Type: TABLE; Schema: public; Owner: postgres
 --
-
 CREATE TABLE public."user" (
-    user_id integer NOT NULL,
-    user_name character varying,
-    user_email character varying,
-    password_hash character varying,
-    user_role character varying
+                               user_id SERIAL PRIMARY KEY,
+                               user_name character varying,
+                               user_email character varying,
+                               password_hash character varying,
+                               user_role VARCHAR(20) DEFAULT 'USER'
 );
-
 
 ALTER TABLE public."user" OWNER TO postgres;
 
 --
--- TOC entry 217 (class 1259 OID 24940)
--- Name: user_user_id_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Optional if you're using pgAdmin export, but not needed for Spring Boot init
 --
 
 CREATE SEQUENCE public.user_user_id_seq
@@ -305,17 +287,9 @@ CREATE SEQUENCE public.user_user_id_seq
     NO MAXVALUE
     CACHE 1;
 
-
 ALTER SEQUENCE public.user_user_id_seq OWNER TO postgres;
 
---
--- TOC entry 4948 (class 0 OID 0)
--- Dependencies: 217
--- Name: user_user_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
---
-
 ALTER SEQUENCE public.user_user_id_seq OWNED BY public."user".user_id;
-
 
 --
 -- TOC entry 4771 (class 2604 OID 24983)
@@ -338,7 +312,7 @@ ALTER TABLE ONLY public.place ALTER COLUMN place_id SET DEFAULT nextval('public.
 -- Name: place_feauture id; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.place_feauture ALTER COLUMN id SET DEFAULT nextval('public.place_feauture_id_seq'::regclass);
+ALTER TABLE ONLY public.place_feature ALTER COLUMN id SET DEFAULT nextval('public.place_feature_id_seq'::regclass);
 
 
 --
@@ -379,8 +353,8 @@ ALTER TABLE ONLY public.accessibility
 -- Name: place_feauture place_feauture_pkey; Type: CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.place_feauture
-    ADD CONSTRAINT place_feauture_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY public.place_feature
+    ADD CONSTRAINT place_feature_pkey PRIMARY KEY (id);
 
 
 --
@@ -424,8 +398,8 @@ ALTER TABLE ONLY public."user"
 -- Name: place_feauture accessibility_id ; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.place_feauture
-    ADD CONSTRAINT "accessibility_id " FOREIGN KEY (accessibility_id) REFERENCES public.accessibility(accessibility_id);
+ALTER TABLE ONLY public.place_feature
+    ADD CONSTRAINT "accessibility_id" FOREIGN KEY (accessibility_id) REFERENCES public.accessibility(accessibility_id);
 
 
 --
@@ -433,7 +407,7 @@ ALTER TABLE ONLY public.place_feauture
 -- Name: place_feauture place_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.place_feauture
+ALTER TABLE ONLY public.place_feature
     ADD CONSTRAINT place_id FOREIGN KEY (place_id) REFERENCES public.place(place_id);
 
 
@@ -442,8 +416,6 @@ ALTER TABLE ONLY public.place_feauture
 -- Name: review place_id; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.review
-    ADD CONSTRAINT place_id FOREIGN KEY (place_id) REFERENCES public.place(place_id) NOT VALID;
 
 
 --
@@ -461,12 +433,50 @@ ALTER TABLE ONLY public.token
 --
 
 ALTER TABLE ONLY public.review
-    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."user"(user_id) NOT VALID;
+    ADD CONSTRAINT place_id FOREIGN KEY (place_id) REFERENCES public.place(place_id);
 
+ALTER TABLE ONLY public.review
+    ADD CONSTRAINT user_id FOREIGN KEY (user_id) REFERENCES public."user"(user_id);
+CREATE INDEX idx_review_user_id ON public.review(user_id);
+CREATE INDEX idx_review_place_id ON public.review(place_id);
 
--- Completed on 2025-08-03 03:47:18
+ALTER TABLE public.user
+    ADD CONSTRAINT chk_user_role
+        CHECK (user_role IN ('ADMIN', 'USER', 'GUEST'));
+ALTER TABLE public."user"
+    ADD CONSTRAINT uk_user_email UNIQUE (user_email);
 
---
--- PostgreSQL database dump complete
---
+ALTER TABLE public.token
+DROP CONSTRAINT user_id,
+ADD CONSTRAINT fk_token_user
+FOREIGN KEY (user_id)
+REFERENCES public."user"(user_id)
+ON DELETE CASCADE;
 
+ALTER TABLE public.review
+DROP CONSTRAINT user_id,
+ADD CONSTRAINT fk_review_user
+FOREIGN KEY (user_id)
+REFERENCES public."user"(user_id)
+ON DELETE SET NULL;
+
+ALTER TABLE public.review
+DROP CONSTRAINT place_id,
+ADD CONSTRAINT fk_review_place
+FOREIGN KEY (place_id)
+REFERENCES public.place(place_id)
+ON DELETE RESTRICT;
+
+ALTER TABLE public.place_feature
+DROP CONSTRAINT "accessibility_id",
+ADD CONSTRAINT fk_feature_accessibility
+FOREIGN KEY (accessibility_id)
+REFERENCES public.accessibility(accessibility_id)
+ON DELETE RESTRICT;
+
+ALTER TABLE public.place_feature
+DROP CONSTRAINT place_id,
+ADD CONSTRAINT fk_feature_place
+FOREIGN KEY (place_id)
+REFERENCES public.place(place_id)
+ON DELETE CASCADE;
