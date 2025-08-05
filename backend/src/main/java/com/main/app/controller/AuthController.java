@@ -25,11 +25,11 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-
+    
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.existsByUserEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, " Email already in use");
         }
 
         User user = new User();
