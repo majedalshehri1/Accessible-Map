@@ -36,7 +36,7 @@ public class Place {
     @Column(name = "place_category", nullable = false, length = Integer.MAX_VALUE)
     private Category placeCategory;
 
-    @OneToMany(mappedBy = "place_id", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List <Review> reviews;
 
     @OneToMany(mappedBy = "place",  fetch = FetchType.LAZY, cascade = CascadeType.ALL)

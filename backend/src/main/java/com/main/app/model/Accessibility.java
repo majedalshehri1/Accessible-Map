@@ -15,7 +15,7 @@ import java.util.Set;
 public class Accessibility {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "accessibility_id", nullable = false)
     private Long id;
 
 
