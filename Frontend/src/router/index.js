@@ -1,4 +1,5 @@
 import AppLayout from "@/layout/AppLayout.vue";
+import RequestPlaceView from "@/views/RequestPlaceView.vue";
 import { createRouter, createWebHistory } from "vue-router"
 
 
@@ -16,6 +17,11 @@ const routes = [
         path: '',
         name: 'Home',
         component: HomeView,
+      },
+      {
+        path: '/newPlace',
+        name: 'AddPlace',
+        component: RequestPlaceView,
       },
     ],
   },
