@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collections;
 @Service
 @RequiredArgsConstructor
-public class UserDetailsServiceImpl implements UserDetailsService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
 
     @Override
@@ -25,5 +25,15 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getPasswordHash(),
                 Collections.singleton(new SimpleGrantedAuthority(user.getUserRole().name()))
         );
+
     }
+
+    // check for it
+//    public User updateUserInfo(User user) {
+//        if(user.getUserName() != null) {
+//            user.setUserName(user.getUserName());
+//        }
+//        return null;
+//
+//    }
 }

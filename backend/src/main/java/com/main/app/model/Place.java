@@ -15,7 +15,7 @@ public class Place {
     @Id
     @ColumnDefault("nextval('place_place_id_seq')")
     @Column(name = "place_id", nullable = false)
-    private Integer id;
+    private Long id;
 
     @NotNull
     @Column(name = "place_name", nullable = false, length = Integer.MAX_VALUE)
