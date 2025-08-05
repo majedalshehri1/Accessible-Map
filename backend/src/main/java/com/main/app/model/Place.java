@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 
+import java.util.List;
+
 @Getter
 @Setter
 @Entity
@@ -33,5 +35,13 @@ public class Place {
     @Enumerated(EnumType.STRING)
     @Column(name = "place_category", nullable = false, length = Integer.MAX_VALUE)
     private Category placeCategory;
+
+    @OneToMany(mappedBy = "place_id", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List <Review> reviews;
+
+    @OneToMany(mappedBy = "place",  fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PlaceFeature> placeFeatures;
+
+
 
 }
