@@ -10,5 +10,4 @@ public class ReviewRequestDTO {
     private Long placeId;
     private String description;
     private Integer rating;
-    private List<AccessibillityType> accessibilityFeatures; // Features available at this place
 }

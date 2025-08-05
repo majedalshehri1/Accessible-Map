@@ -10,8 +10,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class AccessibillityService {
-
+public class AccessibilityService {
 
     private final AccessibilityRepository accessibilityRepository;
 
@@ -28,11 +27,11 @@ public class AccessibillityService {
         return accessibilityRepository.save(accessibility);
     }
 
-    public Accessibility updatedAccessibillity(Long id, Accessibility updatedAccessibillity) {
+    public Accessibility updatedAccessibility(Long id, Accessibility updatedAccessibility) {
         Accessibility existing = accessibilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Accessibility not found with ID: " + id));
 
-        existing.setType(updatedAccessibillity.getType());
+        existing.setType(updatedAccessibility.getType());
         return accessibilityRepository.save(existing);
     }
 

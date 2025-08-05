@@ -40,27 +40,10 @@ public class ReviewService {
         review.setRating(reviewDTO.getRating());
         Review savedReview = reviewRepository.save(review);
 
-        if (reviewDTO.getAccessibilityFeatures() != null && !reviewDTO.getAccessibilityFeatures().isEmpty()) {
-            updatePlaceFeatures(place, reviewDTO.getAccessibilityFeatures());
-        }
 
         return convertToDTO(savedReview);
     }
 
-    private void updatePlaceFeatures(Place place, List<AccessibillityType> features) {
-        placeFeatureRepository.deleteByPlace(place);
-
-        features.forEach(featureType -> {
-            Accessibility accessibility = accessibilityRepository.findByType(featureType)
-                    .orElseThrow(() -> new RuntimeException("Accessibility type not found"));
-
-            PlaceFeature placeFeature = new PlaceFeature();
-            placeFeature.setPlace(place);
-            placeFeature.setAccessibility(accessibility);
-            placeFeature.setAvaliable(true);
-            placeFeatureRepository.save(placeFeature);
-        });
-    }
 
     public List<ReviewResponseDTO> getReviewsByPlace(Long placeId) {
         return reviewRepository.findByPlaceId(placeId)
@@ -110,7 +93,6 @@ public class ReviewService {
         // Get accessibility features
         List<AccessibillityType> features = placeFeatureRepository.findByPlace(place)
                 .stream()
-                .filter(PlaceFeature::getAvaliable)
                 .map(pf -> pf.getAccessibility().getType())
                 .collect(Collectors.toList());
         dto.setAvailableFeatures(features);
