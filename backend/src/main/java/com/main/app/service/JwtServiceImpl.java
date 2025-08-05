@@ -28,7 +28,6 @@ public class JwtServiceImpl implements JwtService {
     public void init() {
         this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
-        // If you need to store it as base64 for later use:
         String base64Key = Encoders.BASE64.encode(key.getEncoded());
         System.out.println("Generated JWT Key: " + base64Key);
     }
