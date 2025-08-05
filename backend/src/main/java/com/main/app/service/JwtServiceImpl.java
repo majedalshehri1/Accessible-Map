@@ -8,7 +8,6 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
-import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -24,14 +23,13 @@ import java.util.function.Function;
 public class JwtServiceImpl implements JwtService {
     private final TokenRepository tokenRepository;
     private Key key;
-
-    public void init() {
-        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-        // If you need to store it as base64 for later use:
-        String base64Key = Encoders.BASE64.encode(key.getEncoded());
-        System.out.println("Generated JWT Key: " + base64Key);
-    }
+//    private static final String SECRET_KEY = "your-256-bit-secret-change-this-in-production";
+//
+//    @PostConstruct
+//    public void init() {
+//        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+//        this.key = Keys.hmacShaKeyFor(keyBytes);
+//    }
 
     @Override
     public String generateAccessToken(User user) {
@@ -40,7 +38,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String generateRefreshToken(User user) {
-        return generateToken(new HashMap<>(), user, TokenType.REFRESH, 7 * 24 * 60 * 60 * 1000);
+        return generateToken(new HashMap<>(), user, TokenType.REFRESH, 7 * 24 * 60 * 60 * 1000); // 7 days
     }
 
     private String generateToken(Map<String, Object> extraClaims, User user, TokenType tokenType, long expiration) {

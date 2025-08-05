@@ -15,6 +15,7 @@ public class AccessibillityService {
 
     private final AccessibillityRepository accessibillityRepository;
 
+
     public List<Accessibillity> getAllAccessibillities() {
         return accessibillityRepository.findAll();
     }
