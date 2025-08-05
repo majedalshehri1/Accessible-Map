@@ -12,19 +12,15 @@ import java.util.Set;
 @Getter
 @Setter
 @Entity
-@Table(name = "accessibillity")
+@Table(name = "accessibility")
 public class Accessibillity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
 
-
     @Enumerated(EnumType.STRING)
     @Column(name = "type")
     private AccessibillityType type;
-
-    @OneToMany(mappedBy = "accessibillity")
-    private Set<PlaceFeature> placeFeatures = new LinkedHashSet<>();
 
 }

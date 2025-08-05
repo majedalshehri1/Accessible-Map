@@ -28,11 +28,4 @@ public class ReviewService {
         return reviewRepository.save(review);
     }
 
-    public Review createRatingReview(Review ratingReview) {
-        return reviewRepository.save(ratingReview);
-    }
-
-    public Review createDescription(Review description) {
-        return reviewRepository.save(description);
-    }
 }
