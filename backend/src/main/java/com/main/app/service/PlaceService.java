@@ -20,7 +20,7 @@ public class PlaceService {
         return placeRepository.findAll();
     }
 
-    public Optional <Place> getPlaceById(int id){
+    public Optional <Place> getPlaceById(Long id){
         return placeRepository.findById(id);
     }
 
@@ -32,12 +32,12 @@ public class PlaceService {
         return placeRepository.save(place);
     }
 
-    public void deletePlace(int id){
+    public void deletePlace(Long id){
         placeRepository.deleteById(id);
     }
 
     public List<Place> getPlaceCategory(Category category){
-       return placeRepository.getCategory(category);
+       return placeRepository.findByPlaceCategory(category);
 
     }
 

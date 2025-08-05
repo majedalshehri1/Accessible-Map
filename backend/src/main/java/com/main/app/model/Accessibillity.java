@@ -1,5 +1,6 @@
 package com.main.app.model;
 
+import com.main.app.Enum.AccessibillityType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,10 +17,12 @@ public class Accessibillity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
-    private Integer id;
+    private Long id;
 
+
+    @Enumerated(EnumType.STRING)
     @Column(name = "type")
-    private List<String> type;
+    private AccessibillityType type;
 
     @OneToMany(mappedBy = "accessibillity")
     private Set<PlaceFeature> placeFeatures = new LinkedHashSet<>();

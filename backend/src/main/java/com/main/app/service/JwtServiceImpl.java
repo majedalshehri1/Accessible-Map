@@ -23,13 +23,13 @@ import java.util.function.Function;
 public class JwtServiceImpl implements JwtService {
     private final TokenRepository tokenRepository;
     private Key key;
-    private static final String SECRET_KEY = "your-256-bit-secret-change-this-in-production";
-
-    @PostConstruct
-    public void init() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+//    private static final String SECRET_KEY = "your-256-bit-secret-change-this-in-production";
+//
+//    @PostConstruct
+//    public void init() {
+//        byte[] keyBytes = Decoders.BASE64.decode(SECRET_KEY);
+//        this.key = Keys.hmacShaKeyFor(keyBytes);
+//    }
 
     @Override
     public String generateAccessToken(User user) {
