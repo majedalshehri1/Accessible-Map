@@ -1,7 +1,7 @@
 package com.main.app.service;
 
 import com.main.app.model.Accessibility;
-import com.main.app.repository.AccessibillityRepository;
+import com.main.app.repository.AccessibilityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,34 +13,34 @@ import java.util.Optional;
 public class AccessibillityService {
 
 
-    private final AccessibillityRepository accessibillityRepository;
+    private final AccessibilityRepository accessibilityRepository;
 
 
     public List<Accessibility> getAllAccessibillities() {
-        return accessibillityRepository.findAll();
+        return accessibilityRepository.findAll();
     }
 
     public Optional<Accessibility> getAccessibillityById(Long id) {
-        return accessibillityRepository.findById(id);
+        return accessibilityRepository.findById(id);
     }
 
     public Accessibility createAccessibillity(Accessibility accessibility) {
-        return accessibillityRepository.save(accessibility);
+        return accessibilityRepository.save(accessibility);
     }
 
     public Accessibility updatedAccessibillity(Long id, Accessibility updatedAccessibillity) {
-        Accessibillity existing = accessibillityRepository.findById(id)
+        Accessibility existing = accessibilityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Accessibility not found with ID: " + id));
 
         existing.setType(updatedAccessibillity.getType());
-        return accessibillityRepository.save(existing);
+        return accessibilityRepository.save(existing);
     }
 
     public void deleteAccessibillity(Long id) {
-        if (!accessibillityRepository.existsById(id)) {
+        if (!accessibilityRepository.existsById(id)) {
             throw new RuntimeException("Accessibillity not found with ID: " + id);
         }
-        accessibillityRepository.deleteById(id);
+        accessibilityRepository.deleteById(id);
     }
 
 }
