@@ -1,7 +1,7 @@
 package com.main.app.dto;
 
 public class AuthResponse {
-    private String accessToken;
+    private final String accessToken;
 
     public AuthResponse(String accessToken) {
         this.accessToken = accessToken;
