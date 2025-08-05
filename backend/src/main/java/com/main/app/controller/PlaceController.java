@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("/api/place")
+@RequestMapping("/place")
 public class PlaceController {
 
     @Autowired
@@ -29,6 +29,25 @@ public class PlaceController {
 
     @PostMapping("/create")
     public ResponseEntity<PlaceDto> createPlace(@RequestBody PlaceDto dto) {
+        Place place = new Place();
+        place.setPlaceName(dto.getPlaceName());
+        place.setLatitude(dto.getLatitude());
+        place.setLongitude(dto.getLongitude());
+        place.setPlaceCategory(dto.getCategory());
+
+        Place saved = placeService.createPlace(place);
+
+        PlaceDto response = new PlaceDto();
+        response.setPlaceName(saved.getPlaceName());
+        response.setLatitude(saved.getLatitude());
+        response.setLongitude(saved.getLongitude());
+        response.setCategory(saved.getPlaceCategory());
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update")
+    public ResponseEntity<PlaceDto> updatePlace(@RequestBody PlaceDto dto) {
         Place place = new Place();
         place.setPlaceName(dto.getPlaceName());
         place.setLatitude(dto.getLatitude());

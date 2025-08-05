@@ -15,12 +15,12 @@ import java.util.List;
 @Table(name = "place")
 public class Place {
     @Id
-    @ColumnDefault("nextval('place_place_id_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "place_id", nullable = false)
     private Long id;
 
     @NotNull
-    @Column(name = "place_name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "place_name", nullable = false)
     private String placeName;
 
     @NotNull

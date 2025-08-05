@@ -11,7 +11,7 @@ import org.hibernate.annotations.ColumnDefault;
 @Table(name = "place_feature")
 public class PlaceFeature {
     @Id
-    @ColumnDefault("nextval('place_feature_place_feature_id_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "place_feature_id", nullable = false)
     private Long id;
 

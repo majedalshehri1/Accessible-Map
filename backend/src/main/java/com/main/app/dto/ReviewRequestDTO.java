@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class ReviewRequestDTO {
     private Long placeId;
+    private Long userId;
     private String description;
     private Integer rating;
-    private List<AccessibillityType> accessibilityFeatures; // Features available at this place
 }
