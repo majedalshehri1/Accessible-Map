@@ -3,7 +3,6 @@ package com.main.app.model;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 @Getter
 @Setter
@@ -23,7 +22,10 @@ public class PlaceFeature {
     @JoinColumn(name = "accessibility_id")
     private Accessibility accessibility;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "place_id")
+    private Place place;
+
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
-
 }

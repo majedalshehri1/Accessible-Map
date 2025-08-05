@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.util.List;
 
@@ -37,11 +36,8 @@ public class Place {
     private Category placeCategory;
 
     @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private List <Review> reviews;
+    private List<Review> reviews;
 
-    @OneToMany(mappedBy = "place",  fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PlaceFeature> placeFeatures;
-
-
-
 }

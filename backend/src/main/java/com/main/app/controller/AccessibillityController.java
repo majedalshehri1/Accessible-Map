@@ -1,9 +1,10 @@
 package com.main.app.controller;
 
 import com.main.app.model.Accessibility;
-import com.main.app.service.AccessibillityService;
+import com.main.app.service.AccessibilityService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,18 +15,19 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AccessibillityController {
 
-    private  final AccessibillityService accessibillityService;
+    @Autowired
+    private AccessibilityService accessibilityService;
 
     // Get All
     @GetMapping("/all")
     public ResponseEntity<List<Accessibility>> getAllAccessibilities() {
-        return ResponseEntity.ok(accessibillityService.getAllAccessibillities());
+        return ResponseEntity.ok(accessibilityService.getAllAccessibillities());
     }
 
     // Get by ID
     @GetMapping("/{id}")
     public ResponseEntity<Accessibility> getAccessibillityById(@PathVariable Long id) {
-        return accessibillityService.getAccessibillityById(id)
+        return accessibilityService.getAccessibillityById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -33,21 +35,21 @@ public class AccessibillityController {
     // Create
     @PostMapping("/create")
     public ResponseEntity<Accessibility> create(@Valid @RequestBody Accessibility accessibillity) {
-        Accessibility created = accessibillityService.createAccessibillity(accessibillity);
+        Accessibility created = accessibilityService.createAccessibillity(accessibillity);
         return ResponseEntity.ok(created);
     }
 
     // Update
     @PutMapping("/{id}")
-    public ResponseEntity<Accessibility> updateAccessibillity(@PathVariable Long id, @Valid @RequestBody Accessibility accessibillity) {
-        Accessibility updated = accessibillityService.updatedAccessibillity(id, accessibillity);
+    public ResponseEntity<Accessibility> updateAccessibillity(@PathVariable Long id, @Valid @RequestBody Accessibility accessibility) {
+        Accessibility updated = accessibilityService.updatedAccessibility(id, accessibility);
         return ResponseEntity.ok(updated);
     }
 
     // Delete
     @DeleteMapping("/{id}")
     public ResponseEntity<Accessibility> deleteAccessibillity(@PathVariable Long id) {
-        accessibillityService.deleteAccessibillity(id);
+        accessibilityService.deleteAccessibillity(id);
         return ResponseEntity.noContent().build();
     }
 
