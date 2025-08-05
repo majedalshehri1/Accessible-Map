@@ -33,7 +33,7 @@ public class AccessibillityController {
     // Create
     @PostMapping("/create")
     public ResponseEntity<Accessibility> create(@Valid @RequestBody Accessibility accessibillity) {
-        Accessibillity created = accessibillityService.createAccessibillity(accessibillity);
+        Accessibility created = accessibillityService.createAccessibillity(accessibillity);
         return ResponseEntity.ok(created);
     }
 

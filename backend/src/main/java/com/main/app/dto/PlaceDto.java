@@ -1,7 +1,9 @@
 package com.main.app.dto;
 
 
+import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
+import com.main.app.model.Accessibility;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -18,4 +20,6 @@ public class PlaceDto {
     private String latitude;
 
     private Category category;
+
+    private AccessibillityType accessibility;
 }

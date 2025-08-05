@@ -29,7 +29,7 @@ public class AccessibillityService {
     }
 
     public Accessibility updatedAccessibillity(Long id, Accessibility updatedAccessibillity) {
-        Accessibillity existing = accessibillityRepository.findById(id)
+        Accessibility existing = accessibillityRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Accessibility not found with ID: " + id));
 
         existing.setType(updatedAccessibillity.getType());
