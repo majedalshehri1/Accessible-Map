@@ -1,5 +1,6 @@
 package com.main.app.service;
 
+import com.main.app.model.Accessibility;
 import com.main.app.model.Accessibillity;
 import com.main.app.repository.AccessibillityRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,11 +17,11 @@ public class AccessibillityService {
     private final AccessibillityRepository accessibillityRepository;
 
 
-    public List<Accessibillity> getAllAccessibillities() {
+    public List<Accessibility> getAllAccessibillities() {
         return accessibillityRepository.findAll();
     }
 
-    public Optional<Accessibillity> getAccessibillityById(Long id) {
+    public Optional<Accessibility> getAccessibillityById(Long id) {
         return accessibillityRepository.findById(id);
     }
 
@@ -28,9 +29,9 @@ public class AccessibillityService {
         return accessibillityRepository.save(accessibillity);
     }
 
-    public Accessibillity updatedAccessibillity(Long id, Accessibillity updatedAccessibillity) {
+    public Accessibility updatedAccessibillity(Long id, Accessibility updatedAccessibillity) {
         Accessibillity existing = accessibillityRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Accessibillity not found with ID: " + id));
+                .orElseThrow(() -> new RuntimeException("Accessibility not found with ID: " + id));
 
         existing.setType(updatedAccessibillity.getType());
         return accessibillityRepository.save(existing);

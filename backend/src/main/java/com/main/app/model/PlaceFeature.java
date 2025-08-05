@@ -17,7 +17,7 @@ public class PlaceFeature {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "accessibillity_id")
-    private Accessibillity accessibillity;
+    private Accessibility accessibility;
 
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
