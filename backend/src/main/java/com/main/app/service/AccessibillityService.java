@@ -1,7 +1,6 @@
 package com.main.app.service;
 
 import com.main.app.model.Accessibility;
-import com.main.app.model.Accessibillity;
 import com.main.app.repository.AccessibillityRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,8 +24,8 @@ public class AccessibillityService {
         return accessibillityRepository.findById(id);
     }
 
-    public Accessibillity createAccessibillity(Accessibillity accessibillity) {
-        return accessibillityRepository.save(accessibillity);
+    public Accessibility createAccessibillity(Accessibility accessibility) {
+        return accessibillityRepository.save(accessibility);
     }
 
     public Accessibility updatedAccessibillity(Long id, Accessibility updatedAccessibillity) {

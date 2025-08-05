@@ -24,7 +24,7 @@ public class Accessibility {
     @Column(name = "type")
     private AccessibillityType type;
 
-    @OneToMany(mappedBy = "accessibillity")
+    @OneToMany(mappedBy = "accessibility")
     private Set<PlaceFeature> placeFeatures = new LinkedHashSet<>();
 
 }
