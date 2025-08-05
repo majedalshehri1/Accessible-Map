@@ -1,38 +1,102 @@
 package com.main.app.service;
 
-import com.main.app.model.Place;
-import com.main.app.model.Review;
-import com.main.app.repository.ReviewRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.main.app.Enum.AccessibillityType;
+import com.main.app.dto.*;
+import com.main.app.model.*;
+import com.main.app.repository.*;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @Service
+@RequiredArgsConstructor
 public class ReviewService {
-    @Autowired
-    private ReviewRepository reviewRepository;
+    private final ReviewRepository reviewRepository;
+    private final PlaceRepository placeRepository;
+    private final UserRepository userRepository;
+    private final AccessibilityRepository accessibilityRepository;
+    private final PlaceFeatureRepository placeFeatureRepository;
 
-    public List<Review> findAllReviewByUserId(Long userId) {
-        return reviewRepository.findAll();
+    @Transactional
+    public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String currentUsername = authentication.getName();
+
+        User user = userRepository.findByUserEmail(currentUsername)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Place place = placeRepository.findById(reviewDTO.getPlaceId())
+                .orElseThrow(() -> new RuntimeException("Place not found"));
+
+        Review review = new Review();
+        review.setPlace(place);
+        review.setUser(user);
+        review.setDescription(reviewDTO.getDescription());
+        review.setRating(reviewDTO.getRating());
+        Review savedReview = reviewRepository.save(review);
+
+
+        return convertToDTO(savedReview);
     }
 
-    public List<Review> findAllReviewByPlace(String place) {
-        return reviewRepository.findAll();
+
+    public List<ReviewResponseDTO> getReviewsByPlace(Long placeId) {
+        return reviewRepository.findByPlaceId(placeId)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    public List<Review> findAllReviewRatingByPlace(String place) {
-        return reviewRepository.findAll();
+    public List<PlaceWithAccessibilityDTO> getPlacesWithAccessibility() {
+        return placeRepository.findAll()
+                .stream()
+                .map(this::convertToPlaceDTO)
+                .collect(Collectors.toList());
     }
 
-    public Review createReview(Review review) {
-        return reviewRepository.save(review);
+    private ReviewResponseDTO convertToDTO(Review review) {
+        ReviewResponseDTO dto = new ReviewResponseDTO();
+        dto.setId(review.getId());
+        dto.setPlaceName(review.getPlace().getPlaceName());
+        dto.setPlaceCategory(review.getPlace().getPlaceCategory());
+        dto.setUserName(review.getUser().getUserName());
+        dto.setDescription(review.getDescription());
+        dto.setRating(review.getRating());
+
+        // Get accessibility features for this place
+        List<AccessibillityType> features = placeFeatureRepository.findByPlace(review.getPlace())
+                .stream()
+                .map(pf -> pf.getAccessibility().getType())
+                .collect(Collectors.toList());
+        dto.setAccessibilityFeatures(features);
+
+        return dto;
     }
 
-    public Review createRatingReview(Review ratingReview) {
-        return reviewRepository.save(ratingReview);
-    }
+    private PlaceWithAccessibilityDTO convertToPlaceDTO(Place place) {
+        PlaceWithAccessibilityDTO dto = new PlaceWithAccessibilityDTO();
+        dto.setId(place.getId());
+        dto.setPlaceName(place.getPlaceName());
+        dto.setLongitude(place.getLongitude());
+        dto.setLatitude(place.getLatitude());
+        dto.setPlaceCategory(place.getPlaceCategory());
 
-    public Review createDescription(Review description) {
-        return reviewRepository.save(description);
+        // Get average rating
+        Double averageRating = reviewRepository.findAverageRatingByPlace(place);
+        dto.setAverageRating(averageRating != null ? averageRating : 0.0);
+
+        // Get accessibility features
+        List<AccessibillityType> features = placeFeatureRepository.findByPlace(place)
+                .stream()
+                .map(pf -> pf.getAccessibility().getType())
+                .collect(Collectors.toList());
+        dto.setAvailableFeatures(features);
+
+        return dto;
     }
 }
