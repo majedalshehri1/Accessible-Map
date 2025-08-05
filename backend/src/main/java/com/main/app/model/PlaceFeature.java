@@ -15,13 +15,9 @@ public class PlaceFeature {
     @Column(name = "place_feature_id", nullable = false)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "place_id" , nullable = false)
-    private Place place;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accessibillity_id" , nullable = false)
-    private Accessibillity accessibillity;
+    @JoinColumn(name = "accessibility_id")
+    private Accessibility accessibility;
 
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;

@@ -1,7 +1,7 @@
 package com.main.app.controller;
 
 import com.main.app.Enum.Role;
-import com.main.app.model.User;  // Changed from security User to your model User
+import com.main.app.model.User;
 import com.main.app.dto.AuthRequest;
 import com.main.app.dto.AuthResponse;
 import com.main.app.dto.RegisterRequest;
@@ -25,24 +25,21 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-
+    
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
         if (userRepository.existsByUserEmail(request.getEmail())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, " Email already in use");
         }
 
-        // Create new user entity using constructor instead of builder
         User user = new User();
         user.setUserName(request.getUsername());
         user.setUserEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
         user.setUserRole(Role.USER);
 
-        // Save user
         User savedUser = userRepository.save(user);
 
-        // Generate token
         String jwtToken = jwtService.generateAccessToken(savedUser);
 
         return ResponseEntity.ok(new AuthResponse(jwtToken));
@@ -61,6 +58,6 @@ public class AuthController {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         String jwtToken = jwtService.generateAccessToken(user);
-        return ResponseEntity.ok(new AuthResponse(jwtToken));  // Using constructor instead of builder
+        return ResponseEntity.ok(new AuthResponse(jwtToken));
     }
 }

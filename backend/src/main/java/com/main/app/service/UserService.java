@@ -27,13 +27,16 @@ public class UserService implements UserDetailsService {
         );
 
     }
+    public User updateUsername(String userEmail, String newUsername) {
+        User user = userRepository.findByUserEmail(userEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-    // check for it
-//    public User updateUserInfo(User user) {
-//        if(user.getUserName() != null) {
-//            user.setUserName(user.getUserName());
-//        }
-//        return null;
-//
-//    }
+        if (userRepository.existsByUserName(newUsername)) {
+            throw new IllegalArgumentException("Username already in use");
+        }
+
+        user.setUserName(newUsername);
+        return userRepository.save(user);
+    }
+
 }
