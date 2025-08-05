@@ -1,6 +1,7 @@
 <script setup>
 // Vue 3 Composition API imports
 import { ref } from 'vue'
+import router from '@/router'
 
 // shadcn-vue UI component imports
 import { Input } from "@/components/ui/input"
@@ -10,17 +11,19 @@ import { Button } from "@/components/ui/button"
 import { Select, SelectTrigger, SelectContent, SelectItem, SelectValue } from "@/components/ui/select"
 import { Card, CardContent } from "@/components/ui/card"
 
+//Component imports
+import Footer from '@/components/Footer.vue'
+
 // Form data reactive reference - Contains all form fields
 const form = ref({
   name: '',
   category: '',
-  location: { lat: null, lng: null },
+  services: [],
+  location: { lat: 223.344, lng: 432432.432324 },
   images: null,
-  services: [], // Array to store selected services
   agree: false
 })
 
-// Available services list - Services that can be selected for the place
 const availableServices = ref([
   { id: 'parking', name: 'مواقف المقعدين' },
   { id: 'water', name: 'دورات المياه' },
@@ -30,10 +33,8 @@ const availableServices = ref([
   { id: 'food_tables', name: 'طاولات الطعام' }
 ])
 
-// Loading state for form submission
 const isLoading = ref(false)
 
-// Form validation function - Check if required fields are filled
 const validateForm = () => {
   if (!form.value.name.trim()) {
     alert('يرجى إدخال اسم المكان')
@@ -44,28 +45,25 @@ const validateForm = () => {
     return false
   }
   if (!form.value.agree) {
-    alert('يجب الموافقة على الشروط أولاً')
+    alert('يجب الموافقة على الشروط والأحكام أولاً')
     return false
   }
   return true
 }
 
-// Toggle service selection - Add or remove service from selected list
 const toggleService = (serviceId) => {
   const index = form.value.services.indexOf(serviceId)
   if (index > -1) {
-    // Remove service if already selected
     form.value.services.splice(index, 1)
   } else {
-    // Add service if not selected
     form.value.services.push(serviceId)
   }
 }
 
-// Check if service is selected - Return true if service is in selected list
 const isServiceSelected = (serviceId) => {
   return form.value.services.includes(serviceId)
 }
+
 const handleFileChange = (event) => {
   const files = event.target.files
   if (files && files.length > 0) {
@@ -73,96 +71,69 @@ const handleFileChange = (event) => {
   }
 }
 
-// Form submission handler - Prepare data for backend
 const submitForm = async () => {
-  // Validate form before submission
   if (!validateForm()) return
 
-  // Set loading state
   isLoading.value = true
 
   try {
-    // Create FormData object for file upload
     const formData = new FormData()
-    
-    // Append text fields
     formData.append('name', form.value.name)
     formData.append('category', form.value.category)
-    
-    // Append location data as JSON string
     formData.append('location', JSON.stringify(form.value.location))
-    
-    // Append selected services as JSON array
     formData.append('services', JSON.stringify(form.value.services))
-    
-    // Append images if selected
     if (form.value.images) {
       for (let i = 0; i < form.value.images.length; i++) {
         formData.append('images', form.value.images[i])
       }
     }
-    
-    // Append agreement status
     formData.append('agree', form.value.agree)
 
-    // Log form data for debugging (remove in production)
+    // ✅ Print full form to console as requested
+    console.log("Form values:", JSON.stringify(form.value, null, 2))
+
+    // Log FormData details (optional)
     console.log("Form data prepared for backend:", {
       name: form.value.name,
       category: form.value.category,
-      location: form.value.location,
       services: form.value.services,
+      location: form.value.location,
       images: form.value.images ? form.value.images.length + ' files' : 'No files',
       agree: form.value.agree
     })
 
-    // Here you would make the API call to your backend
-    // Example: await axios.post('/api/places', formData)
-    
-    // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Success message
-    alert('تم إرسال الطلب بنجاح!')
-    
-    // Reset form after successful submission
+    alert('تم إرسال طلب إضافة المكان بنجاح!')
     resetForm()
-    
+
   } catch (error) {
     console.error('Error submitting form:', error)
     alert('حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.')
   } finally {
-    // Reset loading state
     isLoading.value = false
   }
 }
 
-// Reset form function - Clear all form fields
 const resetForm = () => {
   form.value = {
     name: '',
     category: '',
     location: { lat: null, lng: null },
     images: null,
-    services: [], // Reset services array
+    services: [],
     agree: false
   }
-  // Clear file input
   const fileInput = document.getElementById('picture')
   if (fileInput) fileInput.value = ''
 }
 
-// Handle map click - Update location coordinates
 const handleMapClick = (event) => {
-  // This will be implemented when you integrate with actual map
   console.log('Map clicked - implement with your map library')
-  // Example: form.value.location = { lat: event.lat, lng: event.lng }
 }
 
-// Go back function - Handle navigation
 const goBack = () => {
-  // Implement navigation logic here
   console.log('Going back...')
-  // Example: router.go(-1) or router.push('/previous-page')
+  router.push('/')
 }
 </script>
 
@@ -246,9 +217,6 @@ const goBack = () => {
                         ? 'border-blue-500 bg-blue-50 shadow-lg shadow-blue-100' 
                         : 'border-slate-200 bg-white hover:border-blue-300 hover:shadow-md'"
                     >
-                      <!-- Service icon -->
-                      <!-- <div class="text-3xl mb-1">{{ service.icon }}</div> -->
-                      
                       <!-- Service name -->
                       <span 
                         class="text-sm font-medium transition-colors duration-300"
@@ -326,7 +294,7 @@ const goBack = () => {
             <div class="border-t pt-6">
               <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-lg">
                 <Checkbox
-                  v-model:checked="form.agree"
+                  v-model="form.agree"
                   id="agree"
                   class="mt-1"
                   :disabled="isLoading"
@@ -337,7 +305,7 @@ const goBack = () => {
                   </Label>
                   <p class="text-xs text-slate-500">
                     بالموافقة، أنت تؤكد أن جميع المعلومات المقدمة صحيحة ودقيقة
-                  </p>
+                  </p> 
                 </div>
               </div>
             </div>
@@ -370,10 +338,9 @@ const goBack = () => {
           </form>
         </CardContent>
       </Card>
-
-      
     </div>
   </div>
+  <Footer/>  
 </template>
 
 <style scoped>
