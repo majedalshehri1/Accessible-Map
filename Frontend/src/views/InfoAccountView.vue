@@ -112,6 +112,7 @@ const getCategoryColor = (enumValue) => {
   const category = categories.value.find(cat => cat.value === enumValue)
   return category ? category.color : 'bg-gray-100 text-gray-700'
 }
+
 // Initialize component - fetch categories on mount
 onMounted(() => {
   fetchCategories()

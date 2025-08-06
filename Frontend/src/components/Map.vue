@@ -2,11 +2,37 @@
 import { onMounted, ref, watch } from 'vue';
 import L from "leaflet"
 import { useGeolocation } from '@vueuse/core';
+import { usePlaces } from '@/hooks/usePlaces';
+
+const { places, openPlaceDetails } = usePlaces()
 
 const map = ref();
 const mapContainer = ref();
 
+const markers = ref([])
+
 const { coords, error } = useGeolocation();
+
+const handleMarkerClick = (place) => {
+    // zoom to the marker if clicked
+    map.value.setView([place.lat, place.lng], 16, {
+        animate: true,
+        duration: 0.5
+    });
+
+    openPlaceDetails(place)
+}
+
+const addMarkersToMap = () => {
+    places.value.forEach(place => {
+        const marker = L.marker([place.lat, place.lng])
+            .addTo(map.value)
+            .on('click', () => handleMarkerClick(place))
+
+        markers.value.push(marker)
+    })
+
+}
 
 
 onMounted(() => {
@@ -15,6 +41,8 @@ onMounted(() => {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map.value);
+
+    addMarkersToMap()
 });
 
 watch(coords, () => {
