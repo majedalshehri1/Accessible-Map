@@ -2,6 +2,7 @@
 // Vue 3 Composition API imports
 import { ref } from 'vue'
 import router from '@/router'
+import placeServiecs from '@/services/placeServiecs'
 
 // shadcn-vue UI component imports
 import { Input } from "@/components/ui/input"
@@ -24,17 +25,20 @@ const form = ref({
   agree: false
 })
 
+
 const availableServices = ref([
-  { id: 'parking', name: 'مواقف المقعدين' },
-  { id: 'water', name: 'دورات المياه' },
-  { id: 'elevators', name: 'المنحدرات'},
-  { id: 'lifts', name: 'المصاعد' },
-  { id: 'auto_doors', name: 'أبواب أوتوماتيكية' },
-  { id: 'food_tables', name: 'طاولات الطعام' }
+  { id: 'PARKING_FOR_DISABLED', name: 'مواقف المقعدين' },
+  { id: 'ACCESSIBLE_RESTROOMS', name: 'دورات المياه' },
+  { id: 'RAMPS', name: 'المنحدرات'},
+  { id: 'ELEVATORS', name: 'المصاعد' },
+  { id: 'AUTOMATIC_DOORS', name: 'أبواب أوتوماتيكية' },
+  { id: 'ACCESSIBLE_DINING_AREAS', name: 'طاولات الطعام' }
 ])
 
+// Loading state reactive reference
 const isLoading = ref(false)
 
+// Form validation function
 const validateForm = () => {
   if (!form.value.name.trim()) {
     alert('يرجى إدخال اسم المكان')
@@ -77,32 +81,22 @@ const submitForm = async () => {
   isLoading.value = true
 
   try {
-    const formData = new FormData()
-    formData.append('name', form.value.name)
-    formData.append('category', form.value.category)
-    formData.append('location', JSON.stringify(form.value.location))
-    formData.append('services', JSON.stringify(form.value.services))
-    if (form.value.images) {
-      for (let i = 0; i < form.value.images.length; i++) {
-        formData.append('images', form.value.images[i])
-      }
-    }
-    formData.append('agree', form.value.agree)
-
-    //  Print full form to console as requested
-    console.log("Form values:", JSON.stringify(form.value, null, 2))
-
-    // Log FormData details (optional)
-    console.log("Form data prepared for backend:", {
-      name: form.value.name,
+    // Prepare the request payload
+    const requestPayload = {
+      placeName: form.value.name,
+      longitude: form.value.location.lng.toString(),
+      latitude: form.value.location.lat.toString(),
       category: form.value.category,
-      services: form.value.services,
-      location: form.value.location,
-      images: form.value.images ? form.value.images.length + ' files' : 'No files',
-      agree: form.value.agree
-    })
+      imageUrl: "Urls",
+      accessibilityFeaturse: form.value.services
+    }
 
-    await new Promise(resolve => setTimeout(resolve, 1000))
+    console.log("Request payload:", JSON.stringify(requestPayload, null, 2))
+
+    // send the request to the backend
+    const res = await placeServiecs.createPlace(requestPayload)
+    console.log('Form submitted successfully:', res.data)
+
     alert('تم إرسال طلب إضافة المكان بنجاح!')
     resetForm()
 
@@ -113,6 +107,7 @@ const submitForm = async () => {
     isLoading.value = false
   }
 }
+
 
 const resetForm = () => {
   form.value = {

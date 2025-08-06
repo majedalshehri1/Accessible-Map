@@ -1,6 +1,7 @@
 import AppLayout from "@/layout/AppLayout.vue";
 import InfoAccountView from "@/views/InfoAccountView.vue";
 import RequestPlaceView from "@/views/RequestPlaceView.vue";
+import LoginView from "@/views/LoginView.vue";
 import { createRouter, createWebHistory } from "vue-router"
 
 
@@ -28,6 +29,11 @@ const routes = [
         path: '/InfoAccount',
         name: 'InfoAccount', 
         component: InfoAccountView,
+      },
+      {
+        path: '/login',
+        name: 'login', 
+        component: LoginView,
       },
     ],
   },
