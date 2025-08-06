@@ -89,7 +89,7 @@ const submitForm = async () => {
     }
     formData.append('agree', form.value.agree)
 
-    // ✅ Print full form to console as requested
+    //  Print full form to console as requested
     console.log("Form values:", JSON.stringify(form.value, null, 2))
 
     // Log FormData details (optional)

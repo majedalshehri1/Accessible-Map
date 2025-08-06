@@ -22,10 +22,6 @@ public class PlaceFeature {
     @JoinColumn(name = "accessibility_id")
     private Accessibility accessibility;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "place_id")
-    private Place place;
-
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
 }
