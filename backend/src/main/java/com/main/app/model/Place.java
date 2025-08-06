@@ -5,7 +5,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -13,12 +14,12 @@ import org.hibernate.annotations.ColumnDefault;
 @Table(name = "place")
 public class Place {
     @Id
-    @ColumnDefault("nextval('place_place_id_seq')")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "place_id", nullable = false)
     private Long id;
 
     @NotNull
-    @Column(name = "place_name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "place_name", nullable = false)
     private String placeName;
 
     @NotNull
@@ -33,5 +34,15 @@ public class Place {
     @Enumerated(EnumType.STRING)
     @Column(name = "place_category", nullable = false, length = Integer.MAX_VALUE)
     private Category placeCategory;
+
+    @Column(name = "image_url")
+    private String imageUrl;
+
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<PlaceFeature> placeFeatures;
+
 
 }

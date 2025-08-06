@@ -12,4 +12,6 @@ import java.util.List;
 public interface PlaceRepository extends JpaRepository<Place,Long>{
 
     List<Place> findByPlaceCategory(Category category);
+
+    Place findByPlaceName(String name);
 }

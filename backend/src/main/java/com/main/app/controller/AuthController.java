@@ -1,8 +1,8 @@
 package com.main.app.controller;
 
 import com.main.app.Enum.Role;
-import com.main.app.model.User;
 import com.main.app.dto.AuthRequest;
+import com.main.app.model.User;
 import com.main.app.dto.AuthResponse;
 import com.main.app.dto.RegisterRequest;
 import com.main.app.repository.UserRepository;
