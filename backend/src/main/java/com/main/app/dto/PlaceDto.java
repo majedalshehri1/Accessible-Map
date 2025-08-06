@@ -14,6 +14,6 @@ public class PlaceDto {
     @NotBlank private String longitude;
     @NotBlank private String latitude;
     private Category category;
-    private List<AccessibillityType> accessibility;
-    private String googlePlaceId;
+    private List<AccessibillityType> accessibilityFeatures;
+    private String imageUrl;
 }
