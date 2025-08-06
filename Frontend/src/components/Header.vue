@@ -1,6 +1,11 @@
 <script setup>
 import Button from './ui/button/Button.vue';
 import Search from './Search.vue';
+import router from '@/router';
+
+const goToLogin = () => {
+  router.push('/login');
+};
 
 </script>
 
@@ -13,7 +18,7 @@ import Search from './Search.vue';
         <Search />
 
         <div class="">
-          <Button>تسجيل الدخول</Button>
+          <Button @click="goToLogin">تسجيل الدخول</Button>
         </div>
       </div>
     </div>

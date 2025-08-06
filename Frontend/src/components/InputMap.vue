@@ -38,8 +38,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-    if (map.value && onMapClick) {
-        map.value.off('click', onMapClick);
+    console.log("unmounted map")
+    if (map.value && addMarkerToMap) {
+        map.value.off('click', addMarkerToMap);
+        console.log("map click event removed")
     }
 })
 

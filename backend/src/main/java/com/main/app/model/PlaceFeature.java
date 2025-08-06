@@ -2,6 +2,7 @@ package com.main.app.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.main.app.Enum.AccessibillityType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
