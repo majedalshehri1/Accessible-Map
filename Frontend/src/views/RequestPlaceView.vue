@@ -27,13 +27,14 @@ const form = ref({
 
 
 const availableServices = ref([
-  { id: 'PARKING_FOR_DISABLED', name: 'مواقف المقعدين' },
-  { id: 'ACCESSIBLE_RESTROOMS', name: 'دورات المياه' },
-  { id: 'RAMPS', name: 'المنحدرات'},
+  { id: 'PARKING', name: 'مواقف المقعدين' },
+  { id: 'DEDICATED_RESTROOMS', name: 'دورات المياه' },
+  { id: 'RAMPS', name: 'المنحدرات' },
   { id: 'ELEVATORS', name: 'المصاعد' },
   { id: 'AUTOMATIC_DOORS', name: 'أبواب أوتوماتيكية' },
-  { id: 'ACCESSIBLE_DINING_AREAS', name: 'طاولات الطعام' }
+  { id: 'DEDICATED_DINING_TABLES', name: 'طاولات الطعام' }
 ])
+
 
 // Loading state reactive reference
 const isLoading = ref(false)
@@ -83,13 +84,13 @@ const submitForm = async () => {
   try {
     // Prepare the request payload
     const requestPayload = {
-      placeName: form.value.name,
-      longitude: form.value.location.lng.toString(),
-      latitude: form.value.location.lat.toString(),
-      category: form.value.category,
-      imageUrl: "Urls",
-      accessibilityFeaturse: form.value.services
-    }
+    placeName: form.value.name,
+    longitude: form.value.location.lng.toString(),
+    latitude: form.value.location.lat.toString(),
+    category: form.value.category, // ✅ لا تعدل الكيس، أرسلها كما هي
+    accessibility: form.value.services,
+    googlePlaceId: null
+  }
 
     console.log("Request payload:", JSON.stringify(requestPayload, null, 2))
 
@@ -178,12 +179,11 @@ const goBack = () => {
                       <SelectValue placeholder="اختر الفئة" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="restaurant">مطعم</SelectItem>
-                      <SelectItem value="cafe">كافيه</SelectItem>
-                      <SelectItem value="hospital">مستشفى</SelectItem>
-                      <SelectItem value="mall">مول</SelectItem>
-                      <SelectItem value="park">حديقة</SelectItem>
-                      <SelectItem value="gas-station">محطة وقود</SelectItem>
+                      <SelectItem value="RESTAURANT">مطعم</SelectItem>
+                      <SelectItem value="COFFEE">كافيه</SelectItem>
+                      <SelectItem value="HOSPITAL">مستشفى</SelectItem>
+                      <SelectItem value="MALL">مول</SelectItem>
+                      <SelectItem value="PARK">حديقة</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
