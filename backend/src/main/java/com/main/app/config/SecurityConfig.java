@@ -53,7 +53,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/reviews/place/**").permitAll()
                         .requestMatchers("/api/reviews/**").permitAll()
                         .requestMatchers("/api/users/**").permitAll()
-                        .anyRequest().permitAll()
+                        .anyRequest()
+                        .permitAll()
+
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
