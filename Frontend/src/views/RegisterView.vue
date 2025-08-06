@@ -8,9 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from 'vue-sonner'
 
-// Loading state
+import { useAuthStore } from '@/stores/authStore'
+
+// state
 const isRegistering = ref(false)
+const auth = useAuthStore()
 
 // Register form data
 const registerForm = ref({
@@ -22,23 +26,23 @@ const registerForm = ref({
 // Register form validation
 const validateRegisterForm = () => {
   if (!registerForm.value.name.trim()) {
-    alert('يرجى إدخال الاسم')
+    toast.error("يرجى إدخال الاسم")
     return false
   }
   if (!registerForm.value.email.trim()) {
-    alert('يرجى إدخال البريد الإلكتروني')
+    toast.error("يرجى إدخال البريد الإلكتروني")
     return false
   }
   if (!registerForm.value.password.trim()) {
-    alert('يرجى إدخال كلمة المرور')
+    toast.error("يرجى إدخال كلمة المرور")
     return false
   }
   if (!registerForm.value.email.includes('@')) {
-    alert('يرجى إدخال بريد إلكتروني صحيح')
+    toast.error("يرجى إدخال بريد إلكتروني صحيح")  
     return false
   }
   if (registerForm.value.password.length < 8) {
-    alert('كلمة المرور يجب أن تكون 8 أحرف على الأقل')
+    toast.error("يجب أن تكون كلمة المرور 8 أحرف على الأقل")
     return false
   }
   return true
@@ -47,27 +51,20 @@ const validateRegisterForm = () => {
 // Handle register submission
 const handleRegister = async () => {
   if (!validateRegisterForm()) return
-  
   isRegistering.value = true
-  
+
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Log form data for debugging
-    console.log('Register data:', registerForm.value)
-    
-    // API call would be here
-    // const response = await axios.post('/api/register', registerForm.value)
-    
-    alert('تم إنشاء الحساب بنجاح!')
-    
-    // Redirect to login page after successful registration
-    router.push('/login')
-    
-  } catch (error) {
-    console.error('Register error:', error)
-    alert('حدث خطأ في إنشاء الحساب')
+    const { name, email, password } = registerForm.value
+    auth.register({ username: name, email, password })
+
+    toast.success("تم إنشاء الحساب بنجاح", {
+      description: "مرحبًا بك!"
+    })
+    router.push('/')
+  } catch (err) {
+    toast.error("فشل إنشاء الحساب", {
+      description: "يرجى التحقق من بياناتك"
+    })
   } finally {
     isRegistering.value = false
   }

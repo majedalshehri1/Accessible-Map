@@ -73,8 +73,6 @@ const fetchCategories = async () => {
   isCategoriesLoading.value = true
   
   try {
-    // API call to get categories enum from backend
-    // const response = await fetch('/api/categories')
     const response = await fetch('')
     // const data = await response.json()
     
@@ -94,7 +92,7 @@ const fetchCategories = async () => {
     
   } catch (error) {
     console.error('Error fetching categories:', error)
-    // Fallback categories in case of error
+    
     categories.value = []
   } finally {
     isCategoriesLoading.value = false

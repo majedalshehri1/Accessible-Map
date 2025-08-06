@@ -8,9 +8,13 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { toast } from 'vue-sonner'
 
-// Loading state
+import { useAuthStore } from '@/stores/authStore'
+
+// state
 const isLoggingIn = ref(false)
+const auth = useAuthStore()
 
 // Login form data
 const loginForm = ref({
@@ -21,15 +25,15 @@ const loginForm = ref({
 // Login form validation
 const validateLoginForm = () => {
   if (!loginForm.value.email.trim()) {
-    alert('يرجى إدخال البريد الإلكتروني')
+    toast.error("يرجى إدخال البريد الإلكتروني")
     return false
   }
   if (!loginForm.value.password.trim()) {
-    alert('يرجى إدخال كلمة المرور')
+    toast.error("يرجى إدخال كلمة المرور")
     return false
   }
   if (!loginForm.value.email.includes('@')) {
-    alert('يرجى إدخال بريد إلكتروني صحيح')
+    toast.error("يرجى إدخال بريد إلكتروني صحيح")
     return false
   }
   return true
@@ -38,27 +42,21 @@ const validateLoginForm = () => {
 // Handle login submission
 const handleLogin = async () => {
   if (!validateLoginForm()) return
-  
   isLoggingIn.value = true
-  
+
   try {
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    // Log form data for debugging
-    console.log('Login data:', loginForm.value)
-    
-    // API call would be here
-    // const response = await axios.post('/api/login', loginForm.value)
-    
-    alert('تم تسجيل الدخول بنجاح!')
-    
-    // Redirect user after successful login
-    // router.push('/dashboard')
-    
-  } catch (error) {
-    console.error('Login error:', error)
-    alert('حدث خطأ في تسجيل الدخول')
+    const { email, password } = loginForm.value
+    auth.login({ email, password })
+
+    toast.success("تم تسجيل الدخول بنجاح", {
+      description: "مرحبًا بك!"
+    })
+    router.push('/')
+  } catch (err) {
+    console.error('Login error:', err)
+    toast.error("فشل تسجيل الدخول", {
+      description: "يرجى التحقق من بيانات الاعتماد الخاصة بك"
+    })
   } finally {
     isLoggingIn.value = false
   }
