@@ -3,6 +3,7 @@ package com.main.app.controller;
 import com.main.app.dto.PlaceDto;
 import com.main.app.model.Place;
 import com.main.app.service.PlaceService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,12 +29,14 @@ public class PlaceController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<PlaceDto> createPlace(@RequestBody PlaceDto dto) {
+    public ResponseEntity<PlaceDto> createPlace(@Valid @RequestBody PlaceDto dto) {
         Place place = new Place();
         place.setPlaceName(dto.getPlaceName());
         place.setLatitude(dto.getLatitude());
         place.setLongitude(dto.getLongitude());
         place.setPlaceCategory(dto.getCategory());
+        place.setPlaceCategory(dto.getCategory());
+
 
         Place saved = placeService.createPlace(place);
 

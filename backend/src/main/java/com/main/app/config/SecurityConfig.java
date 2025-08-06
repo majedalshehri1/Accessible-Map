@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers("/api/places/**").permitAll() // Allow anyone to view places
+                        .requestMatchers("/api/place/**").permitAll() // Allow anyone to view places
                         .requestMatchers("/api/reviews/place/**").permitAll() // Allow viewing reviews
                         .requestMatchers("/api/reviews/**").hasRole("USER") // Only users can submit reviews
                         .requestMatchers("/api/users/**").authenticated()
