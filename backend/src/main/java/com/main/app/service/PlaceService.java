@@ -10,7 +10,9 @@ import com.main.app.repository.PlaceRepository;
 import com.main.app.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,13 +44,17 @@ public class PlaceService {
         Place saved = placeRepository.save(place);
 
         if(dto.getAccessibilityFeatures() != null){
-            for (AccessibillityType type : dto.getAccessibilityFeatures()) {
+            List<PlaceFeature> features = new ArrayList<>();
+            for (String type : dto.getAccessibilityFeatures()) {
                 PlaceFeature feature = new PlaceFeature();
-                feature.setPlace(saved);
-                feature.setAccessibillityType(type);
+                feature.setAccessibillityType(AccessibillityType.getByName(type));
                 feature.setIsAvaliable(true);
-                placeFeatureRepository.save(feature);
+                feature.setPlace(saved);
+                features.add(feature);
             }
+            placeFeatureRepository.saveAll(features);
+            saved.setPlaceFeatures(features);
+            saved = placeRepository.save(saved);
         }
 
         return saved;
@@ -56,6 +62,10 @@ public class PlaceService {
 
     public Place updatePlace(Place place){
         return placeRepository.save(place);
+    }
+
+    public List<Place> searchPlace( String name){
+        return placeRepository.findByPlaceNameContainingIgnoreCase(name);
     }
 
     public void deletePlace(Long id){

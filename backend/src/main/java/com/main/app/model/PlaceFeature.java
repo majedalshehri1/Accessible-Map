@@ -1,5 +1,6 @@
 package com.main.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.main.app.Enum.AccessibillityType;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -17,6 +18,7 @@ public class PlaceFeature {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id", nullable = false)
+    @JsonIgnore
     private Place place;
 
     @Enumerated(EnumType.STRING)

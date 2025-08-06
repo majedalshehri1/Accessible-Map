@@ -49,7 +49,7 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        .requestMatchers("/api/places/**").permitAll()
+                        .requestMatchers("/api/place/**").permitAll()
                         .requestMatchers("/api/reviews/place/**").permitAll()
                         .requestMatchers("/api/reviews/**").hasRole("USER")
                         .requestMatchers("/api/users/**").authenticated()

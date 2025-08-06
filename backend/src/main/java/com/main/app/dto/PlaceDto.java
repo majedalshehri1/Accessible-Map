@@ -6,6 +6,7 @@ import com.main.app.Enum.Category;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -14,6 +15,6 @@ public class PlaceDto {
     @NotBlank private String longitude;
     @NotBlank private String latitude;
     private Category category;
-    private List<AccessibillityType> accessibilityFeatures;
+    private List<String> accessibilityFeatures = new ArrayList<>();
     private String imageUrl;
 }
