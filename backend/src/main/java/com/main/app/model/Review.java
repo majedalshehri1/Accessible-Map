@@ -1,5 +1,6 @@
 package com.main.app.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,6 +17,7 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "place_id")
+    @JsonIgnore
     private Place place;
 
     @Column(name = "description", length = Integer.MAX_VALUE)
