@@ -3,23 +3,17 @@ package com.main.app.dto;
 
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
-import com.main.app.model.Accessibility;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
+import java.util.List;
+
 @Data
 public class PlaceDto {
-
-    @NotBlank(message = "Place name is required")
-    private String placeName;
-
-    @NotBlank(message = "longitude is required")
-    private String longitude;
-
-    @NotBlank(message = "latitude is required")
-    private String latitude;
-
+    @NotBlank private String placeName;
+    @NotBlank private String longitude;
+    @NotBlank private String latitude;
     private Category category;
-
-    private AccessibillityType accessibility;
+    private List<AccessibillityType> accessibility;
+    private String googlePlaceId;
 }

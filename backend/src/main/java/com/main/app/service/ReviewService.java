@@ -19,7 +19,6 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final PlaceRepository placeRepository;
     private final UserRepository userRepository;
-    private final AccessibilityRepository accessibilityRepository;
     private final PlaceFeatureRepository placeFeatureRepository;
 
     @Transactional

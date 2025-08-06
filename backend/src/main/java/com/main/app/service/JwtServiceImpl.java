@@ -7,7 +7,6 @@ import com.main.app.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.io.Encoders;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
@@ -25,11 +24,10 @@ public class JwtServiceImpl implements JwtService {
     private final TokenRepository tokenRepository;
     private Key key;
 
+    @PostConstruct
     public void init() {
         this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-        String base64Key = Encoders.BASE64.encode(key.getEncoded());
-        System.out.println("Generated JWT Key: " + base64Key);
+        System.out.println("JWT Secret Key: " + Encoders.BASE64.encode(key.getEncoded()));
     }
 
     @Override
