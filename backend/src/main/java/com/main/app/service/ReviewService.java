@@ -19,7 +19,6 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final PlaceRepository placeRepository;
     private final UserRepository userRepository;
-    private final AccessibilityRepository accessibilityRepository;
     private final PlaceFeatureRepository placeFeatureRepository;
 
     @Transactional
@@ -68,12 +67,6 @@ public class ReviewService {
         dto.setDescription(review.getDescription());
         dto.setRating(review.getRating());
 
-        // Get accessibility features for this place
-        List<AccessibillityType> features = placeFeatureRepository.findByPlace(review.getPlace())
-                .stream()
-                .map(pf -> pf.getAccessibility().getType())
-                .collect(Collectors.toList());
-        dto.setAccessibilityFeatures(features);
 
         return dto;
     }

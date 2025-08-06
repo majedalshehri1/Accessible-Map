@@ -14,5 +14,4 @@ public class ReviewResponseDTO {
     private String userName;
     private String description;
     private Integer rating;
-    private List<AccessibillityType> accessibilityFeatures;
 }
