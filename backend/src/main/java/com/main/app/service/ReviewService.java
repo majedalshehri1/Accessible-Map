@@ -7,6 +7,7 @@ import com.main.app.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,7 +25,7 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-         String currentUsername = authentication.getName();
+        String currentUsername = authentication.getName();
 
         User user = userRepository.findByUserEmail(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
