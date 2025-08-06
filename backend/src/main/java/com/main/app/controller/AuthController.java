@@ -25,6 +25,7 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+
     
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -36,7 +37,6 @@ public class AuthController {
         user.setUserName(request.getUsername());
         user.setUserEmail(request.getEmail());
         user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-        user.setUserRole(Role.USER);
 
         User savedUser = userRepository.save(user);
 
