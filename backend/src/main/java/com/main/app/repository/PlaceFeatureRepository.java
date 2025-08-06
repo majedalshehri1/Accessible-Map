@@ -8,5 +8,9 @@ import java.util.List;
 
 public interface PlaceFeatureRepository extends JpaRepository<PlaceFeature, Long> {
     List<PlaceFeature> findByPlace(Place place);
-    void deleteByPlace(Place place);
+
+
+
+//    void deleteByPlace(Place place);
+//
 }

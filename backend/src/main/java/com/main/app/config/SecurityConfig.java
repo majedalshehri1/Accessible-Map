@@ -59,10 +59,10 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-        http.addFilterBefore(
-                new JwtAuthenticationFilter(jwtService, userDetailsService),
-                UsernamePasswordAuthenticationFilter.class
-        );
+//        http.addFilterBefore(
+//                new JwtAuthenticationFilter(jwtService, userDetailsService),
+//                UsernamePasswordAuthenticationFilter.class
+//        );
 
         return http.build();
     }
@@ -72,10 +72,14 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:8081","http://localhost:5173"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setExposedHeaders(List.of("Authorization"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Cache-Control", "Content-Type","Content-Type",
+                "Accept",
+                "Origin",
+                "X-Requested-With"));
+        configuration.setExposedHeaders(List.of("Authorization","Access-Token","Refresh-Token","Expires-At","M"));
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

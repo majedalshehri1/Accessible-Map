@@ -24,7 +24,7 @@ public class ReviewService {
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
+         String currentUsername = authentication.getName();
 
         User user = userRepository.findByUserEmail(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -86,7 +86,7 @@ public class ReviewService {
         // Get accessibility features
         List<AccessibillityType> features = placeFeatureRepository.findByPlace(place)
                 .stream()
-                .map(pf -> pf.getAccessibility().getType())
+                .map(PlaceFeature::getAccessibillityType)
                 .collect(Collectors.toList());
         dto.setAvailableFeatures(features);
 

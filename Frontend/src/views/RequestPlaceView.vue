@@ -14,6 +14,7 @@ import { Card, CardContent } from "@/components/ui/card"
 
 //Component imports
 import Footer from '@/components/Footer.vue'
+import InputMap from '@/components/InputMap.vue'
 
 // Form data reactive reference - Contains all form fields
 const form = ref({
@@ -77,6 +78,11 @@ const handleFileChange = (event) => {
   }
 }
 
+// sync marker location when a new marker is added
+const handleAddMarker = (newLocation) => {
+  form.value.location = newLocation;
+}
+
 const submitForm = async () => {
   if (!validateForm()) return
 
@@ -125,10 +131,6 @@ const resetForm = () => {
   }
 }
 
-const handleMapClick = (event) => {
-  console.log('Map clicked - implement with your map library')
-}
-
 const goBack = () => {
   console.log('Going back...')
   router.push('/')
@@ -139,7 +141,7 @@ const goBack = () => {
   <!-- Main container with RTL direction and modern styling -->
   <div dir="rtl" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
     <div class="max-w-2xl mx-auto">
-      
+
       <!-- Header section -->
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-slate-800 mb-2">طلب إضافة مكان جديد</h1>
@@ -249,18 +251,10 @@ const goBack = () => {
               <!-- Map placeholder -->
               <div class="space-y-2">
                 <Label class="text-sm font-medium text-slate-700">اختر الموقع على الخريطة</Label>
-                <div 
-                  @click="handleMapClick"
+                <div
                   class="h-80 bg-gradient-to-br from-slate-100 to-slate-200 rounded-xl border-2 border-dashed border-slate-300 flex flex-col items-center justify-center text-slate-500 hover:border-blue-400 transition-colors duration-200 cursor-pointer"
-                  :class="{ 'opacity-50 cursor-not-allowed': isLoading }"
-                >
-                  <div class="text-6xl mb-4">🗺️</div>
-                  <p class="text-lg font-medium">خريطة تفاعلية</p>
-                  <p class="text-sm">انقر لتحديد الموقع</p>
-                  <!-- Display selected coordinates if available -->
-                  <div v-if="form.location.lat && form.location.lng" class="mt-2 text-xs text-green-600">
-                    الموقع المحدد: {{ form.location.lat.toFixed(6) }}, {{ form.location.lng.toFixed(6) }}
-                  </div>
+                  :class="{ 'opacity-50 cursor-not-allowed': isLoading }">
+                  <InputMap @on-add-marker="handleAddMarker"/>
                 </div>
               </div>
 
@@ -270,9 +264,9 @@ const goBack = () => {
                 <div class="relative">
                   <!-- File upload input with change handler -->
                   <Input 
-                  class="h-12 cursor-pointer text-blue-600" 
-                  id="picture" 
-                  type="file" 
+                  class="h-12 cursor-pointer text-blue-600"
+                  id="picture"
+                  type="file"
                   multiple
                   accept="image/*"
                   @change="handleFileChange"

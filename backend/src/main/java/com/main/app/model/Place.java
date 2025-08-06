@@ -19,7 +19,7 @@ public class Place {
     private Long id;
 
     @NotNull
-    @Column(name = "place_name", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "place_name", nullable = false)
     private String placeName;
 
     @NotNull
@@ -35,9 +35,14 @@ public class Place {
     @Column(name = "place_category", nullable = false, length = Integer.MAX_VALUE)
     private Category placeCategory;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Review> reviews;
 
     @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<PlaceFeature> placeFeatures;
+
+
 }
