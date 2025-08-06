@@ -21,13 +21,13 @@ const form = ref({
   category: '',
   services: [],
   location: { lat: 223.344, lng: 432432.432324 },
-  images: null,
+  images: '',
   agree: false
 })
 
 
 const availableServices = ref([
-  { id: 'PARKING', name: 'مواقف المقعدين' },
+  { id: 'PARKING', name: 'مواقف' },
   { id: 'DEDICATED_RESTROOMS', name: 'دورات المياه' },
   { id: 'RAMPS', name: 'المنحدرات' },
   { id: 'ELEVATORS', name: 'المصاعد' },
@@ -36,8 +36,9 @@ const availableServices = ref([
 ])
 
 
-// Loading state reactive reference
+// refrences for inputs
 const isLoading = ref(false)
+const fileInputRef = ref(null)
 
 // Form validation function
 const validateForm = () => {
@@ -88,8 +89,8 @@ const submitForm = async () => {
     longitude: form.value.location.lng.toString(),
     latitude: form.value.location.lat.toString(),
     category: form.value.category, // ✅ لا تعدل الكيس، أرسلها كما هي
-    accessibility: form.value.services,
-    googlePlaceId: null
+    accessibilityFeatures: form.value.services,
+    imageUrl: form.value.images
   }
 
     console.log("Request payload:", JSON.stringify(requestPayload, null, 2))
@@ -119,8 +120,9 @@ const resetForm = () => {
     services: [],
     agree: false
   }
-  const fileInput = document.getElementById('picture')
-  if (fileInput) fileInput.value = ''
+  if (fileInputRef.value) {
+    fileInputRef.value.value = '' // Reset file input
+  }
 }
 
 const handleMapClick = (event) => {
@@ -268,14 +270,15 @@ const goBack = () => {
                 <div class="relative">
                   <!-- File upload input with change handler -->
                   <Input 
-                    class="h-12 cursor-pointer text-blue-600" 
-                    id="picture" 
-                    type="file" 
-                    multiple
-                    accept="image/*"
-                    @change="handleFileChange"
-                    :disabled="isLoading"
-                  />
+                  class="h-12 cursor-pointer text-blue-600" 
+                  id="picture" 
+                  type="file" 
+                  multiple
+                  accept="image/*"
+                  @change="handleFileChange"
+                  :disabled="isLoading"
+                  ref="fileInputRef"
+                />
                 </div>
                 <p class="text-xs text-slate-500">يمكنك اختيار عدة صور (أقصى حد 10 صور)</p>
                 <!-- Display selected files count -->
