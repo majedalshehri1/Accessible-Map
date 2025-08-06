@@ -21,7 +21,7 @@ const form = ref({
   name: '',
   category: '',
   services: [],
-  location: { lat: 223.344, lng: 432432.432324 },
+  location: { lat: '', lng: '' },
   images: '',
   agree: false
 })
@@ -94,9 +94,9 @@ const submitForm = async () => {
     placeName: form.value.name,
     longitude: form.value.location.lng.toString(),
     latitude: form.value.location.lat.toString(),
-    category: form.value.category, // ✅ لا تعدل الكيس، أرسلها كما هي
+    category: form.value.category,
     accessibilityFeatures: form.value.services,
-    imageUrl: form.value.images
+    imageUrl: 'https://sitechecker.pro/wp-content/uploads/2023/06/400-status-code.png'
   }
 
     console.log("Request payload:", JSON.stringify(requestPayload, null, 2))
