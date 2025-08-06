@@ -1,10 +1,16 @@
 package com.main.app.Enum;
 
-public enum Category {
-    RESTAURANT,
-    MALL,
-    COFFEE,
-    HOSPITAL,
-    PARK
+import com.fasterxml.jackson.annotation.JsonCreator;
 
+public enum Category {
+    HOSPITAL,
+    COFFEE,
+    RESTAURANT,
+    PARK,
+    MALL;
+
+    @JsonCreator
+    public static Category fromString(String value) {
+        return Category.valueOf(value.toUpperCase());
+    }
 }

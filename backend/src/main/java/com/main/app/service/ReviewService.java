@@ -86,7 +86,7 @@ public class ReviewService {
         // Get accessibility features
         List<AccessibillityType> features = placeFeatureRepository.findByPlace(place)
                 .stream()
-                .map(pf -> pf.getAccessibility().getType())
+                .map(PlaceFeature::getAccessibillityType)
                 .collect(Collectors.toList());
         dto.setAvailableFeatures(features);
 

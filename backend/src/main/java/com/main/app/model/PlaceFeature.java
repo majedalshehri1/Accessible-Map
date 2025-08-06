@@ -1,5 +1,6 @@
 package com.main.app.model;
 
+import com.main.app.Enum.AccessibillityType;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -18,9 +19,9 @@ public class PlaceFeature {
     @JoinColumn(name = "place_id", nullable = false)
     private Place place;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "accessibility_id")
-    private Accessibility accessibility;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "accessibillity_type")
+    private AccessibillityType accessibillityType;
 
     @Column(name = "is_avaliable")
     private Boolean isAvaliable;
