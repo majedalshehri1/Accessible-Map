@@ -42,8 +42,8 @@ public class PlaceController {
 
     @PostMapping("/create")
     public ResponseEntity<PlaceDto> createPlace(@Valid @RequestBody PlaceDto dto) {
-        Place saved = placeService.createPlace(dto);
-        return ResponseEntity.ok(convertToDto(saved));
+        return ResponseEntity.ok(placeService.createPlace(dto));
+
     }
     private PlaceDto convertToDto(Place place){
         PlaceDto placeDto = new PlaceDto();
@@ -67,8 +67,9 @@ public class PlaceController {
     public ResponseEntity<List<PlaceDto>> searchPlace(@RequestParam String search) {
         List<Place> places = placeService.searchPlace(search);
         List<PlaceDto> dtos = places.stream()
-                .map(this::convertToDto)
+                .map(placeService::convertToDto) // انتبه هنا نستخدم method الجديدة
                 .collect(Collectors.toList());
+
 
         return ResponseEntity.ok(dtos);
     }
@@ -94,7 +95,8 @@ public class PlaceController {
     @GetMapping("category")
     public ResponseEntity<List<PlaceDto>> getPlaceCategory(@RequestParam Category category){
         List<Place> places = placeRepository.findByPlaceCategory(category);
-        List<PlaceDto> dtos = places.stream().map(this::convertToDto).collect(Collectors.toList());
+        List<PlaceDto> dtos = places.stream().map(placeService::convertToDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
 

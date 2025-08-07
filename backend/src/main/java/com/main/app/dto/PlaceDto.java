@@ -11,10 +11,12 @@ import java.util.List;
 
 @Data
 public class PlaceDto {
+    private long id ;
     @NotBlank private String placeName;
     @NotBlank private String longitude;
     @NotBlank private String latitude;
     private Category category;
+    private List<ReviewResponseDTO> reviews;
     private List<String> accessibilityFeatures = new ArrayList<>();
     private String imageUrl;
 }
