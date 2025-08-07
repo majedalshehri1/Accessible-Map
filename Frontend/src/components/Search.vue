@@ -7,7 +7,48 @@ import Button from './ui/button/Button.vue'
 import placeServiecs from "../services/placeServiecs"
 import { usePlaces } from '@/hooks/usePlaces'
 
-const { isLoadingPlaces } = usePlaces()
+const formatPlace = (data) => {
+    console.log(data);
+
+    let rating = 0;
+    let reviewsCount = data.reviews.length;
+
+    const reviews = data.reviews.map(r => {
+        rating += r.rating
+
+        return {
+            id: r.id,
+            userName: r.user.userName,
+            rating: r.rating,
+            comment: r.description
+        }
+    });
+
+    rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
+
+    const placeFeatures = [];
+
+    data.placeFeatures.forEach(pl => {
+        if (pl.isAvaliable) {
+            placeFeatures.push(pl.accessibillityType)
+        }
+    })
+
+    return {
+        id: data.id,
+        name: data.placeName,
+        lng: data.longitude,
+        lat: data.latitude,
+        placeCategory: data.placeCategory,
+        images: [data.imageUrl],
+        reviews,
+        placeFeatures,
+        rating,
+        reviewsCount
+    }
+}
+
+const { isLoadingPlaces, places } = usePlaces()
 
 const isOpen = ref(false)
 const searchQuery = ref('')
@@ -35,7 +76,8 @@ const handleSearch = async (query) => {
 
     try {
         const { data } = await placeServiecs.getPlacesByQuery(query, { signal: controller.signal });
-        console.log(data);
+        const formatedData = data.map(formatPlace);
+        places.value = formatedData;
     } catch (err) {
         if (error.name !== 'AbortError') {
             console.error('Fetch error:', error)

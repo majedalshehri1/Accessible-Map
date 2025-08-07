@@ -5,6 +5,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Star, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import reviewServices from '@/services/reviewServices'
+import { usePlaces } from '@/hooks/usePlaces'
+
+const { selectedPlace } = usePlaces()
 
 const emit = defineEmits(['close', 'submit'])
 
@@ -34,8 +38,12 @@ const submitReview = async () => {
     isLoading.value = true
 
     try {
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500))
+        const { data } = reviewServices.createReview({
+            placeId: selectedPlace.value.id,
+            rating: form.value.rating,
+            description: form.value.comment,
+            userId: 1
+        })
 
         toast.success('ارسل التقييم بنجاح')
 

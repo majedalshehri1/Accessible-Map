@@ -5,8 +5,50 @@ import Button from './ui/button/Button.vue';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
 import { usePlaces } from '@/hooks/usePlaces';
+import placeServiecs from '@/services/placeServiecs';
 
-const { isLoadingPlaces } = usePlaces();
+const formatPlace = (data) => {
+    console.log(data);
+
+    let rating = 0;
+    let reviewsCount = data.reviews.length;
+
+    const reviews = data.reviews.map(r => {
+        rating += r.rating
+
+        return {
+            id: r.id,
+            userName: r.user.userName,
+            rating: r.rating,
+            comment: r.description
+        }
+    });
+
+    rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
+
+    const placeFeatures = [];
+
+    data.placeFeatures.forEach(pl => {
+        if (pl.isAvaliable) {
+            placeFeatures.push(pl.accessibillityType)
+        }
+    })
+
+    return {
+        id: data.id,
+        name: data.placeName,
+        lng: data.longitude,
+        lat: data.latitude,
+        placeCategory: data.placeCategory,
+        images: [data.imageUrl],
+        reviews,
+        placeFeatures,
+        rating,
+        reviewsCount
+    }
+}
+
+const { isLoadingPlaces, places } = usePlaces();
 
 const categories = [
     {
@@ -30,7 +72,9 @@ const categories = [
 ]
 
 const asyncFunc = async (category) => {
-    await new Promise((res, rej) => setTimeout(res, 2000))
+    const { data } = await placeServiecs.getPlacesByCategory(category);
+    const formatedData = data.map(formatPlace);
+    places.value = formatedData;
     currentSelectedFilter.value = category
 };
 
