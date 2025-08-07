@@ -4,14 +4,14 @@ import L from "leaflet"
 import { useGeolocation } from '@vueuse/core';
 import { usePlaces } from '@/hooks/usePlaces';
 
-const { places, openPlaceDetails } = usePlaces()
+const { places, openPlaceDetails, fetchAllPlaces } = usePlaces()
 
 const map = ref();
 const mapContainer = ref();
 
 const markers = ref([])
 
-const { coords, error } = useGeolocation();
+const { coords } = useGeolocation();
 
 const handleMarkerClick = (place) => {
     // zoom to the marker if clicked
@@ -24,7 +24,10 @@ const handleMarkerClick = (place) => {
 }
 
 const addMarkersToMap = () => {
+    console.log(places);
     places.value.forEach(place => {
+        console.log(place);
+        
         const marker = L.marker([place.lat, place.lng])
             .addTo(map.value)
             .on('click', () => handleMarkerClick(place))
@@ -35,14 +38,19 @@ const addMarkersToMap = () => {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
     map.value = L.map(mapContainer.value).setView([24.760547398165134, 46.71390262311927], 12);
     L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
         attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     }).addTo(map.value);
 
-    addMarkersToMap()
+    console.time("before fetch")
+    const fetchedPlaces = await fetchAllPlaces();
+    places.value = fetchedPlaces
+    console.time("after fetch")
+
+    addMarkersToMap();
 });
 
 watch(coords, () => {
