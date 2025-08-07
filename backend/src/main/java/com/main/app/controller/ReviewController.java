@@ -25,9 +25,9 @@ public class ReviewController {
     public ResponseEntity<List<ReviewResponseDTO>> getReviewsByPlace(@PathVariable Long placeId) {
         return ResponseEntity.ok(reviewService.getReviewsByPlace(placeId));
     }
-    @DeleteMapping("/delete/{place_id}")
-    public ResponseEntity<ReviewResponseDTO> deleteReview(@PathVariable Long placeId) {
-        reviewService.deleteReview(placeId);
+    @DeleteMapping("/delete/{review_id}")
+    public ResponseEntity<ReviewResponseDTO> deleteReview(@PathVariable("review_id") Long reviewId) {
+        reviewService.deleteReview(reviewId);
         return ResponseEntity.ok().build();
     }
     @PutMapping("/edit")
