@@ -28,7 +28,7 @@ const formatPlace = (data) => {
 
     const placeFeatures = [];
 
-    data.placeFeatures.forEach(pl => {
+    data.reviews.forEach(pl => {
         if (pl.isAvaliable) {
             placeFeatures.push(pl.accessibillityType)
         }
@@ -48,7 +48,7 @@ const formatPlace = (data) => {
     }
 }
 
-const { isLoadingPlaces, places } = usePlaces()
+const { isLoadingPlaces, places, fetchAllPlaces } = usePlaces()
 
 const isOpen = ref(false)
 const searchQuery = ref('')
@@ -65,7 +65,11 @@ const closeSearch = () => {
 }
 
 const handleSearch = async (query) => {
-    if (!query) return
+    if (query.length <= 2) {
+        const fetchedPlaces = await fetchAllPlaces();
+        places.value = fetchedPlaces;
+        return
+    }
 
     // Cancel any previous request
     if (controller) {
@@ -79,8 +83,8 @@ const handleSearch = async (query) => {
         const formatedData = data.map(formatPlace);
         places.value = formatedData;
     } catch (err) {
-        if (error.name !== 'AbortError') {
-            console.error('Fetch error:', error)
+        if (err.name !== 'AbortError') {
+            console.error('Fetch error:', err)
             toast.error("حدث خطأ اثناء تحميل البيانات")
         }
     }

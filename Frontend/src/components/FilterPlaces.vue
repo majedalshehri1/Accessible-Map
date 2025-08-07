@@ -28,7 +28,7 @@ const formatPlace = (data) => {
 
     const placeFeatures = [];
 
-    data.placeFeatures.forEach(pl => {
+    data.accessibilityFeatures.forEach(pl => {
         if (pl.isAvaliable) {
             placeFeatures.push(pl.accessibillityType)
         }
@@ -48,7 +48,7 @@ const formatPlace = (data) => {
     }
 }
 
-const { isLoadingPlaces, places } = usePlaces();
+const { isLoadingPlaces, places, fetchAllPlaces } = usePlaces();
 
 const categories = [
     {
@@ -72,17 +72,21 @@ const categories = [
 ]
 
 const asyncFunc = async (category) => {
-    const { data } = await placeServiecs.getPlacesByCategory(category);
+    const { data } = await placeServiecs.getPlacesByCategory(category.value);
     const formatedData = data.map(formatPlace);
     places.value = formatedData;
     currentSelectedFilter.value = category
 };
 
 const handleClick = async (category) => {
-    toast.promise(() => asyncFunc(category), {
-        loading: "تحميل...",
-        error: () => "حدث خطأ اثناء تحميل الأماكن",
-    });
+    if (category.value === "all") {
+        const fetchedPlaces = await fetchAllPlaces();
+        places.value = fetchedPlaces;
+        currentSelectedFilter.value = categories[0];
+        return;
+    } else {
+        await asyncFunc(category)
+    }
 }
 
 const currentSelectedFilter = ref(categories[0])
@@ -90,7 +94,7 @@ const currentSelectedFilter = ref(categories[0])
 </script>
 
 <template>
-    <div v-if="!isLoadingPlaces"
+    <div
         class="absolute top-6 left-1/2 -translate-x-1/2 flex flex-wrap gap-2 max-w-64 sm:max-w-72 md:max-w-lg mx-auto z-[800]">
         <Button v-for="category in categories" :key="category.id" @click="handleClick(category)"
             :variant="currentSelectedFilter.id === category.id ? '' : 'outline'" size="sm"

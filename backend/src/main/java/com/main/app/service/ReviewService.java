@@ -28,7 +28,7 @@ public class ReviewService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUsername = authentication.getName();
 
-        User user = userRepository.findByUserEmail(currentUsername)
+        User user = userRepository.findByUserEmail("test@example.com")
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Place place = placeRepository.findById(reviewDTO.getPlaceId())
