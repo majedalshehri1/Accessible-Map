@@ -2,7 +2,13 @@ import AppLayout from "@/layout/AppLayout.vue";
 import InfoAccountView from "@/views/InfoAccountView.vue";
 import RequestPlaceView from "@/views/RequestPlaceView.vue";
 import LoginView from "@/views/LoginView.vue";
+import RegisterView from "@/views/RegisterView.vue";
 import { createRouter, createWebHistory } from "vue-router"
+
+// import pinia and auth store
+import { useAuthStore } from '@/stores/authStore'
+import { storeToRefs } from 'pinia'
+
 
 
 const HomeView = () => import("@/views/HomeView.vue")
@@ -35,6 +41,11 @@ const routes = [
         name: 'login', 
         component: LoginView,
       },
+      {
+        path: '/register',
+        name: 'register', 
+        component: RegisterView,
+      },
     ],
   },
 ];
@@ -45,8 +56,25 @@ const router = createRouter({
 });
 
 // Global gurads
-router.beforeEach((to, from, next) => { console.log(`checking pre route gurads from ${from.fullPath} to ${to.fullPath}`); next() });
+router.beforeEach((to, from, next) => {
+  console.log(`checking before route guards from ${from.fullPath} to ${to.fullPath}`);
 
-router.afterEach((to, from) => { console.log(`checking after route gurads from ${from.fullPath} to ${to.fullPath}`); });
+  const authStore = useAuthStore();
+  const { user } = storeToRefs(authStore);
+
+  // Allow access to home, login, and register for everyone
+  if (to.path === '/' || to.name === 'login' || to.name === 'register') {
+    next();
+    return;
+  }
+
+  // For all other routes, require login
+  if (!user.value) {
+    next({ name: 'login' });
+  } else {
+    next();
+  }
+});
+
 
 export default router

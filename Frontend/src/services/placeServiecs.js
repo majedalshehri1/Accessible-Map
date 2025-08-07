@@ -8,7 +8,7 @@ export default {
         return axiosClient.get(`/place/${id}`);
     },
     createPlace(placeData) {
-        return axiosClient.post("/place", placeData);
+        return axiosClient.post("/place/create", placeData);
     },
     deletePlace(id) {
         return axiosClient.delete(`/place/${id}`);

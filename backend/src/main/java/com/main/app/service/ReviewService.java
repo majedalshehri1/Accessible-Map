@@ -7,6 +7,7 @@ import com.main.app.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,10 +22,11 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final PlaceFeatureRepository placeFeatureRepository;
 
+
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-         String currentUsername = authentication.getName();
+        String currentUsername = authentication.getName();
 
         User user = userRepository.findByUserEmail(currentUsername)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -92,4 +94,19 @@ public class ReviewService {
 
         return dto;
     }
+    public void deleteReview(Long reviewId) {
+        reviewRepository.deleteById(reviewId);
+    }
+    public ReviewResponseDTO editReview(Long reviewId, ReviewRequestDTO reviewDTO) {
+        Review review =  reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new RuntimeException("Review not found"));
+        if (!review.getUser().getUserId().equals(review.getUser().getUserId())) {
+            throw new RuntimeException("Not authorized to edit review");
+        }
+        review.setDescription(reviewDTO.getDescription());
+        review.setRating(reviewDTO.getRating());
+        Review updatedReview = reviewRepository.save(review);
+        return convertToDTO(updatedReview);
+    }
 }
+
