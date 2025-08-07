@@ -1,49 +1,90 @@
 import { ref } from "vue";
 
+import placeServiecs from "@/services/placeServiecs";
+
 const selectedPlace = ref(null)
 const isDrawerOpen = ref(false);
 
-const places = ref([
-    {
-        id: 1,
-        name: "Riyadh Mall",
-        lat: 24.960547398165134,
-        lng: 46.71390262311927,
-        images: [
-            "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400",
-            "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400",
-            "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400",
-        ],
-        accessibility: {
-            elevator: true,
-            parking: true,
-            toilets: true,
-            ramps: true,
-            brailleSignage: false
-        },
-        rating: 4.2,
-        reviewsCount: 156,
-        reviews: [
-            {
-                id: 1,
-                userName: "Ahmed Al-Salem",
-                rating: 5,
-                comment: "Great accessibility features, very wheelchair friendly!",
-                date: "2024-01-15"
-            },
-            {
-                id: 2,
-                userName: "Sara Mohammed",
-                rating: 4,
-                comment: "Good facilities but could use more disabled parking spots.",
-                date: "2024-01-10"
-            }
-        ]
-    },
-    // Add more places...
-]);
+const isLoadingPlaces = ref(false);
+
+const formatPlace = (data) => {
+    console.log(data);
+
+    let rating = 0;
+    let reviewsCount = data.reviews.length;
+
+    const reviews = data.reviews.map(r => {
+        rating += r.rating
+
+        return {
+            id: r.id,
+            userName: r.user.userName,
+            rating: r.rating,
+            comment: r.description
+        }
+    });
+
+    rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
+
+    const placeFeatures = [];
+
+    data.placeFeatures.forEach(pl => {
+        if (pl.isAvaliable) {
+            placeFeatures.push(pl.accessibillityType)
+        }
+    })
+
+    return {
+        id: data.id,
+        name: data.placeName,
+        lng: data.longitude,
+        lat: data.latitude,
+        placeCategory: data.placeCategory,
+        images: [data.imageUrl],
+        reviews,
+        placeFeatures,
+        rating,
+        reviewsCount
+    }
+}
+
+const places = ref([]);
+
+const fetchAllPlaces = async () => {
+    try {
+        isLoadingPlaces.value = true;
+        console.log(isLoadingPlaces);
+        
+        const { data } = await placeServiecs.getAllPlaces();
+
+        const formatedData = data.map(formatPlace)
+
+        return formatedData;
+    } catch (error) {
+        console.log(error);
+    } finally {
+        isLoadingPlaces.value = false;
+    }
+}
+
+const fetchPlacesByCategory = async (category) => {
+    try {
+        isLoadingPlaces.value = true;
+        const { data } = await placeServiecs.getPlacesByCategory(category);
+
+        const formatedData = data.map(formatPlace)
+
+        return formatedData;
+    } catch (error) {
+        console.log(error);
+    } finally {
+        isLoadingPlaces.value = false;
+    }
+}
 
 const openPlaceDetails = (place) => {
+    console.log(place);
+    
     selectedPlace.value = place
     isDrawerOpen.value = true;
     console.log("this is showen");
@@ -60,6 +101,8 @@ export const usePlaces = () => {
         places,
         selectedPlace,
         isDrawerOpen,
+        isLoadingPlaces,
+        fetchAllPlaces,
         openPlaceDetails,
         closePlaceDetails
     }

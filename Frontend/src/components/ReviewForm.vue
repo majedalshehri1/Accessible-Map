@@ -5,6 +5,10 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Star, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
+import reviewServices from '@/services/reviewServices'
+import { usePlaces } from '@/hooks/usePlaces'
+
+const { selectedPlace } = usePlaces()
 
 const emit = defineEmits(['close', 'submit'])
 
@@ -15,6 +19,7 @@ const form = ref({
 })
 
 const hoverRating = ref(0)
+const isLoading = ref(false)
 
 const setRating = (rating) => {
     form.value.rating = rating
@@ -24,32 +29,58 @@ const setHoverRating = (rating) => {
     hoverRating.value = rating
 }
 
-const submitReview = () => {
-    // Here you would typically send the review to your API
-    console.log('Submitting review:', form.value)
+const submitReview = async () => {
+    if (!form.value.userName || !form.value.comment || form.value.rating === 0) {
+        toast.error('يرجى تعبئة جميع الحقول وتحديد التقييم')
+        return
+    }
 
-    toast.success("ارسل التقييم بنجاح", {
-        description: "اختبار لتقييم......................."
-    })
+    isLoading.value = true
 
-    // Reset form
-    form.value = { rating: 0, comment: '' }
+    try {
+        const { data } = reviewServices.createReview({
+            placeId: selectedPlace.value.id,
+            rating: form.value.rating,
+            description: form.value.comment,
+            userId: 1
+        })
 
-    emit('submit')
+        toast.success('ارسل التقييم بنجاح')
+
+        // Reset form
+        form.value = {
+            userName: '',
+            rating: 0,
+            comment: ''
+        }
+
+        emit('submit')
+    } catch (error) {
+        toast.error('فشل في إرسال التقييم. حاول مرة أخرى.')
+    } finally {
+        isLoading.value = false
+    }
 }
 </script>
 
+
 <template>
-    <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+    <div class="fixed inset-0 bg-zinc-950/80 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold">اضف تقييم</h3>
-                <Button variant="ghost" size="sm" @click="emit('close')">
+                <Button variant="ghost" size="sm" @click="emit('close')" :disabled="isLoading">
                     <X class="h-4 w-4" />
                 </Button>
             </div>
 
             <form @submit.prevent="submitReview" class="space-y-4">
+                <div>
+                    <Label for="userName">الاسم</Label>
+                    <input id="userName" v-model="form.userName" type="text" placeholder="اسم المستخدم" required
+                        class="w-full border rounded px-3 py-2 mt-1 text-sm" :disabled="isLoading" />
+                </div>
+
                 <div>
                     <Label>التقييم</Label>
                     <div class="flex gap-1 mt-1.5">
@@ -62,14 +93,16 @@ const submitReview = () => {
 
                 <div>
                     <Label for="comment">التعليق</Label>
-                    <Textarea id="comment" v-model="form.comment" placeholder="شاركنا تجربتك..." rows="4" required />
+                    <Textarea id="comment" v-model="form.comment" placeholder="شاركنا تجربتك..." rows="4" required
+                        :disabled="isLoading" />
                 </div>
 
                 <div class="flex gap-2 pt-2">
-                    <Button type="submit" :disabled="!form.rating">
-                        ارسل التقييم
+                    <Button type="submit" :disabled="isLoading" class="bg-blue-600 hover:bg-blue-700 ring-blue-300">
+                        <span v-if="isLoading">جاري الإرسال...</span>
+                        <span v-else>ارسل التقييم</span>
                     </Button>
-                    <Button type="button" variant="outline" @click="emit('close')">
+                    <Button type="button" variant="outline" @click="emit('close')" :disabled="isLoading">
                         الغاء
                     </Button>
                 </div>
