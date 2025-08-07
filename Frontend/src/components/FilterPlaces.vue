@@ -1,40 +1,61 @@
 <script setup>
-import { CheckCircle, Coffee, Hospital, Trees, Utensils } from 'lucide-vue-next';
+import { CheckCircle, Coffee, Hospital, ShoppingBag, Trees, Utensils } from 'lucide-vue-next';
 
 import Button from './ui/button/Button.vue';
 import { ref } from 'vue';
+import { toast } from 'vue-sonner';
+import { usePlaces } from '@/hooks/usePlaces';
 
-const currentSelectedFilter = ref(1)
+const { isLoadingPlaces } = usePlaces();
 
 const categories = [
     {
         id: 0, label: "الكل", value: "all"
     },
     {
-        id: 1, label: "المطاعم", icon: Utensils, value: "resturant"
+        id: 1, label: "المطاعم", icon: Utensils, value: "RESTAURANT"
     },
     {
-        id: 2, label: "المقاهي", icon: Coffee, value: "coffe"
+        id: 2, label: "المقاهي", icon: Coffee, value: "COFFEE"
     },
     {
-        id: 3, label: "المنتزهات", icon: Trees, value: "parks"
+        id: 3, label: "المنتزهات", icon: Trees, value: "PARK"
     },
     {
-        id: 4, label: "المستشفيات", icon: Hospital, value: "hospita;"
+        id: 4, label: "المستشفيات", icon: Hospital, value: "HOSPITAL"
+    },
+    {
+        id: 5, label: "أسواق", icon: ShoppingBag, value: "MALL"
     },
 ]
+
+const asyncFunc = async (category) => {
+    await new Promise((res, rej) => setTimeout(res, 2000))
+    currentSelectedFilter.value = category
+};
+
+const handleClick = async (category) => {
+    toast.promise(() => asyncFunc(category), {
+        loading: "تحميل...",
+        error: () => "حدث خطأ اثناء تحميل الأماكن",
+    });
+}
+
+const currentSelectedFilter = ref(categories[0])
 
 </script>
 
 <template>
-    <div
+    <div v-if="!isLoadingPlaces"
         class="absolute top-6 left-1/2 -translate-x-1/2 flex flex-wrap gap-2 max-w-64 sm:max-w-72 md:max-w-lg mx-auto z-[800]">
-        <Button v-for="{ id, label, icon, value } in categories" :key="id" @click="currentSelectedFilter = id"
-            :variant="currentSelectedFilter === id ? '' : 'outline'" size="sm" class="relative flex-[1_1_0%]">
-            <CheckCircle v-if="currentSelectedFilter === id"
-                class="absolute -top-1 right-0 translate-x-1/2 h-2 w-2 fill-zinc-100 stroke-zinc-900 z-[801]" />
-            <component v-if="icon" :is="icon" class="h-4 w-4 mr-2" />
-            {{ label }}
+        <Button v-for="category in categories" :key="category.id" @click="handleClick(category)"
+            :variant="currentSelectedFilter.id === category.id ? '' : 'outline'" size="sm"
+            class="relative flex-[1_1_0%]"
+            :class="currentSelectedFilter.id === category.id && 'bg-blue-600 hover:bg-blue-700 ring-blue-300'">
+            <CheckCircle v-if="currentSelectedFilter.id === category.id"
+                class="absolute -top-1 right-0 translate-x-1/2 h-2 w-2 fill-zinc-100 stroke-blue-600 z-[801]" />
+            <component v-if="category.icon" :is="category.icon" class="h-4 w-4 mr-2" />
+            {{ category.label }}
         </Button>
     </div>
 </template>

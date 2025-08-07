@@ -12,5 +12,11 @@ export default {
     },
     deletePlace(id) {
         return axiosClient.delete(`/place/${id}`);
+    },
+    getPlacesByCategory(category) {
+        return axiosClient.get(`/place/category?category=${encodeURIComponent(category)}`)
+    },
+    getPlacesByQuery(query) {
+        return axiosClient.get(`/place/search?search=${query}`)
     }
 }

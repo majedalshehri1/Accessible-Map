@@ -13,7 +13,7 @@ import Search from './Search.vue';
         <Search />
 
         <div class="">
-          <Button>تسجيل الدخول</Button>
+          <Button @click="goToLogin" class="bg-blue-600 hover:bg-blue-700 ring-blue-300">تسجيل الدخول</Button>
         </div>
       </div>
     </div>

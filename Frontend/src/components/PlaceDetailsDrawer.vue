@@ -18,8 +18,22 @@ import { usePlaces } from '@/hooks/usePlaces'
 import Carousel from './Carousel.vue'
 import AccessibilityDetails from './AccessibilityDetails.vue'
 import Reviews from './Reviews.vue'
+import { watchEffect } from 'vue'
 
-const { selectedPlace, isDrawerOpen, closePlaceDetails } = usePlaces()
+const { selectedPlace, isDrawerOpen, closePlaceDetails } = usePlaces();
+
+const categories = {
+    "RESTAURANT": "المطاعم",
+    "COFFEE": "المقاهي",
+    "PARK": "المنتزهات",
+    "HOSPITAL": "المستشفيات",
+    "MALL": "أسواق"
+
+}
+
+watchEffect(() => {
+   console.log(selectedPlace.value);
+})
 
 </script>
 
@@ -28,8 +42,9 @@ const { selectedPlace, isDrawerOpen, closePlaceDetails } = usePlaces()
         <DrawerContent class="h-[80vh] z-900">
             <DrawerHeader class="border-b">
                 <div class="flex items-center justify-between">
-                    <DrawerTitle class="text-xl">
-                        {{ selectedPlace?.name }}
+                    <DrawerTitle>
+                        <span class="text-3xl font-medium block text-blue-500">{{ selectedPlace?.name }}</span>
+                        <span class="text-xs text-zinc-400">{{ categories[selectedPlace?.placeCategory] || "" }}</span>
                     </DrawerTitle>
                     <DrawerClose as-child>
                         <Button variant="ghost" size="sm">
@@ -52,7 +67,7 @@ const { selectedPlace, isDrawerOpen, closePlaceDetails } = usePlaces()
                         </TabsList>
 
                         <TabsContent value="accessibility" class="mt-4" dir="rtl">
-                            <AccessibilityDetails :accessibility="selectedPlace.accessibility" />
+                            <AccessibilityDetails :place-features="selectedPlace.placeFeatures" />
                         </TabsContent>
 
                         <TabsContent value="reviews" class="mt-4" dir="rtl">
