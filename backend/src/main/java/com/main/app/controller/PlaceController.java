@@ -2,6 +2,7 @@ package com.main.app.controller;
 
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
+import com.main.app.Exceptions.PlaceNotFoundException;
 import com.main.app.dto.PlaceDto;
 import com.main.app.model.Place;
 import com.main.app.model.PlaceFeature;
@@ -36,40 +37,28 @@ public class PlaceController {
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<Optional<Place>> getPlaceById(@PathVariable Long id){
-        return ResponseEntity.ok(placeService.getPlaceById(id));
+    public ResponseEntity<PlaceDto> getPlaceById(@PathVariable Long id){
+        Place place = placeService.getPlaceOrThrow(id);
+        return ResponseEntity.ok(placeService.convertToDto(place));
     }
 
     @PostMapping("/create")
     public ResponseEntity<PlaceDto> createPlace(@Valid @RequestBody PlaceDto dto) {
-        return ResponseEntity.ok(placeService.createPlace(dto));
-
-    }
-    private PlaceDto convertToDto(Place place){
-        PlaceDto placeDto = new PlaceDto();
-        placeDto.setPlaceName(place.getPlaceName());
-        placeDto.setLongitude(place.getLongitude());
-        placeDto.setLatitude(place.getLatitude());
-        placeDto.setCategory(place.getPlaceCategory());
-        placeDto.setImageUrl(place.getImageUrl());
-
-//        List<AccessibillityType> features = placeFeatureRepository.findByPlace(place).stream()
-//                .map(PlaceFeature::getAccessibillityType).collect(Collectors.toList());
-        List<String> features = placeFeatureRepository.findByPlace(place).stream()
-                .map(PlaceFeature::getAccessibillityType)
-                .map(AccessibillityType::toString)
-                .collect(Collectors.toList());
-        placeDto.setAccessibilityFeatures(features);
-        return  placeDto;
+        PlaceDto created = placeService.createPlace(dto);
+        return ResponseEntity.ok(created);
     }
 
     @GetMapping("/search")
     public ResponseEntity<List<PlaceDto>> searchPlace(@RequestParam String search) {
         List<Place> places = placeService.searchPlace(search);
-        List<PlaceDto> dtos = places.stream()
-                .map(placeService::convertToDto) // انتبه هنا نستخدم method الجديدة
-                .collect(Collectors.toList());
 
+        if (places.isEmpty()) {
+            throw new PlaceNotFoundException(search);
+        }
+
+        List<PlaceDto> dtos = places.stream()
+                .map(placeService::convertToDto)
+                .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos);
     }
@@ -94,7 +83,7 @@ public class PlaceController {
 
     @GetMapping("category")
     public ResponseEntity<List<PlaceDto>> getPlaceCategory(@RequestParam Category category){
-        List<Place> places = placeRepository.findByPlaceCategory(category);
+        List<Place> places = placeService.getPlaceCategory(category);
         List<PlaceDto> dtos = places.stream().map(placeService::convertToDto)
                 .collect(Collectors.toList());
 

@@ -30,7 +30,7 @@ const setHoverRating = (rating) => {
 }
 
 const submitReview = async () => {
-    if (!form.value.userName || !form.value.comment || form.value.rating === 0) {
+    if (!form.value.comment || form.value.rating === 0) {
         toast.error('يرجى تعبئة جميع الحقول وتحديد التقييم')
         return
     }
@@ -75,12 +75,6 @@ const submitReview = async () => {
             </div>
 
             <form @submit.prevent="submitReview" class="space-y-4">
-                <div>
-                    <Label for="userName">الاسم</Label>
-                    <input id="userName" v-model="form.userName" type="text" placeholder="اسم المستخدم" required
-                        class="w-full border rounded px-3 py-2 mt-1 text-sm" :disabled="isLoading" />
-                </div>
-
                 <div>
                     <Label>التقييم</Label>
                     <div class="flex gap-1 mt-1.5">

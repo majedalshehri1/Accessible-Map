@@ -61,10 +61,10 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 );
 
-//        http.addFilterBefore(
-//                new JwtAuthenticationFilter(jwtService, userDetailsService),
-//                UsernamePasswordAuthenticationFilter.class
-//        );
+        http.addFilterBefore(
+                new JwtAuthenticationFilter(jwtService, userDetailsService),
+                UsernamePasswordAuthenticationFilter.class
+        );
 
         return http.build();
     }
