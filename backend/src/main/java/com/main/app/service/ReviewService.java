@@ -52,6 +52,12 @@ public class ReviewService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    public List<ReviewResponseDTO> getReviewsByUser(Long userId) {
+        return reviewRepository.findByUser_UserId(userId)
+                .stream()
+                .map(this ::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     public List<PlaceWithAccessibilityDTO> getPlacesWithAccessibility() {
         return placeRepository.findAll()
@@ -108,5 +114,6 @@ public class ReviewService {
         Review updatedReview = reviewRepository.save(review);
         return convertToDTO(updatedReview);
     }
+
 }
 
