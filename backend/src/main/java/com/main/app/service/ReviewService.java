@@ -131,9 +131,9 @@ public class ReviewService {
     public ReviewResponseDTO editReview(Long reviewId, ReviewRequestDTO reviewDTO) {
         Review review =  reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
-        if (!review.getUser().getUserId().equals(review.getUser().getUserId())) {
-            throw new RuntimeException("Not authorized to edit review");
-        }
+//        if (!review.getUser().getUserId().equals(review.getUser().getUserId())) {
+//            throw new RuntimeException("Not authorized to edit review");
+//        }
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
         Review updatedReview = reviewRepository.save(review);
