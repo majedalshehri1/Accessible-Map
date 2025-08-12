@@ -18,7 +18,7 @@ const formatPlace = (data) => {
 
         return {
             id: r.id,
-            userName: r.user.userName,
+            userName: r.userName,
             rating: r.rating,
             comment: r.description
         }
