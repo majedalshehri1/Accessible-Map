@@ -14,7 +14,8 @@ import com.main.app.repository.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
-
+import com.main.app.Exceptions.PlaceNotFoundException;
+import com.main.app.Exceptions.DuplicatePlaceException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,11 +32,17 @@ public class PlaceService {
     @Autowired
     private ReviewRepository reviewRepository;
 
+
     public List<Place> getAllPlaces(){
         return placeRepository.findAll();
     }
 
-      public PlaceDto convertToDto(Place place) {
+    public Place getPlaceOrThrow(Long id) {
+        return placeRepository.findById(id)
+                .orElseThrow(() -> new PlaceNotFoundException(id));
+    }
+
+    public PlaceDto convertToDto(Place place) {
         PlaceDto dto = new PlaceDto();
         dto.setId(place.getId());
         dto.setPlaceName(place.getPlaceName());
@@ -44,19 +51,24 @@ public class PlaceService {
         dto.setCategory(place.getPlaceCategory());
         dto.setImageUrl(place.getImageUrl());
 
+        List<String> features = placeFeatureRepository.findByPlace(place).stream()
+                .map(PlaceFeature::getAccessibillityType)
+                .map(Enum::name)
+                .collect(Collectors.toList());
+        dto.setAccessibilityFeatures(features);
+
+        // Reviews
         List<Review> reviews = reviewRepository.findByPlaceId(place.getId());
-
         List<ReviewResponseDTO> reviewDtos = reviews.stream().map(review -> {
-            ReviewResponseDTO reviewDto = new ReviewResponseDTO();
-            reviewDto.setId(review.getId());
-            reviewDto.setPlaceName(place.getPlaceName());
-            reviewDto.setPlaceCategory(place.getPlaceCategory());
-            reviewDto.setUserName(review.getUser().getUserName());
-            reviewDto.setDescription(review.getDescription());
-            reviewDto.setRating(review.getRating());
-            return reviewDto;
+            ReviewResponseDTO r = new ReviewResponseDTO();
+            r.setId(review.getId());
+            r.setPlaceName(place.getPlaceName());
+            r.setPlaceCategory(place.getPlaceCategory());
+            r.setUserName(review.getUser().getUserName());
+            r.setDescription(review.getDescription());
+            r.setRating(review.getRating());
+            return r;
         }).collect(Collectors.toList());
-
         dto.setReviews(reviewDtos);
 
         return dto;
@@ -69,6 +81,11 @@ public class PlaceService {
     }
 
     public PlaceDto createPlace(PlaceDto dto) {
+
+        if (placeRepository.existsByPlaceNameIgnoreCase(dto.getPlaceName())) {
+            throw new DuplicatePlaceException(dto.getPlaceName());
+        }
+
         Place place = new Place();
         place.setPlaceName(dto.getPlaceName());
         place.setLatitude(dto.getLatitude());
@@ -76,10 +93,8 @@ public class PlaceService {
         place.setPlaceCategory(dto.getCategory());
         place.setImageUrl(dto.getImageUrl());
 
-        // حفظ المكان
         Place saved = placeRepository.save(place);
 
-        // إضافة الميزات
         if (dto.getAccessibilityFeatures() != null) {
             List<PlaceFeature> features = new ArrayList<>();
             for (String type : dto.getAccessibilityFeatures()) {
@@ -94,7 +109,6 @@ public class PlaceService {
             saved = placeRepository.save(saved);
         }
 
-        // ✅ هنا يتم تحويل كائن الـ Place بعد الحفظ إلى DTO فيه ID
         return convertToDto(saved);
     }
 
