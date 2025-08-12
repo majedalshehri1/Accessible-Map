@@ -5,6 +5,7 @@ import com.main.app.dto.*;
 import com.main.app.model.*;
 import com.main.app.repository.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -22,13 +23,38 @@ public class ReviewService {
     private final UserRepository userRepository;
     private final PlaceFeatureRepository placeFeatureRepository;
 
+    @Autowired
+    JwtService jwtService;
 
+//    @Transactional
+//    public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO, String jwt) {
+//       // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+////        String currentUsername = authentication.getName();
+//        // user id , reuqested instead of jwt
+//        String currentUsername = jwtService.extractUsername(jwt);
+//
+//        System.out.println("Current username : " + currentUsername);
+//
+//        // find by userId, not email
+//        User user = userRepository.findByUserEmail(currentUsername)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        Place place = placeRepository.findById(reviewDTO.getPlaceId())
+//                .orElseThrow(() -> new RuntimeException("Place not found"));
+//
+//        Review review = new Review();
+//        review.setPlace(place);
+//        review.setUser(user);
+//        review.setDescription(reviewDTO.getDescription());
+//        review.setRating(reviewDTO.getRating());
+//        Review savedReview = reviewRepository.save(review);
+//
+//
+//        return convertToDTO(savedReview);
+//    }
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUsername = authentication.getName();
-
-        User user = userRepository.findByUserEmail("test@example.com")
+        User user = userRepository.findById(reviewDTO.getUserId())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Place place = placeRepository.findById(reviewDTO.getPlaceId())
@@ -39,9 +65,8 @@ public class ReviewService {
         review.setUser(user);
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
+
         Review savedReview = reviewRepository.save(review);
-
-
         return convertToDTO(savedReview);
     }
 
