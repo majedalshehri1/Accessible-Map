@@ -77,6 +77,12 @@ public class ReviewService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    public List<ReviewResponseDTO> getReviewsByUser(Long userId) {
+        return reviewRepository.findByUser_UserId(userId)
+                .stream()
+                .map(this ::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
     public List<PlaceWithAccessibilityDTO> getPlacesWithAccessibility() {
         return placeRepository.findAll()
@@ -125,13 +131,14 @@ public class ReviewService {
     public ReviewResponseDTO editReview(Long reviewId, ReviewRequestDTO reviewDTO) {
         Review review =  reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("Review not found"));
-        if (!review.getUser().getUserId().equals(review.getUser().getUserId())) {
-            throw new RuntimeException("Not authorized to edit review");
-        }
+//        if (!review.getUser().getUserId().equals(review.getUser().getUserId())) {
+//            throw new RuntimeException("Not authorized to edit review");
+//        }
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
         Review updatedReview = reviewRepository.save(review);
         return convertToDTO(updatedReview);
     }
+
 }
 

@@ -29,13 +29,17 @@ public class ReviewController {
     public ResponseEntity<List<ReviewResponseDTO>> getReviewsByPlace(@PathVariable Long placeId) {
         return ResponseEntity.ok(reviewService.getReviewsByPlace(placeId));
     }
+    @GetMapping("/user/{user_id}")
+    public ResponseEntity<List<ReviewResponseDTO>> getReviewsByUserId(@PathVariable("user_id") Long userId) {
+        return ResponseEntity.ok(reviewService.getReviewsByUser(userId));
+    }
     @DeleteMapping("/delete/{review_id}")
     public ResponseEntity<ReviewResponseDTO> deleteReview(@PathVariable("review_id") Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.ok().build();
     }
-    @PutMapping("/edit")
-    public ResponseEntity<ReviewResponseDTO> editReview(@PathVariable Long id, @RequestBody ReviewRequestDTO reviewDTO) {
+    @PutMapping("/edit/{review_id}")
+    public ResponseEntity<ReviewResponseDTO> editReview(@PathVariable("review_id") Long id, @RequestBody ReviewRequestDTO reviewDTO) {
         ReviewResponseDTO reviewResponseDTO = reviewService.editReview(id, reviewDTO);
         return ResponseEntity.ok().body(reviewResponseDTO);
     }
