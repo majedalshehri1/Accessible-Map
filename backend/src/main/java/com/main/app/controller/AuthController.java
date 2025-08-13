@@ -1,6 +1,8 @@
 package com.main.app.controller;
 
 import com.main.app.Enum.Role;
+import com.main.app.Exceptions.DuplicateEmailException;
+import com.main.app.Exceptions.DuplicateUsernameException;
 import com.main.app.dto.AuthRequest;
 import com.main.app.model.User;
 import com.main.app.dto.AuthResponse;
@@ -63,8 +65,13 @@ public class AuthController {
 @PostMapping("/register")
 public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     if (userRepository.existsByUserEmail(request.getEmail())) {
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Email already in use");
+        throw new DuplicateEmailException(request.getEmail());
     }
+
+    if (userRepository.existsByUserName(request.getUsername())) {
+        throw new DuplicateUsernameException(request.getUsername());
+    }
+
 
     User user = new User();
     user.setUserName(request.getUsername());

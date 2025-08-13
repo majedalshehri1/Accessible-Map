@@ -29,4 +29,17 @@ public class GlobalExceptionHandler {
         pd.setTitle("Internal Server Error");
         return pd;
     }
+    @ExceptionHandler(DuplicateEmailException.class)
+    public ProblemDetail handleDuplicateEmail(DuplicateEmailException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        pd.setTitle("Duplicate Email");
+        return pd;
+    }
+
+    @ExceptionHandler(DuplicateUsernameException.class)
+    public ProblemDetail handleDuplicateUsername(DuplicateUsernameException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
+        pd.setTitle("Duplicate Username");
+        return pd;
+    }
 }
