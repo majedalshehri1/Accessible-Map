@@ -1,8 +1,8 @@
 <script setup>
-// Vue 3 Composition API imports
+// Vue
 import { ref, computed, onMounted } from 'vue'
 
-// shadcn-vue UI component imports
+// UI components
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
@@ -10,208 +10,200 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
-// Footer component
+
 import Footer from '@/components/Footer.vue'
 
-// Categories data from backend (enum mapping)
-const categories = ref([])
+import { useAuthStore } from '@/stores/authStore'
 
-// Loading state for categories
-const isCategoriesLoading = ref(false)
+import reviewService from '@/services/reviewServices'
 
-// User profile data
+
+const auth = useAuthStore()
+
+// For user section
 const userProfile = ref({
-  id: 1,
-  name: 'أحمد محمد',
-  email: 'ahmed@example.com',
-  joinDate: '2024-01-15'
+  id: null,
+  username: '',
+  email: ''
 })
 
-// User reviews data
-const userReviews = ref([
-  {
-    id: 1,
-    placeName: 'مطعم الشرقي',
-    placeCategory: 'RESTAURANT', // Backend enum value
-    comment: 'مطعم رائع والطعام لذيذ جداً، الخدمة ممتازة والأسعار معقولة. أنصح بتجربة المشاوي.'
-  },
-  {
-    id: 2,
-    placeName: 'كافيه النخيل',
-    placeCategory: 'COFFEE', // Backend enum value
-    comment: 'كافيه هادئ ومناسب للعمل، القهوة جيدة لكن الأسعار مرتفعة قليلاً.'
-  },
-  {
-    id: 3,
-    placeName: 'مستشفى الملك فهد',
-    placeCategory: 'HOSPITAL', // Backend enum value
-    comment: 'مستشفى متميز، الأطباء محترفون والنظافة ممتازة، لكن أوقات الانتظار طويلة.'
-  }
-])
-
-// Loading states
-const isUpdatingProfile = ref(false)
-const isEditingReview = ref(false)
-
-// Dialog state for delete confirmation
-const showConfirmDialog = ref(false)
-const reviewToDelete = ref(null)
-
-// Edit mode states
 const isEditingProfile = ref(false)
-const editingReviewId = ref(null)
+const isUpdatingProfile = ref(false)
+const editProfileForm = ref({ username: '' })
 
-// Form data
-const editProfileForm = ref({ name: '' })
-const editReviewForm = ref({ comment: '' })
+const avatarInitial = computed(() => (userProfile.value.username || '').trim().charAt(0) || '؟')
+const totalReviews = ref(0)
 
-// Computed property for total reviews
-const totalReviews = computed(() => userReviews.value.length)
-
-// API function to fetch categories from backend
-const fetchCategories = async () => {
-  isCategoriesLoading.value = true
-  
-  try {
-    const response = await fetch('')
-    // const data = await response.json()
-    
-    // Simulate API call - replace with actual backend call
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    // Mock response that matches backend enum structure
-    const mockCategories = [
-      { value: 'RESTAURANT', label: 'مطعم', color: 'bg-orange-100 text-orange-700' },
-      { value: 'MALL', label: 'مول', color: 'bg-purple-100 text-purple-700' },
-      { value: 'COFFEE', label: 'كافيه', color: 'bg-amber-100 text-amber-700' },
-      { value: 'HOSPITAL', label: 'مستشفى', color: 'bg-red-100 text-red-700' },
-      { value: 'PARK', label: 'حديقة', color: 'bg-green-100 text-green-700' }
-    ]
-    
-    categories.value = mockCategories
-    
-  } catch (error) {
-    console.error('Error fetching categories:', error)
-    
-    categories.value = []
-  } finally {
-    isCategoriesLoading.value = false
-  }
+const loadUserFromStore = () => {
+  const u = auth.user || {}
+  userProfile.value.id = u.id ?? null
+  userProfile.value.username = u.username ?? ''
+  userProfile.value.email = u.email ?? ''
 }
 
-// Function to get category display name from enum value
-const getCategoryLabel = (enumValue) => {
-  const category = categories.value.find(cat => cat.value === enumValue)
-  return category ? category.label : enumValue
-}
-
-// Function to get category color from enum value
-const getCategoryColor = (enumValue) => {
-  const category = categories.value.find(cat => cat.value === enumValue)
-  return category ? category.color : 'bg-gray-100 text-gray-700'
-}
-
-// Initialize component - fetch categories on mount
-onMounted(() => {
-  fetchCategories()
+onMounted(async () => {
+  if (!auth.user) await auth.restore()
+  loadUserFromStore()
+  await fetchUserReviews()
 })
 
-// Profile editing functions
+// update username
 const startEditingProfile = () => {
-  editProfileForm.value.name = userProfile.value.name
+  editProfileForm.value.username = userProfile.value.username
   isEditingProfile.value = true
 }
-
+// Cancel editing profile
 const cancelEditingProfile = () => {
   isEditingProfile.value = false
-  editProfileForm.value.name = ''
+  editProfileForm.value.username = ''
 }
 
 const saveProfile = async () => {
-  if (!editProfileForm.value.name.trim()) return
-  
+  const newName = editProfileForm.value.username?.trim()
+  if (!newName) return
   isUpdatingProfile.value = true
-  
   try {
-    // API call: await updateUserProfile(userProfile.value.id, { name: editProfileForm.value.name })
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    
-    userProfile.value.name = editProfileForm.value.name
+    await auth.updateUsername(newName) // API call to update usernamE
+    loadUserFromStore()
     isEditingProfile.value = false
-    
-  } catch (error) {
-    console.error('Error updating profile:', error)
+  } catch (e) {
+    console.error('Error updating profile username:', e)
   } finally {
     isUpdatingProfile.value = false
   }
 }
 
-// Review editing functions
+// For review section
+const userReviews = ref([])
+// { id, placeName, placeCategory, userName, description, rating }
+const isReviewsLoading = ref(false)
+const editingReviewId = ref(null)
+const isEditingReview = ref(false)
+const editReviewForm = ref({ comment: '', rating: 0 })
+
+const showConfirmDialog = ref(false)
+const reviewToDelete = ref(null)
+
+// Categories mapping (the backend returns category as a string like "RESTAURANT", "HOSPITAL", etc.) it can be used to display category labels and colors for custom styling
+const categoriesMap = {
+  RESTAURANT: { label: 'مطعم',   color: 'bg-orange-100 text-orange-700' },
+  HOSPITAL:   { label: 'مستشفى', color: 'bg-red-100 text-red-700' },
+  COFFEE:     { label: 'كافيه',  color: 'bg-amber-100 text-amber-700' },
+  MALL:       { label: 'مول',    color: 'bg-purple-100 text-purple-700' },
+  PARK:       { label: 'حديقة',  color: 'bg-green-100 text-green-700' },
+}
+const getCategoryLabel = (v) => categoriesMap[v]?.label ?? v
+const getCategoryColor = (v) => categoriesMap[v]?.color ?? 'bg-gray-100 text-gray-700'
+
+// ( GET /api/reviews/user/{user_id} )
+const fetchUserReviews = async () => {
+  if (!auth.user?.id) return
+  isReviewsLoading.value = true
+  try {
+    const { data } = await reviewService.getReviewsByUserId(auth.user.id)
+    userReviews.value = data
+    totalReviews.value = data.length
+  } catch (e) {
+    console.error('Error fetching user reviews:', e)
+    userReviews.value = []
+    totalReviews.value = 0
+  } finally {
+    isReviewsLoading.value = false
+  }
+}
+
+
 const startEditingReview = (review) => {
   editingReviewId.value = review.id
-  editReviewForm.value.comment = review.comment
+  editReviewForm.value.comment = review.description
+  editReviewForm.value.rating = review.rating ?? 0
 }
 
 const cancelEditingReview = () => {
   editingReviewId.value = null
-  editReviewForm.value.comment = ''
+  editReviewForm.value = { comment: '', rating: 0 }
 }
 
 const saveReview = async (reviewId) => {
-  if (!editReviewForm.value.comment.trim()) return
-  
+  const description = editReviewForm.value.comment?.trim()
+  const rating = Number(editReviewForm.value.rating ?? 0)
+  if (!description) return
+
   isEditingReview.value = true
-  
   try {
-    // API call: await updateReviewComment(reviewId, editReviewForm.value.comment)
-    await new Promise(resolve => setTimeout(resolve, 800))
-    
-    const reviewIndex = userReviews.value.findIndex(r => r.id === reviewId)
-    if (reviewIndex !== -1) {
-      userReviews.value[reviewIndex].comment = editReviewForm.value.comment
+    const { data: updated } = await reviewService.editReview(reviewId, { description, rating })
+    const i = userReviews.value.findIndex(r => r.id === reviewId)
+    if (i !== -1) {
+      userReviews.value[i] = {
+        ...userReviews.value[i],
+        description: updated.description ?? description,
+        rating: updated.rating ?? rating,
+        placeName: updated.placeName ?? userReviews.value[i].placeName,
+        placeCategory: updated.placeCategory ?? userReviews.value[i].placeCategory,
+        userName: updated.userName ?? userReviews.value[i].userName,
+      }
     }
-    
     cancelEditingReview()
-    
-  } catch (error) {
-    console.error('Error updating review:', error)
+  } catch (e) {
+    console.error('Error updating review:', e)
   } finally {
     isEditingReview.value = false
   }
 }
 
-// Delete review functions
 const confirmDeleteReview = (reviewId) => {
   reviewToDelete.value = reviewId
   showConfirmDialog.value = true
 }
 
+// ( DELETE /api/reviews/delete/{id} )
 const deleteReview = async () => {
-  showConfirmDialog.value = false
-  
+  if (!reviewToDelete.value) return
   try {
-    // API call: await deleteUserReview(reviewToDelete.value)
-    await new Promise(resolve => setTimeout(resolve, 500))
-    
-    const reviewIndex = userReviews.value.findIndex(r => r.id === reviewToDelete.value)
-    if (reviewIndex !== -1) {
-      userReviews.value.splice(reviewIndex, 1)
-    }
-    
-  } catch (error) {
-    console.error('Error deleting review:', error)
+    await reviewService.deleteReview(reviewToDelete.value)
+    const i = userReviews.value.findIndex(r => r.id === reviewToDelete.value)
+    if (i !== -1) userReviews.value.splice(i, 1)
+    totalReviews.value = userReviews.value.length
+  } catch (e) {
+    console.error('Error deleting review:', e)
   } finally {
     reviewToDelete.value = null
+    showConfirmDialog.value = false
   }
 }
 
 const closeConfirmDialog = () => {
-  showConfirmDialog.value = false
   reviewToDelete.value = null
+  showConfirmDialog.value = false
 }
 </script>
 
+
 <template>
+  <!-- Top bar: back to home + breadcrumb -->
+<div class="sticky top-0 z-20 -mx-4 mb-4 bg-white/70 backdrop-blur supports-[backdrop-filter]:bg-white/50 border-b border-slate-200/60">
+  <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between" dir="rtl">
+    <!-- Back button -->
+    <RouterLink to="/" class="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition">
+      <!-- Arrow (RTL-friendly) -->
+      <svg class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+        <path fill-rule="evenodd" d="M12.78 15.53a.75.75 0 01-1.06 0l-4.5-4.5a.75.75 0 010-1.06l4.5-4.5a.75.75 0 111.06 1.06L8.56 10l4.22 4.22a.75.75 0 010 1.06z" clip-rule="evenodd"/>
+      </svg>
+      <span>رجوع للرئيسية</span>
+    </RouterLink>
+
+    <!-- Breadcrumb -->
+    <nav class="text-xs text-slate-500">
+      <ol class="flex items-center gap-1">
+        <li>
+          <RouterLink to="/" class="hover:text-slate-700">الرئيسية</RouterLink>
+        </li>
+        <li class="px-1">/</li>
+        <li class="text-slate-700 font-medium">الملف الشخصي</li>
+      </ol>
+    </nav>
+  </div>
+</div>
   <!-- Main container -->
   <div dir="rtl" class="min-h-screen bg-slate-50 relative overflow-hidden">
     
@@ -243,7 +235,7 @@ const closeConfirmDialog = () => {
               <!-- User avatar -->
               <div class="flex flex-col items-center space-y-4">
                 <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center text-2xl font-bold text-blue-700">
-                  {{ userProfile.name.charAt(0) }}
+                  {{ avatarInitial }}
                 </div>
               </div>
 
@@ -255,7 +247,7 @@ const closeConfirmDialog = () => {
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <Label class="text-sm font-medium text-slate-600">الاسم</Label>
-                      <p class="text-lg font-semibold text-slate-800 mt-1">{{ userProfile.name }}</p>
+                      <p class="text-lg font-semibold text-slate-800 mt-1">{{ userProfile.username }}</p>
                     </div>
                     <div>
                       <Label class="text-sm font-medium text-slate-600">البريد الإلكتروني</Label>
@@ -281,7 +273,7 @@ const closeConfirmDialog = () => {
                     <Label for="edit-name" class="text-sm font-medium text-slate-700">الاسم الجديد</Label>
                     <Input 
                       id="edit-name"
-                      v-model="editProfileForm.name"
+                      v-model="editProfileForm.username"
                       placeholder="أدخل اسمك الجديد"
                       class="text-right"
                       :disabled="isUpdatingProfile"
@@ -346,7 +338,7 @@ const closeConfirmDialog = () => {
 
                 <!-- Display mode -->
                 <div v-if="editingReviewId !== review.id">
-                  <p class="text-slate-700 mb-4 leading-relaxed">{{ review.comment }}</p>
+                  <p class="text-slate-700 mb-4 leading-relaxed">{{ review.description }}</p>
 
                   <div class="flex gap-2">
                     <Button 

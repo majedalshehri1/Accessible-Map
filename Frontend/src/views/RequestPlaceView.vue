@@ -22,7 +22,7 @@ const form = ref({
   category: '',
   services: [],
   location: { lat: '', lng: '' },
-  images: '',
+  imageUrl: '',
   agree: false
 })
 
@@ -39,7 +39,7 @@ const availableServices = ref([
 
 // refrences for inputs
 const isLoading = ref(false)
-const fileInputRef = ref(null)
+// const fileInputRef = ref(null)
 
 // Form validation function
 const validateForm = () => {
@@ -71,12 +71,6 @@ const isServiceSelected = (serviceId) => {
   return form.value.services.includes(serviceId)
 }
 
-const handleFileChange = (event) => {
-  const files = event.target.files
-  if (files && files.length > 0) {
-    form.value.images = files
-  }
-}
 
 // sync marker location when a new marker is added
 const handleAddMarker = (newLocation) => {
@@ -96,7 +90,7 @@ const submitForm = async () => {
     latitude: form.value.location.lat.toString(),
     category: form.value.category,
     accessibilityFeatures: form.value.services,
-    imageUrl: 'https://sitechecker.pro/wp-content/uploads/2023/06/400-status-code.png'
+    imageUrl: form.value.imageUrl
   }
 
     console.log("Request payload:", JSON.stringify(requestPayload, null, 2))
@@ -116,18 +110,15 @@ const submitForm = async () => {
   }
 }
 
-
+// Reset form fields to initial state
 const resetForm = () => {
   form.value = {
     name: '',
     category: '',
-    location: { lat: null, lng: null },
-    images: null,
     services: [],
+    location: { lat: '', lng: '' },
+    imageUrl: '',
     agree: false
-  }
-  if (fileInputRef.value) {
-    fileInputRef.value.value = '' // Reset file input
   }
 }
 
@@ -256,29 +247,22 @@ const goBack = () => {
                 </div>
               </div>
 
-              <!-- Image upload -->
+              <!-- Image URL input -->
               <div class="space-y-2">
-                <Label for="picture" class="text-sm font-medium text-slate-700">إضافة صور للمكان</Label>
+                <Label for="picture" class="text-sm font-medium text-slate-700">رابط صورة للمكان</Label>
                 <div class="relative">
-                  <!-- File upload input with change handler -->
                   <Input 
-                  class="h-12 cursor-pointer text-blue-600"
-                  id="picture"
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  @change="handleFileChange"
-                  :disabled="isLoading"
-                  ref="fileInputRef"
-                />
+                    id="picture"
+                    type="text"
+                    class="h-12 text-right border-slate-200 focus:border-blue-500 focus:ring-blue-500/20"
+                    placeholder="ضع رابط الصورة (URL)"
+                    v-model="form.imageUrl"
+                    :disabled="isLoading"
+                  />
                 </div>
-                <p class="text-xs text-slate-500">يمكنك اختيار عدة صور (أقصى حد 10 صور)</p>
-                <!-- Display selected files count -->
-                <div v-if="form.images && form.images.length > 0" class="text-xs text-green-600">
-                  تم اختيار {{ form.images.length }} صورة
-                </div>
+                <p class="text-xs text-slate-500">ملاحظة: أدخل رابطًا مباشرًا للصورة (مثال: https://.../image.jpg)</p>
               </div>
-            </div>
+              </div>
 
             <!-- Terms and conditions -->
             <div class="border-t pt-6">

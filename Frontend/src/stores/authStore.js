@@ -51,6 +51,26 @@ export const useAuthStore = defineStore("auth", {
       } catch {
         this.user = null;
       }
+      // delete jwt from cookies 
+      
+    },
+    async updateUsername(newUsername) {
+      this.loading = true; 
+      this.error = null;
+      try {
+        // (PATCH /api/users/username) like in the backend newUsername
+        await api.patch("/users/username", { newUsername });
+        
+        // after successful update, refresh profile 
+        await this.refreshProfile();
+        
+        return this.user;
+      } catch (err) {
+        this.error = "تعذّر تحديث الاسم";
+        throw err;
+      } finally {
+        this.loading = false;
+      }
     },
 
     async logout() {
