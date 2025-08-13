@@ -1,41 +1,69 @@
-import { defineStore } from 'pinia'
+import { defineStore } from "pinia";
+import api from "@/apis/axiosClient";
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: null
+    user: null,    
+    loading: false,
+    error: null,
   }),
+
   actions: {
-    register(userData) {
-      let users = JSON.parse(localStorage.getItem('users')) || []
-
-      const exists = users.find(u => u.email === userData.email)
-      if (exists) throw new Error('المستخدم موجود مسبقًا')
-
-      users.push(userData)
-      localStorage.setItem('users', JSON.stringify(users))
-
-      this.user = userData
-      localStorage.setItem('user', JSON.stringify(userData))
+    
+    async register({ username, email, password }) {
+      this.loading = true; this.error = null;
+      try {
+        await api.post("/auth/register", { username, email, password });
+        await this.refreshProfile();
+        return this.user;
+      } catch (err) {
+        this.error =
+          err.response?.status === 409 || err.response?.status === 400
+            ? "المستخدم موجود مسبقًا أو بيانات غير صحيحة"
+            : "حدث خطأ أثناء التسجيل";
+        throw err;
+      } finally {
+        this.loading = false;
+      }
     },
 
-    login({ email, password }) {
-      const users = JSON.parse(localStorage.getItem('users')) || []
-      const found = users.find(u => u.email === email && u.password === password)
-
-      if (!found) throw new Error('بيانات الدخول غير صحيحة')
-
-      this.user = found
-      localStorage.setItem('user', JSON.stringify(found))
+    async login({ email, password, username }) {
+      this.loading = true; this.error = null;
+      try {
+        const body = username ? { username, email, password } : { email, password };
+        await api.post("/auth/login", body);
+        await this.refreshProfile();
+        return this.user;
+      } catch (err) {
+        this.error = err.response?.status === 401
+          ? "بيانات الدخول غير صحيحة"
+          : "تعذّر تسجيل الدخول";
+        throw err;
+      } finally {
+        this.loading = false;
+      }
     },
 
-    logout() {
-      this.user = null
-      localStorage.removeItem('user')
+    async refreshProfile() {
+      try {
+        const { data } = await api.get("/auth/me");
+        this.user = { id: data.id, username: data.username, email: data.email };
+      } catch {
+        this.user = null;
+      }
+    },
+
+    async logout() {
+      try {
+        await api.post("/auth/logout");
+      } finally {
+        this.user = null;
+        this.error = null;
+      }
     },
 
     restore() {
-      const user = localStorage.getItem('user')
-      this.user = user ? JSON.parse(user) : null
-    }
-  }
-})
+      return this.refreshProfile();
+    },
+  },
+});

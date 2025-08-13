@@ -70,7 +70,7 @@ public class JwtServiceImpl implements JwtService {
     private boolean isTokenRevoked(String jti) {
         return tokenRepository.findByJti(jti)
                 .map(Token::isRevoked)
-                .orElse(true);
+                .orElse(false);
     }
 
     @Override

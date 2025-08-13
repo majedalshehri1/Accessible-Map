@@ -138,17 +138,15 @@ const goBack = () => {
 </script>
 
 <template>
-  <!-- Main container with RTL direction and modern styling -->
   <div dir="rtl" class="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 py-8 px-4">
     <div class="max-w-2xl mx-auto">
 
-      <!-- Header section -->
+  
       <div class="text-center mb-8">
         <h1 class="text-4xl font-bold text-slate-800 mb-2">طلب إضافة مكان جديد</h1>
         <p class="text-slate-600 text-lg">أضف مكانك التي تريد تقييمة</p>
       </div>
 
-      <!-- Main form card -->
       <Card class="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
         <CardContent class="p-8">
           <!-- Form element with submit prevention -->

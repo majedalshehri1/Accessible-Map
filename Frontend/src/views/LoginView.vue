@@ -1,6 +1,5 @@
 <script setup>
-// Vue 3 Composition API imports
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import router from '@/router'
 
 // shadcn-vue UI component imports
@@ -13,10 +12,10 @@ import { toast } from 'vue-sonner'
 import { useAuthStore } from '@/stores/authStore'
 
 // state
-const isLoggingIn = ref(false)
 const auth = useAuthStore()
 
-// Login form data
+const isLoggingIn = computed(() => auth.loading) // Update
+
 const loginForm = ref({
   email: '',
   password: ''
@@ -42,46 +41,40 @@ const validateLoginForm = () => {
 // Handle login submission
 const handleLogin = async () => {
   if (!validateLoginForm()) return
-  isLoggingIn.value = true
 
   try {
     const { email, password } = loginForm.value
-    auth.login({ email, password })
+    
+    await auth.login({ email, password })
 
+    
     toast.success("تم تسجيل الدخول بنجاح", {
-      description: "مرحبًا بك!"
+      description: `مرحبًا ${auth.user?.username || ''}!` 
     })
+
     router.push('/')
   } catch (err) {
-    console.error('Login error:', err)
+    console.error('Login error:', err) // Log the error for debugging
     toast.error("فشل تسجيل الدخول", {
-      description: "يرجى التحقق من بيانات الاعتماد الخاصة بك"
+      description: auth.error || "يرجى التحقق من بيانات الاعتماد الخاصة بك"
     })
-  } finally {
-    isLoggingIn.value = false
   }
 }
 
-// Navigate to register page
+// Navigate to Register view
 const goToRegister = () => {
-  // Redirect to register page
   router.push('/register')
 }
-
 </script>
 
 <template>
-  <!-- Main container with RTL direction -->
   <div dir="rtl" class="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center py-12 px-4">
-    
-    <!-- Background decorative elements -->
     <div class="absolute inset-0 overflow-hidden pointer-events-none">
       <div class="absolute top-10 right-10 w-72 h-72 bg-blue-200/30 rounded-full blur-3xl"></div>
       <div class="absolute bottom-10 left-10 w-80 h-80 bg-purple-200/30 rounded-full blur-3xl"></div>
       <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-200/20 rounded-full blur-3xl"></div>
     </div>
 
-    <!-- Auth Card -->
     <div class="relative z-10 w-full max-w-md">
       <Card class="shadow-2xl border-0 bg-white/95 backdrop-blur-sm">
         <CardHeader class="text-center pb-6">
@@ -156,8 +149,6 @@ const goToRegister = () => {
 
         </CardContent>
       </Card>
-
-      <!-- Footer -->
       
     </div>
   </div>
