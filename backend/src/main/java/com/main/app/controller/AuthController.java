@@ -9,13 +9,18 @@ import com.main.app.repository.UserRepository;
 import com.main.app.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -60,6 +65,18 @@ public class AuthController {
 //        String jwtToken = jwtService.generateAccessToken(user);
 //        return ResponseEntity.ok(new AuthResponse(jwtToken));
 //    }
+
+
+    private ResponseCookie buildJwtCookie(String token) {
+        return ResponseCookie.from("jwt", token)
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(60L * 60 * 24 * 30)
+                .build();
+    }
+
 @PostMapping("/register")
 public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
     if (userRepository.existsByUserEmail(request.getEmail())) {
@@ -74,15 +91,17 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
     User savedUser = userRepository.save(user);
 
     String jwtToken = jwtService.generateAccessToken(savedUser);
-
-    return ResponseEntity.ok(
-            new AuthResponse(
-                    jwtToken,
-                    savedUser.getUserId(),
-                    savedUser.getUserName(),
-                    savedUser.getUserEmail()
-            )
+    ResponseCookie cookie = buildJwtCookie(jwtToken);
+    AuthResponse body = new AuthResponse(
+            jwtToken,
+            savedUser.getUserId(),
+            savedUser.getUserName(),
+            savedUser.getUserEmail()
     );
+    return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .body(body);
+
 }
 
     @PostMapping("/login")
@@ -98,13 +117,43 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 
         String jwtToken = jwtService.generateAccessToken(user);
-        return ResponseEntity.ok(
-                new AuthResponse(
-                        jwtToken,
-                        user.getUserId(),
-                        user.getUserName(),
-                        user.getUserEmail()
-                )
+        ResponseCookie cookie = buildJwtCookie(jwtToken);
+        AuthResponse body = new AuthResponse(
+                jwtToken,
+                user.getUserId(),
+                user.getUserName(),
+                user.getUserEmail()
         );
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                .body(body);
+    }
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout() {
+        ResponseCookie clear = ResponseCookie.from("jwt", "")
+                .httpOnly(true).secure(true).sameSite("None").path("/")
+                .maxAge(0) // remobve the cookie
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, clear.toString())
+                .build();
+    }
+    @GetMapping("/me")
+    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+
+        User user = userRepository.findByUserEmail(auth.getName())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+
+
+        return ResponseEntity.ok(Map.of(
+                "id", user.getUserId(),
+                "username", user.getUserName(),
+                "email", user.getUserEmail()
+        ));
     }
 }
