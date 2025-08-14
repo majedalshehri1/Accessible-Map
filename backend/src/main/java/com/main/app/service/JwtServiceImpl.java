@@ -1,6 +1,7 @@
 package com.main.app.service;
 
 import com.main.app.Enum.TokenType;
+import com.main.app.Exceptions.JwtValidationException;
 import com.main.app.model.Token;
 import com.main.app.model.User;
 import com.main.app.repository.TokenRepository;
@@ -26,8 +27,12 @@ public class JwtServiceImpl implements JwtService {
 
     @PostConstruct
     public void init() {
-        this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-        System.out.println("JWT Secret Key: " + Encoders.BASE64.encode(key.getEncoded()));
+        try {
+            this.key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+            System.out.println("JWT Secret Key: " + Encoders.BASE64.encode(key.getEncoded()));
+        } catch (IllegalArgumentException e) {
+            throw new JwtValidationException("Error generating JWT secret key", e);
+        }
     }
 
     @Override
@@ -89,11 +94,21 @@ public class JwtServiceImpl implements JwtService {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (io.jsonwebtoken.security.SignatureException e) {
+            throw new JwtValidationException("Invalid JWT signature", e);
+        } catch (io.jsonwebtoken.ExpiredJwtException e) {
+            throw new JwtValidationException("JWT token is expired", e);
+        } catch (io.jsonwebtoken.MalformedJwtException e) {
+            throw new JwtValidationException("Malformed JWT token", e);
+        } catch (Exception e) {
+            throw new JwtValidationException("JWT token validation failed", e);
+        }
     }
 
     private Date extractExpiration(String token) {
