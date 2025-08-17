@@ -26,10 +26,6 @@ public class PlaceController {
 
     @Autowired
     private PlaceService placeService;
-    @Autowired
-    private PlaceFeatureRepository placeFeatureRepository;
-    @Autowired
-    private PlaceRepository placeRepository;
 
     @GetMapping("/all")
     public ResponseEntity <List<Place>> getAllPlaces(){
@@ -51,10 +47,6 @@ public class PlaceController {
     @GetMapping("/search")
     public ResponseEntity<List<PlaceDto>> searchPlace(@RequestParam String search) {
         List<Place> places = placeService.searchPlace(search);
-
-        if (places.isEmpty()) {
-            throw new PlaceNotFoundException(search);
-        }
 
         List<PlaceDto> dtos = places.stream()
                 .map(placeService::convertToDto)

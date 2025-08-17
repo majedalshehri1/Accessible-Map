@@ -33,7 +33,7 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
-    
+
 //    @PostMapping("/register")
 //    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
 //        if (userRepository.existsByUserEmail(request.getEmail())) {
@@ -163,4 +163,20 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
                 "email", user.getUserEmail()
         ));
     }
+
+    @GetMapping("/clear-jwt")
+    public ResponseEntity<Void> clearJwt() {
+        ResponseCookie clear = ResponseCookie.from("jwt", "")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.noContent()
+                .header(HttpHeaders.SET_COOKIE, clear.toString())
+                .build();
+    }
+
 }
