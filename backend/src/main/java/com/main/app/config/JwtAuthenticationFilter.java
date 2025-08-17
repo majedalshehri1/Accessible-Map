@@ -6,6 +6,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,57 +26,75 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         this.userDetailsService = userDetailsService;
     }
 
-
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
-                                    FilterChain filterChain)
+                                    FilterChain chain)
             throws ServletException, IOException {
 
+        String token = extractTokenFromCookieOrHeader(request);
 
-        String jwt = null;
-        if (request.getCookies() != null) { // UPDATE
-            for (Cookie c : request.getCookies()) {
-                if ("jwt".equals(c.getName())) {
-                    jwt = c.getValue();
-                    break;
-                }
-            }
-        }
-
-        if (jwt == null) {
-            final String authHeader = request.getHeader("Authorization");
-            if (authHeader != null && authHeader.startsWith("Bearer ")) {
-                jwt = authHeader.substring(7);
-            }
-        }
-
-
-        if (jwt == null) {
-            filterChain.doFilter(request, response);
+        if (token == null) {
+            chain.doFilter(request, response);
             return;
         }
 
+        if (!jwtService.isTokenValid(token)) {
+            unauthorizedAndClearCookie(response);
+            return;
+        }
 
-
-        String userEmail = jwtService.extractUsername(jwt);
+        String userEmail;
+        try {
+            userEmail = jwtService.extractUsername(token);
+        } catch (Exception e) {
+            unauthorizedAndClearCookie(response);
+            return;
+        }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-
-            boolean valid = jwtService.isTokenValid(jwt);
-            if (valid) {
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+            var authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, null, userDetails.getAuthorities()
+            );
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
         }
 
-        filterChain.doFilter(request, response);
+        chain.doFilter(request, response);
+    }
+
+    private static String extractTokenFromCookieOrHeader(HttpServletRequest req) {
+        if (req.getCookies() != null) {
+            for (Cookie c : req.getCookies()) {
+                if ("jwt".equals(c.getName()) && c.getValue() != null && !c.getValue().isBlank()) {
+                    return c.getValue();
+                }
+            }
+        }
+        String auth = req.getHeader("Authorization");
+        if (auth != null && auth.startsWith("Bearer ")) {
+            return auth.substring(7);
+        }
+        return null;
+    }
+
+    private static void unauthorizedAndClearCookie(HttpServletResponse res) throws IOException {
+        ResponseCookie clear = ResponseCookie.from("jwt","")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+        res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
+        res.addHeader("Cache-Control", "no-store");
+
+        // RFC7807 Problem JSON
+        res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        res.setContentType("application/problem+json");
+        res.getWriter().write("""
+          {"type":"about:blank","title":"Unauthorized","status":401,"detail":"Invalid or expired token"}
+        """);
     }
 }

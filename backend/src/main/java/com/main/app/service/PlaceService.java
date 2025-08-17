@@ -117,6 +117,9 @@ public class PlaceService {
     }
 
     public List<Place> searchPlace( String name){
+        if (name.isEmpty()) {
+            throw new PlaceNotFoundException(name);
+        }
         return placeRepository.findByPlaceNameContainingIgnoreCase(name);
     }
 
