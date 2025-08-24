@@ -92,8 +92,8 @@ public class AdminController {
     }
 
     @GetMapping("places/top")
-    public ResponseEntity<List<TopPlaceDto>> getTopPlaces(@RequestParam int limit) {
-        return ResponseEntity.ok(adminService.getTopPlaces(limit));
+    public ResponseEntity<List<TopPlaceDto>> getTopPlaces() {
+        return ResponseEntity.ok(adminService.getTopPlaces(3));
     }
 
     @PutMapping("users/{id}/block")
