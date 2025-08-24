@@ -1,5 +1,7 @@
 package com.main.app.config;
 
+import com.main.app.model.User;
+import com.main.app.service.CustomUserDetails;
 import com.main.app.service.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -54,6 +56,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+
+            if(userDetails instanceof CustomUserDetails u && u.isBlocked()){
+                forbiddenAndClearCookie(response);
+                return;
+            }
+
             var authToken = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()
             );
@@ -97,4 +105,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           {"type":"about:blank","title":"Unauthorized","status":401,"detail":"Invalid or expired token"}
         """);
     }
+    private static void forbiddenAndClearCookie(HttpServletResponse res) throws IOException {
+        ResponseCookie clear = ResponseCookie.from("jwt","")
+                .httpOnly(true)
+                .secure(false)
+                .sameSite("Lax")
+                .path("/")
+                .maxAge(0)
+                .build();
+        res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
+        res.addHeader("Cache-Control", "no-store");
+
+        res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        res.setContentType("application/problem+json");
+        res.getWriter().write("""
+      {"type":"about:blank","title":"Forbidden","status":403,"detail":"User is blocked"}
+    """);
+    }
+
+
+
 }

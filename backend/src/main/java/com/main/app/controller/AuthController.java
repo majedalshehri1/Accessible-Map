@@ -3,6 +3,7 @@ package com.main.app.controller;
 import com.main.app.Enum.Role;
 import com.main.app.Exceptions.DuplicateEmailException;
 import com.main.app.Exceptions.DuplicateUsernameException;
+import com.main.app.Exceptions.LockedUserException;
 import com.main.app.dto.AuthRequest;
 import com.main.app.model.User;
 import com.main.app.dto.AuthResponse;
@@ -112,29 +113,25 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
 }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
+            );
+            var user = userRepository.findByUserEmail(req.getEmail())
+                    .orElseThrow();
 
-        User user = userRepository.findByUserEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+            var jwt = jwtService.generateAccessToken(user);
 
-        String jwtToken = jwtService.generateAccessToken(user);
-        ResponseCookie cookie = buildJwtCookie(jwtToken);
-        AuthResponse body = new AuthResponse(
-                jwtToken,
-                user.getUserId(),
-                user.getUserName(),
-                user.getUserEmail()
-        );
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(body);
+            var cookie = buildJwtCookie(jwt);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
+                    .body(new AuthResponse(jwt, user.getUserId(), user.getUserName(), user.getUserEmail()));
+        } catch (LockedUserException e) {
+            return ResponseEntity.status(403).body(new AuthResponse("User is Blocked"));
+        }
     }
+
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         ResponseCookie clear = ResponseCookie.from("jwt", "")

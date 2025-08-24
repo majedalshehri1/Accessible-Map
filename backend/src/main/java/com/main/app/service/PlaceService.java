@@ -33,8 +33,8 @@ public class PlaceService {
     private ReviewRepository reviewRepository;
 
 
-    public List<Place> getAllPlaces(){
-        return placeRepository.findAll();
+    public List<PlaceDto> getAllPlaces(){
+        return placeRepository.findAll().stream().map(this::convertToDto).toList();
     }
 
     public Place getPlaceOrThrow(Long id) {
