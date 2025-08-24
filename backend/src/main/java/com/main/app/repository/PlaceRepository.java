@@ -22,6 +22,10 @@ public interface PlaceRepository extends JpaRepository<Place,Long>{
 
     boolean existsByPlaceNameIgnoreCase(String placeName);
 
+    @Query("SELECT p.placeCategory, COUNT(p) FROM Place p GROUP BY p.placeCategory")
+    List<Object[]> countPlacesByCategory();
+
+
     @Query("""
     select
         p.id as id,

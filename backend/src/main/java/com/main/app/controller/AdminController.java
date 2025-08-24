@@ -1,5 +1,6 @@
 package com.main.app.controller;
 
+import com.main.app.Enum.Category;
 import com.main.app.dto.*;
 import com.main.app.model.Place;
 import com.main.app.model.Review;
@@ -105,6 +106,12 @@ public class AdminController {
     public ResponseEntity<String> unblockUser(@PathVariable Long id) {
         adminService.unblockUser(id);
         return ResponseEntity.ok("User is unblocked successfully");
+    }
+
+    @GetMapping("count/placeCategory")
+    public ResponseEntity<List<Object[]>> countPlaceCategory() {
+        return ResponseEntity.ok(placeService.countPlacesByCategory());
+
     }
 
 
