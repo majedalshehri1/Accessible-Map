@@ -1,6 +1,5 @@
 package com.main.app.controller;
 
-import com.main.app.Enum.Category;
 import com.main.app.dto.*;
 import com.main.app.model.Place;
 import com.main.app.model.Review;
@@ -108,10 +107,14 @@ public class AdminController {
         return ResponseEntity.ok("User is unblocked successfully");
     }
 
-    @GetMapping("count/placeCategory")
-    public ResponseEntity<List<Object[]>> countPlaceCategory() {
-        return ResponseEntity.ok(placeService.countPlacesByCategory());
+    @GetMapping("/last24hours")
+    public List<ReviewResponseDTO> getReviewsFromLast24Hours() {
+        return reviewService.getLast24HoursReviews();
+    }
 
+    @GetMapping("/reviewsbycategory")
+    public ResponseEntity<List<Object[]>> getReviewsByCategory() {
+        return ResponseEntity.ok(reviewService.getReviewCountByCategory());
     }
 
 

@@ -43,5 +43,9 @@ public class ReviewController {
         ReviewResponseDTO reviewResponseDTO = reviewService.editReview(id, reviewDTO);
         return ResponseEntity.ok().body(reviewResponseDTO);
     }
+//    @GetMapping("/last24hours")
+//    public List<ReviewResponseDTO> getReviewsFromLast24Hours() {
+//        return reviewService.getLast24HoursReviews();
+//    }
 
 }
