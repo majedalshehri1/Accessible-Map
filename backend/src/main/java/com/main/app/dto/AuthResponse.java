@@ -5,7 +5,11 @@ public class AuthResponse {
     private Long userId;
     private String username;
     private String email;
+    private String message;
 
+    public AuthResponse(String message) {
+        this.message = message;
+    }
     public AuthResponse(String accessToken, Long userId, String username, String email) {
         this.accessToken = accessToken;
         this.userId = userId;

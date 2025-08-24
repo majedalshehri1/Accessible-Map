@@ -47,4 +47,7 @@ public class User {
     @Column(name = "user_role", nullable = false)
     private Role userRole = Role.USER;
 
+    @Column(name = "is_blocked")
+    private Boolean isBlocked = false;
+
 }

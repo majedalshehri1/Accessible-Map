@@ -4,6 +4,7 @@ package com.main.app.Exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -53,5 +54,15 @@ public class GlobalExceptionHandler {
         errorResponse.put("error", ex.getMessage());
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
     }
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<?> handleLocked(LockedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(Map.of(
+                        "status", 403,
+                        "error", "Forbidden",
+                        "message", "User is blocked"
+                ));
+    }
+
 
 }

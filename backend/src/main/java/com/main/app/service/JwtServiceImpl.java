@@ -23,10 +23,10 @@ import java.util.Map;
 public class JwtServiceImpl implements JwtService {
 
     private final TokenRepository tokenRepository;
-    private final BootId bootId;              // ← مهم
+    private final BootId bootId;
 
     @Value("${jwt.secret}")
-    private String secret;                    // سر ثابت من properties
+    private String secret;
 
     private Key key;
 
