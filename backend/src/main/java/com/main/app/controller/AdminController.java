@@ -115,6 +115,12 @@ public class AdminController {
     @GetMapping("/reviewsbycategory")
     public ResponseEntity<List<Object[]>> getReviewsByCategory() {
         return ResponseEntity.ok(reviewService.getReviewCountByCategory());
+        }
+
+    @GetMapping("count/placeCategory")
+    public ResponseEntity<List<Object[]>> countPlaceCategory() {
+        return ResponseEntity.ok(placeService.countPlacesByCategory());
+
     }
 
 
