@@ -1,6 +1,7 @@
 package com.main.app.service;
 
 import com.main.app.Enum.AccessibillityType;
+import com.main.app.Enum.Category;
 import com.main.app.dto.*;
 import com.main.app.model.*;
 import com.main.app.repository.*;
@@ -12,6 +13,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -65,6 +67,7 @@ public class ReviewService {
         review.setUser(user);
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
+        review.setReviewDate(OffsetDateTime.now());
 
         Review savedReview = reviewRepository.save(review);
         return convertToDTO(savedReview);
@@ -144,5 +147,17 @@ public class ReviewService {
         return convertToDTO(updatedReview);
     }
 
+    public List<ReviewResponseDTO> getLast24HoursReviews() {
+        List<Review> reviews = reviewRepository.findAllFromLast24Hours();
+        return reviews.stream()
+                .map(this::convertToDTO)
+                .toList();
+
+    }
+
+    public List<Object[]> getReviewCountByCategory() {
+        return reviewRepository.countReviewsByCategory();
+
+    }
 }
 

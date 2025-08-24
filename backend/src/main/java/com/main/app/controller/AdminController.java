@@ -107,6 +107,16 @@ public class AdminController {
         return ResponseEntity.ok("User is unblocked successfully");
     }
 
+    @GetMapping("/last24hours")
+    public List<ReviewResponseDTO> getReviewsFromLast24Hours() {
+        return reviewService.getLast24HoursReviews();
+    }
+
+    @GetMapping("/reviewsbycategory")
+    public ResponseEntity<List<Object[]>> getReviewsByCategory() {
+        return ResponseEntity.ok(reviewService.getReviewCountByCategory());
+    }
+
 
 
 
