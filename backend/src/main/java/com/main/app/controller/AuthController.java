@@ -9,6 +9,7 @@ import com.main.app.model.User;
 import com.main.app.dto.AuthResponse;
 import com.main.app.dto.RegisterRequest;
 import com.main.app.repository.UserRepository;
+import com.main.app.service.AuthService;
 import com.main.app.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,52 +34,9 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final AuthService authService;
 
 
-//    @PostMapping("/register")
-//    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-//        if (userRepository.existsByUserEmail(request.getEmail())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, " Email already in use");
-//        }
-//
-//        User user = new User();
-//        user.setUserName(request.getUsername());
-//        user.setUserEmail(request.getEmail());
-//        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-//
-//        User savedUser = userRepository.save(user);
-//
-//        String jwtToken = jwtService.generateAccessToken(savedUser);
-//
-//        return ResponseEntity.ok(new AuthResponse(jwtToken));
-//    }
-//
-//    @PostMapping("/login")
-//    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getEmail(),
-//                        request.getPassword()
-//                )
-//        );
-//
-//        User user = userRepository.findByUserEmail(request.getEmail())
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-//
-//        String jwtToken = jwtService.generateAccessToken(user);
-//        return ResponseEntity.ok(new AuthResponse(jwtToken));
-//    }
-
-
-    private ResponseCookie buildJwtCookie(String token) {
-        return ResponseCookie.from("jwt", token)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(60L * 60 * 24 * 30)
-                .build();
-    }
 
 @PostMapping("/register")
 public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -99,7 +57,7 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
     User savedUser = userRepository.save(user);
 
     String jwtToken = jwtService.generateAccessToken(savedUser);
-    ResponseCookie cookie = buildJwtCookie(jwtToken);
+    ResponseCookie cookie = authService.buildJwtCookie(jwtToken);
     AuthResponse body = new AuthResponse(
             jwtToken,
             savedUser.getUserId(),
@@ -114,22 +72,10 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(req.getEmail(), req.getPassword())
-            );
-            var user = userRepository.findByUserEmail(req.getEmail())
-                    .orElseThrow();
-
-            var jwt = jwtService.generateAccessToken(user);
-
-            var cookie = buildJwtCookie(jwt);
-            return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                    .body(new AuthResponse(jwt, user.getUserId(), user.getUserName(), user.getUserEmail()));
-        } catch (LockedUserException e) {
-            return ResponseEntity.status(403).body(new AuthResponse("User is Blocked"));
-        }
+        var result = authService.login(req);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, result.cookie().toString())
+                .body(result.body());
     }
 
     @PostMapping("/logout")
@@ -161,19 +107,6 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
         ));
     }
 
-    @GetMapping("/clear-jwt")
-    public ResponseEntity<Void> clearJwt() {
-        ResponseCookie clear = ResponseCookie.from("jwt", "")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
 
-        return ResponseEntity.noContent()
-                .header(HttpHeaders.SET_COOKIE, clear.toString())
-                .build();
-    }
 
 }
