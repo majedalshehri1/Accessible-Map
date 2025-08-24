@@ -16,9 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.main.app.Exceptions.PlaceNotFoundException;
 import com.main.app.Exceptions.DuplicatePlaceException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -129,9 +128,13 @@ public class PlaceService {
 
     public List<Place> getPlaceCategory(Category category){
        return placeRepository.findByPlaceCategory(category);
+    }
+
+    public List<Object[]> countPlacesByCategory(){
+        return placeRepository.countPlacesByCategory();
+    }
+
 
     }
 
 
-
-}
