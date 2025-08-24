@@ -1,4 +1,3 @@
-// main.js
 import { createApp } from 'vue'
 import './style.css'
 import App from './App.vue'
@@ -8,12 +7,17 @@ import { useAuthStore } from '@/stores/authStore'
 
 const app = createApp(App)
 
+
 const pinia = createPinia()
 app.use(pinia)
 
-const authStore = useAuthStore()
-authStore.restore()
+const auth = useAuthStore()
 
+try {
+  await auth.refreshProfile()
+} catch (_) {
+  
+}
 
 app.use(router)
 app.mount('#app')

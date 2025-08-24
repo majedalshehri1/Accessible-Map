@@ -70,6 +70,11 @@ public class ReviewService {
         return convertToDTO(savedReview);
     }
 
+    public List<ReviewResponseDTO> getAllReviews() {
+        return reviewRepository.findAll().stream().map(this::convertToDTO).toList();
+
+    }
+
 
     public List<ReviewResponseDTO> getReviewsByPlace(Long placeId) {
         return reviewRepository.findByPlaceId(placeId)
@@ -91,7 +96,7 @@ public class ReviewService {
                 .collect(Collectors.toList());
     }
 
-    private ReviewResponseDTO convertToDTO(Review review) {
+    public ReviewResponseDTO convertToDTO(Review review) {
         ReviewResponseDTO dto = new ReviewResponseDTO();
         dto.setId(review.getId());
         dto.setPlaceName(review.getPlace().getPlaceName());
@@ -99,7 +104,6 @@ public class ReviewService {
         dto.setUserName(review.getUser().getUserName());
         dto.setDescription(review.getDescription());
         dto.setRating(review.getRating());
-
 
         return dto;
     }
