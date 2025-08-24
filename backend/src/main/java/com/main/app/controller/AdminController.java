@@ -111,7 +111,6 @@ public class AdminController {
     @GetMapping("count/placeCategory")
     public ResponseEntity<List<Object[]>> countPlaceCategory() {
         return ResponseEntity.ok(placeService.countPlacesByCategory());
-
     }
 
 
