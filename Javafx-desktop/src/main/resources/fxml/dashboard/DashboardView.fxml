@@ -1,58 +1,151 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.control.Button?>
-<?import javafx.scene.control.Label?>
-<?import javafx.scene.control.ToggleButton?>
-<?import javafx.scene.control.ToggleGroup?>
-<?import javafx.scene.layout.BorderPane?>
-<?import javafx.scene.layout.Region?>
-<?import javafx.scene.layout.StackPane?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.chart.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
 
-<BorderPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="600.0" prefWidth="1000.0" styleClass="app-root" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.MainController">
-
-
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<BorderPane xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.wakeb.yusradmin.controllers.DashboardController"
+            stylesheets="@css/dashboard.css">
     <right>
-        <VBox alignment="TOP_RIGHT" prefWidth="260" spacing="12" styleClass="sidebar">
-
-
-            <VBox spacing="4" />
-         <Region prefHeight="41.0" prefWidth="223.0" />
-             <Label alignment="TOP_RIGHT" prefHeight="2.0" prefWidth="223.0" style="-fx-font-weight: bold;" text="ماجد الشهري" />
-             <Label alignment="TOP_RIGHT" prefHeight="7.0" prefWidth="188.0" styleClass="muted" text="engmajedas1@gmail.com" />
-         <Region layoutX="28.0" layoutY="80.0" prefHeight="26.0" prefWidth="223.0" />
-
-
-            <VBox prefHeight="143.0" prefWidth="223.0" styleClass="vbox-sidbar-sections">
-            <ToggleButton fx:id="usersButton1" layoutX="10.0" layoutY="10.0" maxWidth="Infinity" onAction="#handleUsers" prefHeight="44" styleClass="nav-btn" text="نظرة عامة">
-               <toggleGroup>
-                  <ToggleGroup fx:id="sideNav1" />
-               </toggleGroup>
-            </ToggleButton>
-
-                <ToggleButton fx:id="usersButton" maxWidth="Infinity" onAction="#handleUsers" prefHeight="44" styleClass="nav-btn" text="إدارة الحسابات">
-               <toggleGroup>
-                  <ToggleGroup fx:id="sideNav" />
-               </toggleGroup></ToggleButton>
-   
-                <ToggleButton fx:id="reviewsButton" maxWidth="Infinity" onAction="#handleOverviews" prefHeight="44" styleClass="nav-btn" text="إدارة التقييمات" toggleGroup="$sideNav" />
-
-                <ToggleButton fx:id="placesButton" maxWidth="Infinity" onAction="#handlePlaces" prefHeight="44" styleClass="nav-btn" text="إدارة الأماكن" toggleGroup="$sideNav" />
+        <!-- Sidebar -->
+        <VBox styleClass="sidebar" spacing="20" alignment="TOP_RIGHT" prefWidth="220">
+            <VBox styleClass="admin-profile" alignment="TOP_RIGHT" spacing="10">
+                <ImageView fx:id="adminAvatar" fitWidth="80" fitHeight="80" styleClass="admin-avatar">
+                    <Image url="@images/avatar.png" />
+                </ImageView>
+                <Label fx:id="adminNameLabel" text="أحمد خالد" styleClass="admin-name"/>
+                <Label fx:id="adminEmailLabel" text="ahmed@gmail.com" styleClass="admin-email"/>
             </VBox>
 
+            <!-- Navigation -->
+            <VBox styleClass="navigation" spacing="15" alignment="TOP_RIGHT">
+                <Button styleClass="nav-button" text="نظرة عامة" contentDisplay="RIGHT">
+                    <graphic>
+                        <ImageView fitWidth="20" fitHeight="20">
+                            <Image url="@images/home.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button styleClass="nav-button" text="إدارة الحساب" contentDisplay="RIGHT">
+                    <graphic>
+                        <ImageView fitWidth="20" fitHeight="20">
+                            <Image url="@images/account.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button styleClass="nav-button" text="إدارةالتقييمات" contentDisplay="RIGHT">
+                    <graphic>
+                        <ImageView fitWidth="20" fitHeight="20">
+                            <Image url="@images/reviews.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+                <Button styleClass="nav-button" text="إدارة الأماكن" contentDisplay="RIGHT">
+                    <graphic>
+                        <ImageView fitWidth="20" fitHeight="20">
+                            <Image url="@images/places.png" />
+                        </ImageView>
+                    </graphic>
+                </Button>
+            </VBox>
 
-            <Region prefHeight="174.0" prefWidth="223.0" VBox.vgrow="ALWAYS" />
-
-            <Button fx:id="logoutButton" maxWidth="Infinity" onAction="#handleLogout" styleClass="logout-btn" text="تسجيل خروج" />
-
-
-            <fx:define>
-                <ToggleGroup fx:id="sideNav" />
-            </fx:define>
+            <Region VBox.vgrow="ALWAYS"/>
+            <!-- Logout Button at Bottom -->
+            <Button styleClass="logout-btn" text="تسجيل خروج" contentDisplay="RIGHT" >
+                <graphic>
+                    <ImageView fitWidth="20" fitHeight="20">
+                        <Image url="@images/logout.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
         </VBox>
     </right>
 
     <center>
-        <StackPane fx:id="contentArea" alignment="TOP_RIGHT" prefHeight="560" prefWidth="740" styleClass="content" />
+        <VBox spacing="20" style="-fx-padding: 20;">
+            <!-- Statistics Cards -->
+            <HBox spacing="20" alignment="TOP_CENTER">
+                <VBox styleClass="stat-card">
+                    <HBox alignment="CENTER" spacing="10">
+                        <!--                        <ImageView fitWidth="30" fitHeight="30">-->
+                        <!--                            <Image url="@../icons/users.png" />-->
+                        <!--                        </ImageView>-->
+                        <Label text="عدد الحسابات المسجلة" styleClass="stat-title"/>
+                    </HBox>
+                    <Label fx:id="registeredUsersLabel" text="0 حساب" styleClass="stat-value"/>
+                </VBox>
+                <VBox styleClass="stat-card">
+                    <HBox alignment="CENTER" spacing="10">
+                        <ImageView fitWidth="30" fitHeight="30">
+                            <Image url="@images/reviews.png" />
+                        </ImageView>
+                        <Label text="إجمالي التعليقات" styleClass="stat-title"/>
+                    </HBox>
+                    <Label fx:id="totalReviewsLabel" text="0 تعليق" styleClass="stat-value"/>
+                </VBox>
+                <VBox styleClass="stat-card">
+                    <HBox alignment="CENTER" spacing="10">
+                        <ImageView fitWidth="30" fitHeight="30">
+                            <Image url="@images/places.png" />
+                        </ImageView>
+                        <Label text="إجمالي الأماكن" styleClass="stat-title"/>
+                    </HBox>
+                    <Label fx:id="totalPlacesLabel" text="0 مكان" styleClass="stat-value"/>
+                </VBox>
+                <VBox styleClass="stat-card">
+                    <HBox alignment="CENTER" spacing="10">
+                        <ImageView fitWidth="30" fitHeight="30">
+                            <Image url="@images/reviews.png" />
+                        </ImageView>
+                        <Label text="متوسط التقييمات" styleClass="stat-title"/>
+                    </HBox>
+                    <Label fx:id="avgRatingLabel" text="0.0" styleClass="stat-value"/>
+                </VBox>
+            </HBox>
+
+            <VBox styleClass="section-card">
+                <HBox alignment="CENTER_RIGHT"  spacing="10">
+                    <Label text="أحدث التعليقات" styleClass="section-title"/>
+                    <ImageView fitWidth="24" fitHeight="24">
+                        <Image url="@images/recent.png" />
+                    </ImageView>
+                </HBox>
+                <TableView fx:id="reviewsTableView" style="-fx-max-height: 300;">
+                    <columns>
+                        <TableColumn text="المستخدم" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="userName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="المكان" prefWidth="150">
+                            <cellValueFactory><PropertyValueFactory property="placeName"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="التعليق" prefWidth="200">
+                            <cellValueFactory><PropertyValueFactory property="description"/></cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="التقييم" prefWidth="80">
+                            <cellValueFactory>
+                                <PropertyValueFactory property="rating"/>
+                            </cellValueFactory>
+                        </TableColumn>
+                        <TableColumn text="التاريخ" prefWidth="120">
+                            <cellValueFactory><PropertyValueFactory property="createdAt"/></cellValueFactory>
+                        </TableColumn>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
     </center>
+
+    <bottom>
+        <HBox style="-fx-background-color: #ecf0f1; -fx-padding: 10;" alignment="CENTER">
+            <Label text="الحالة:"/>
+            <Label fx:id="statusLabel" text="جاهز" style="-fx-text-fill: #27ae60; -fx-padding: 0 0 0 10;"/>
+            <ProgressIndicator fx:id="loadingIndicator" visible="false" style="-fx-pref-width: 20; -fx-pref-height: 20;"/>
+        </HBox>
+    </bottom>
 </BorderPane>
