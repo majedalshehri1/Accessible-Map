@@ -53,20 +53,20 @@ public class DashboardController implements Initializable {
 
     private void loadAdminProfile() {
         // Get current admin user from authentication
-        UserDto adminUser = authService.getCurrentUser();
-        if (adminUser != null) {
-            adminNameLabel.setText(adminUser.getUserName());
-            adminEmailLabel.setText(adminUser.getUserEmail());
-
-            // Load admin avatar
-            try {
-                Image avatar = new Image(getClass().getResourceAsStream("/images/avatars/" + adminUser.getUserId() + ".png"));
-                adminAvatar.setImage(avatar);
-            } catch (Exception e) {
-                // Use default avatar if specific one doesn't exist
-                adminAvatar.setImage(new Image(getClass().getResourceAsStream("/images/avatar.png")));
-            }
-        }
+        //UserDto adminUser = authService.getCurrentUser();
+//        if (adminUser != null) {
+//            adminNameLabel.setText(adminUser.getUserName());
+//            adminEmailLabel.setText(adminUser.getUserEmail());
+//
+//            // Load admin avatar
+//            try {
+//                Image avatar = new Image(getClass().getResourceAsStream("/images/avatars/" + adminUser.getUserId() + ".png"));
+//                adminAvatar.setImage(avatar);
+//            } catch (Exception e) {
+//                // Use default avatar if specific one doesn't exist
+//                adminAvatar.setImage(new Image(getClass().getResourceAsStream("/images/avatar.png")));
+//            }
+//        }
     }
 
     private void setupTables() {
@@ -111,7 +111,7 @@ public class DashboardController implements Initializable {
 
     @FXML
     private void logout() {
-        authService.logout();
+        // authService.logout();
         NavigationManager.getInstance().navigateToScene(SceneType.LOGIN);
     }
 
