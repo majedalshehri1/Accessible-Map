@@ -90,7 +90,18 @@
 
 
 .nav-btn:focused { -fx-border-color: transparent; }
-
+.stat-icon {
+    -fx-icon-size: 18px; /* Match .stat-title font size */
+    -fx-fill: #008ED1;   /* Example color */
+    -fx-alignment: center;
+    -fx-padding: 0 4px 0 0;
+}
+.stat-title {
+    -fx-font-size: 18px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #0f172a;
+    -fx-alignment: center;
+}
 /* ========== logout button ========== */
 .logout-btn {
     -fx-background-color: transparent !important;
