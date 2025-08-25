@@ -21,9 +21,8 @@ public class App extends Application {
 
             navigationManager.navigateToScene(SceneType.LOGIN);
 
+
             primaryStage.setTitle("yusr Admin App");
-
-
             primaryStage.show();
 
         } catch (Exception e) {

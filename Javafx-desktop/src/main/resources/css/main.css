@@ -119,19 +119,6 @@
 
 /* ===== Hero image card (login) ===== */
 .hero-card {
-    -fx-background-image: url("../images/image-login.png");
-    -fx-background-size: cover;
-    -fx-background-position: center;
-    -fx-background-repeat: no-repeat;
-
-    -fx-background-color: white;
-    -fx-background-radius: 22;
-    -fx-border-radius: 22;
-    -fx-background-insets: 0;
-
-    -fx-border-color: rgba(0,0,0,0.10);
-    -fx-border-width: 1;
-
-    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 24, 0.20, 0, 6);
-    -fx-padding: 0;
+    -fx-border-color: rgba(0, 0, 0, 0.19);
+    -fx-border-width: 3px;
 }
