@@ -1,20 +1,41 @@
 package com.wakeb.yusradmin.models;
 
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
-    private String username;
-    private String email;
 
-    public User() {} // للـGson
+    public User() {}
 
-    public User(String username, String email) {
-        this.username = username;
-        this.email = email;
-    }
+    @JsonProperty("userId")
+    private long id;
 
-    // Getters/Setters
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    @JsonProperty("userName")
+    private String userName;
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    @JsonProperty("userEmail")
+    private String userEmail;
+
+    @JsonProperty("hasRole")
+    private String role;
+
+    @JsonProperty("isBlocked")
+    private boolean blocked;
+
+    public long getId() { return id; }
+    public void setId(long id) { this.id = id; }
+
+    public String getUserName() { return userName; }
+    public void setUserName(String userName) { this.userName = userName; }
+
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
+
+    public boolean isBlocked() { return blocked; }
+    public void setBlocked(boolean blocked) { this.blocked = blocked; }
 }

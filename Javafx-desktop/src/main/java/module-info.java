@@ -1,12 +1,19 @@
 module com.wakeb.yusradmin {
+    // JavaFX
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires java.net.http;
     requires java.prefs;
+
+
+    requires com.fasterxml.jackson.core;
+    requires com.fasterxml.jackson.databind;
+    requires com.fasterxml.jackson.annotation;
+
     requires com.google.gson;
 
     // Allow FXML to access controllers
+
     opens com.wakeb.yusradmin.controllers to javafx.fxml;
 
     // Allow Gson to reflect on model classes
@@ -16,6 +23,8 @@ module com.wakeb.yusradmin {
     opens com.wakeb.yusradmin to javafx.graphics;
 
     // Public API exports
+
     exports com.wakeb.yusradmin;
     exports com.wakeb.yusradmin.controllers;
+    exports com.wakeb.yusradmin.models;
 }
