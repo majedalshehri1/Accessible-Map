@@ -57,6 +57,7 @@
             </VBox>
 
             <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" prefHeight="44.0" styleClass="button" text="تسجيل الدخول" />
+            <Label fx:id="errorLabel" visible="false" styleClass="error-label" />
          </children>
       </VBox>
 

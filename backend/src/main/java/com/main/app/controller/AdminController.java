@@ -37,8 +37,8 @@ public class AdminController {
         return ResponseEntity.ok(placeService.getAllPlaces());
     }
 
-    @GetMapping("all/users")
-    public ResponseEntity <List<UserDto>> getAllUsers(){
+    @GetMapping("/all/users")
+    public ResponseEntity<List<UserDto>> getAllUsers(){
         return ResponseEntity.ok(userService.getAllUser());
     }
 
@@ -65,6 +65,16 @@ public class AdminController {
 
         return ResponseEntity.ok(dtos);
     }
+    @GetMapping("/searchUser")
+    public ResponseEntity<List<UserDto>> searchUserEmail(@RequestParam String email) {
+        List<User> users = adminService.searchUserByEmail(email);
+
+        List<UserDto> dtos1 = users.stream()
+                .map(userService::convertToDTO)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos1);
+    }
 
     @PutMapping("/update/review/{id}")
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long id, @RequestBody ReviewRequestDTO dto) {
@@ -90,6 +100,20 @@ public class AdminController {
         adminService.deletePlace(id);
         return ResponseEntity.ok("Place deleted successfully");
     }
+
+    @PutMapping("/update/user/{id}")
+    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto dto) {
+        var saved = adminService.adminUpdateUser(id, dto);
+        return ResponseEntity.ok(userService.convertToDTO(saved));
+    }
+
+    @DeleteMapping("/delete/user/{id}")
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
+        adminService.deleteUser(id);
+        return ResponseEntity.ok("User deleted successfully");
+    }
+
+
 
     @GetMapping("places/top")
     public ResponseEntity<List<TopPlaceDto>> getTopPlaces() {

@@ -48,10 +48,11 @@ public class UserService implements UserDetailsService {
 
     public UserDto convertToDTO(User user) {
         UserDto dto = new UserDto();
+        dto.setUserId(user.getUserId());
         dto.setUserName(user.getUserName());
         dto.setUserEmail(user.getUserEmail());
-        dto.setHasRole(user.getUserRole().name());
-        dto.setBlocked(user.getIsBlocked());
+        dto.setHasRole(user.getUserRole());
+        dto.setIsBlocked(user.getIsBlocked());
         return dto;
     }
 
