@@ -11,6 +11,7 @@ module com.wakeb.yusradmin {
     requires com.fasterxml.jackson.annotation;
 
     requires com.google.gson;
+    requires java.net.http;
 
     // Allow FXML to access controllers
 

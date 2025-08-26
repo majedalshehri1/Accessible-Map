@@ -67,13 +67,13 @@ public class MainController {
             return;
         }
 
-        String name  = safe(u.getUsername(), "—");
-        String email = safe(u.getEmail(), "");
+        String name  = safe(u.getUserName(), "—");
+        String email = safe(u.getUserEmail(), "");
         setSafeText(displayNameLabel, name);
         setSafeText(emailLabel, email);
 
         // Avatar = first letter from username (then email) if available
-        String source = firstNonEmpty(u.getUsername(), u.getEmail());
+        String source = firstNonEmpty(u.getUserName(), u.getUserEmail());
         String letter = (source != null && !source.isBlank())
                 ? source.trim().substring(0, 1)
                 : "؟";

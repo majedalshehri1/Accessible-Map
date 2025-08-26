@@ -7,7 +7,12 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class User {
 
-    public User() {}
+    public User(String UserName , String userEmail) {
+        this.userName =  UserName;
+        this.userEmail = userEmail;
+    }
+
+    public User() {};
 
     @JsonProperty("userId")
     private long id;
