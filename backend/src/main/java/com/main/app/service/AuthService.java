@@ -37,7 +37,7 @@ public class AuthService {
         String jwt = jwtService.generateAccessToken(user);
         ResponseCookie cookie = buildJwtCookie(jwt);
 
-        AuthResponse body = new AuthResponse(jwt, user.getUserId(), user.getUserName(), user.getUserEmail());
+        AuthResponse body = new AuthResponse(jwt, user.getUserId(), user.getUserName(), user.getUserEmail() , user.getUserRole());
 
         return new LoginResult(body, cookie);
     }

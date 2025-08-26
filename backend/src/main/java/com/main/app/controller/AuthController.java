@@ -62,7 +62,8 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
             jwtToken,
             savedUser.getUserId(),
             savedUser.getUserName(),
-            savedUser.getUserEmail()
+            savedUser.getUserEmail(),
+            savedUser.getUserRole()
     );
     return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -103,7 +104,8 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
         return ResponseEntity.ok(Map.of(
                 "id", user.getUserId(),
                 "username", user.getUserName(),
-                "email", user.getUserEmail()
+                "email", user.getUserEmail(),
+                "role", user.getUserRole()
         ));
     }
 
