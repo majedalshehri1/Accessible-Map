@@ -24,16 +24,7 @@ public class AdminController {
     private final PlaceService placeService;
     private final AdminService adminService;
     private final UserService userService;
-    private final AuthService authService;
 
-
-    @PostMapping("/loginAdmin")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
-        var result = authService.login(req);
-        return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, result.cookie().toString())
-                .body(result.body());
-    }
 
     @GetMapping("/all/reviews")
     public ResponseEntity<List<ReviewResponseDTO>> allReviews() {
