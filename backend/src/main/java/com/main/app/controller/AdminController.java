@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
-@PreAuthorize("hasRole('ADMIN')")
+//@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class AdminController {
 
@@ -73,6 +73,11 @@ public class AdminController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(dtos1);
+    }
+
+    @GetMapping("/findReview")
+    public ReviewResponseDTO getReviewById(@RequestParam long reviewId) {
+        return reviewService.getReviewById(reviewId);
     }
 
     @PutMapping("/update/review/{id}")

@@ -1,19 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.control.*?>
 
-<VBox xmlns="http://javafx.com/javafx/24.0.1"
-      xmlns:fx="http://javafx.com/fxml/1"
-        fx:controller="com.wakeb.yusradmin.controllers.ReviewsController"
-      alignment="TOP_RIGHT" spacing="12" nodeOrientation="RIGHT_TO_LEFT">
-    <Label styleClass="title" text="التعليقات" />
-    <TableView prefHeight="480">
-        <columns>
-            <TableColumn prefWidth="220" text="المكان" />
-            <TableColumn prefWidth="140" text="المستخدم" />
-            <TableColumn prefWidth="100" text="التقييم" />
-            <TableColumn prefWidth="140" text="التاريخ" />
-            <TableColumn prefWidth="120" text="الحالة" />
-        </columns>
-    </TableView>
-</VBox>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane nodeOrientation="RIGHT_TO_LEFT" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.ReviewsController">
+
+    <center>
+        <VBox spacing="14" style="-fx-padding:18;">
+            <Label styleClass="h1" text="إدارة التقييمات" />
+
+            <HBox spacing="8">
+                <TextField fx:id="searchField" promptText="ابحث بالاسم" HBox.hgrow="ALWAYS" />
+                <Button fx:id="searchBtn" text="بحث" />
+            </HBox>
+
+            <TableView fx:id="table" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="colId" prefWidth="70" text="ID" />
+                    <TableColumn fx:id="colUsername" prefWidth="190" text="المستخدم" />
+                    <TableColumn fx:id="colPlace" prefWidth="260" text="المكان" />
+                    <TableColumn fx:id="colReview" prefWidth="110" text="التقييم" />
+                    <TableColumn fx:id="colDescription" text="الوصف" prefWidth="300"/>
+                    <TableColumn fx:id="colDate" prefWidth="140" text="التاريخ" />
+                    <TableColumn fx:id="colStatus" prefWidth="120" text="الحالة" visible="false" />
+                    <!-- عمود الإجراءات -->
+                    <TableColumn fx:id="colActions" prefWidth="220" text="الإجراءات" />
+                </columns>
+                <placeholder>
+                    <Label text="لا توجد بيانات" />
+                </placeholder>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

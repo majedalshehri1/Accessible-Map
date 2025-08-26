@@ -29,4 +29,7 @@ module com.wakeb.yusradmin {
     exports com.wakeb.yusradmin;
     exports com.wakeb.yusradmin.controllers;
     exports com.wakeb.yusradmin.models;
+
+
+
 }
