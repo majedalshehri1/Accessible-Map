@@ -53,7 +53,7 @@ public class ApiClient {
                 .timeout(Duration.ofSeconds(10))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json");
-        var jwt = AuthSession.getJwt();
+        var jwt = AuthService.getInstance().getCurrentToken();
         if (jwt != null && !jwt.isBlank()) {
             b.header("Authorization", "Bearer " + jwt);
         }
