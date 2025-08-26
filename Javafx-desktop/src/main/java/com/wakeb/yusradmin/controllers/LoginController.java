@@ -40,17 +40,19 @@ public class LoginController {
         setLoading(false);
         if (errorLabel != null) errorLabel.setVisible(false);
 
-        // Validate stored session with backend (no auto-login without server)
         Task<Boolean> validateTask = auth.validateSessionAsync();
         validateTask.setOnSucceeded(e -> {
             boolean valid = Boolean.TRUE.equals(validateTask.getValue());
-            if (valid) {
+            var u = auth.getCurrentUser();
+            boolean isAdmin = valid && u != null && u.getRole() != null
+                    && u.getRole().trim().equalsIgnoreCase("ADMIN");
+
+            if (isAdmin) {
                 navigationManager.navigateToScene(SceneType.MAIN);
+
             }
-            // if not valid -> remain on login screen
         });
         validateTask.setOnFailed(e -> {
-            // Server unreachable or unexpected error -> stay on login
         });
         new Thread(validateTask, "validate-session").start();
     }
@@ -91,7 +93,16 @@ public class LoginController {
 
             // Navigate only on real success (token present; AuthService already validated session)
             if (result.isSuccess() && result.getToken() != null) {
-                navigationManager.navigateToScene(SceneType.MAIN);
+                var u = auth.getCurrentUser();
+                boolean isAdmin = u != null && u.getRole() != null
+                        && u.getRole().trim().equalsIgnoreCase("ADMIN");
+
+                if (isAdmin) {
+                    navigationManager.navigateToScene(SceneType.MAIN);
+                } else {
+                    showError("Admins only. Access denied.");
+                    showAlert(Alert.AlertType.ERROR, "Access Denied", "You must be an ADMIN.");
+                }
             } else {
                 String msg = (result.getMessage() == null || result.getMessage().isBlank())
                         ? "Login failed. Please try again."

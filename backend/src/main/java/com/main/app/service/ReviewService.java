@@ -7,11 +7,13 @@ import com.main.app.model.*;
 import com.main.app.repository.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -67,17 +69,21 @@ public class ReviewService {
         review.setUser(user);
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
-        review.setReviewDate(OffsetDateTime.now());
-
-        Review savedReview = reviewRepository.save(review);
-        return convertToDTO(savedReview);
+        Review saved = reviewRepository.save(review);
+        return convertToDTO(saved);
     }
 
     public List<ReviewResponseDTO> getAllReviews() {
         return reviewRepository.findAll().stream().map(this::convertToDTO).toList();
 
     }
+    @Transactional(readOnly = true)
+    public ReviewResponseDTO getReviewById(long reviewId) {
+        Review review = reviewRepository.findById(reviewId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Review not found"));
 
+        return convertToDTO(review);
+    }
 
     public List<ReviewResponseDTO> getReviewsByPlace(Long placeId) {
         return reviewRepository.findByPlaceId(placeId)
@@ -107,6 +113,7 @@ public class ReviewService {
         dto.setUserName(review.getUser().getUserName());
         dto.setDescription(review.getDescription());
         dto.setRating(review.getRating());
+        dto.setReviewDate(review.getReviewDate());
 
         return dto;
     }

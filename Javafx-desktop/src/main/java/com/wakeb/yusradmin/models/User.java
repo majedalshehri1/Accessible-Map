@@ -12,6 +12,12 @@ public class User {
         this.userEmail = userEmail;
     }
 
+    public User(String UserName , String userEmail , String  role) {
+        this.userName =  UserName;
+        this.userEmail = userEmail;
+        this.role = role;
+    }
+
     public User() {};
 
     @JsonProperty("userId")
