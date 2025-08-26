@@ -188,7 +188,61 @@
     -fx-text-fill: #64748b;
     -fx-font-weight: 500;
 }
+/* Icon styles */
+.stat-icon {
+    -fx-icon-color: #008ED1;
+    -fx-icon-size: 24px;
+}
 
+.nav-btn FontIcon {
+    -fx-icon-color: #6b7280;
+    -fx-icon-size: 18px;
+}
+
+.nav-btn:selected FontIcon {
+    -fx-icon-color: white;
+}
+
+.logout-btn FontIcon {
+    -fx-icon-color: #6b7280;
+    -fx-icon-size: 16px;
+}
+
+/* Statistics cards */
+.stat-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-pref-width: 200;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+    -fx-alignment: CENTER;
+}
+
+.stat-title {
+    -fx-font-size: 14px;
+    -fx-text-fill: #7f8c8d;
+}
+
+.stat-value {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+    -fx-padding: 10 0 0 0;
+}
+
+/* Section cards */
+.section-card {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 10;
+    -fx-padding: 20;
+    -fx-effect: dropshadow(three-pass-box, rgba(0,0,0,0.1), 10, 0, 0, 0);
+}
+
+.section-title {
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #2c3e50;
+}
 /* ==================== Clean Table ==================== */
 .clean-table {
     -fx-background-color: transparent;
