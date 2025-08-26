@@ -35,7 +35,7 @@
                   <ToggleGroup fx:id="sideNav" />
                </toggleGroup></ToggleButton>
    
-                <ToggleButton fx:id="reviewsButton" maxWidth="Infinity" onAction="#handleOverviews" prefHeight="44" styleClass="nav-btn" text="إدارة التقييمات" toggleGroup="$sideNav" />
+                <ToggleButton fx:id="reviewsButton" maxWidth="Infinity" onAction="#handleReviews" prefHeight="44" styleClass="nav-btn" text="إدارة التقييمات" toggleGroup="$sideNav" />
 
                 <ToggleButton fx:id="placesButton" maxWidth="Infinity" onAction="#handlePlaces" prefHeight="44" styleClass="nav-btn" text="إدارة الأماكن" toggleGroup="$sideNav" />
             </VBox>
@@ -47,7 +47,7 @@
 
 
             <fx:define>
-                <ToggleGroup fx:id="sideNav" />
+                <ToggleGroup  />
             </fx:define>
         </VBox>
     </right>

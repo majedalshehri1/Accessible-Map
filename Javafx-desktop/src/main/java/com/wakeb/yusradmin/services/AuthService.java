@@ -39,7 +39,7 @@ public class AuthService {
     public AuthService() {
         this.httpClient = HttpClient.newHttpClient();
         this.gson = new Gson();
-        this.baseUrl = "https://api.yourapp.com/v1"; // TODO(team): move to config
+        this.baseUrl = "http://localhost:8081"; // TODO(team): move to config
         this.preferences = Preferences.userNodeForPackage(AuthService.class);
         loadStoredAuth(); // Restore any stored session
     }
@@ -145,5 +145,15 @@ public class AuthService {
         public User getUser() { return user; }
         public String getMessage() { return message; }
         public String getToken() { return token; }
+    }
+    // Add to AuthService
+    public String getBaseUrl() {
+        // set this ONCE to your backend base (without /api/admin)
+        return "http://localhost:8081";
+    }
+
+    public String getBearerToken() {
+        String t = getCurrentToken();
+        return (t == null || t.isBlank()) ? null : "Bearer " + t;
     }
 }
