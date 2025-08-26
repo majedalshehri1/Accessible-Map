@@ -35,13 +35,16 @@ public class ReviewsController implements Initializable {
 
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
+    private ReviewService reviewService;
 
     private final ObservableList<ReviewRow> data = FXCollections.observableArrayList();
 
     // Services (use your AuthService and ReviewService)
-    private final AuthService authService = new AuthService(); // uses getBaseUrl() + getBearerToken()  :contentReference[oaicite:7]{index=7}
-    private final ReviewService reviewService = new ReviewService(authService); // points to {base}/api/admin  :contentReference[oaicite:8]{index=8}
 
+    public void setService(ReviewService service) {
+        this.reviewService = service;
+        loadAllReviewsAsync(); // Load reviews when service is set
+    }
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // map columns
@@ -82,7 +85,6 @@ public class ReviewsController implements Initializable {
         searchField.setOnAction(e -> doSearchById());
 
         // initial load from backend: GET /api/admin/all/reviews  :contentReference[oaicite:9]{index=9}
-        loadAllReviewsAsync();
     }
 
     // ---------- API wiring ----------
