@@ -50,7 +50,7 @@ public class ApiClient {
     private HttpRequest.Builder base(String path) {
         var b = HttpRequest.newBuilder()
                 .uri(URI.create(baseUrl + path))
-                .timeout(Duration.ofSeconds(10))
+                .timeout(Duration.ofSeconds(30))
                 .header("Accept", "application/json")
                 .header("Content-Type", "application/json");
         var jwt = AuthService.getInstance().getCurrentToken();
@@ -58,5 +58,10 @@ public class ApiClient {
             b.header("Authorization", "Bearer " + jwt);
         }
         return b;
+    }
+    // In ApiClient.java, add this method:
+    public HttpResponse<String> getRaw(String path) throws Exception {
+        var req = base(path).GET().build();
+        return client.send(req, HttpResponse.BodyHandlers.ofString());
     }
 }

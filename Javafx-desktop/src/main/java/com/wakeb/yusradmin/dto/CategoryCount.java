@@ -1,31 +1,18 @@
 package com.wakeb.yusradmin.dto;
-// Dummy data purpose for overview
+
 public class CategoryCount {
     private String category;
-    private int count;
+    private Long count; // Use Long instead of Integer
 
-    public CategoryCount() {
-    }
-
-    public CategoryCount(String category, int count) {
+    public CategoryCount(String category, Long count) {
         this.category = category;
         this.count = count;
     }
 
-    // Getters and Setters
-    public String getCategory() {
-        return category;
-    }
+    // Getters and setters
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public int getCount() {
-        return count;
-    }
-
-    public void setCount(int count) {
-        this.count = count;
-    }
+    public Long getCount() { return count; }
+    public void setCount(Long count) { this.count = count; }
 }

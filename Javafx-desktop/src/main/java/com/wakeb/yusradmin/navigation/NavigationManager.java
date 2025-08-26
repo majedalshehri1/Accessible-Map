@@ -1,8 +1,14 @@
 package com.wakeb.yusradmin.navigation;
 
+import com.wakeb.yusradmin.controllers.MapController;
+import com.wakeb.yusradmin.controllers.ReviewsController;
 import com.wakeb.yusradmin.controllers.UsersController;
+import com.wakeb.yusradmin.dto.PlaceMapDTO;
 import com.wakeb.yusradmin.services.ApiClient;
+import com.wakeb.yusradmin.services.PlaceService;
+import com.wakeb.yusradmin.services.ReviewService;
 import com.wakeb.yusradmin.services.UserServiceHTTP;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,6 +17,7 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -103,6 +110,8 @@ public class NavigationManager {
      * Navigate within the MAIN layout only.
      * Changes the center content of the BorderPane without replacing the whole scene.
      */
+    // In NavigationManager.java, update the navigateToView method
+    // In NavigationManager.java, update the navigateToView method:
     public void navigateToView(SceneType viewType) {
         if (mainLayout == null) {
             System.err.println("Main layout not initialized!");
@@ -110,15 +119,30 @@ public class NavigationManager {
         }
 
         try {
-            // Load new FXML view
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPaths.get(viewType)));
             Pane view = loader.load();
 
             if (viewType == SceneType.USERS) {
                 UsersController ctrl = loader.getController();
                 ctrl.setService(new UserServiceHTTP(new ApiClient(apiBase)));
+            } else if (viewType == SceneType.MAP) {
+                MapController mapCtrl = loader.getController();
+                PlaceService placeService = new PlaceService();
+                Task<List<PlaceMapDTO>> task = placeService.getAllPlacesAsync();
+                task.setOnSucceeded(e -> {
+                    List<PlaceMapDTO> places = task.getValue();
+                    mapCtrl.setPlacesData(places);
+                });
+                task.setOnFailed(e -> {
+                    System.err.println("Failed to load places: " + task.getException().getMessage());
+                    // You might want to show an alert to the user here
+                });
+                new Thread(task).start();
+            } else if (viewType == SceneType.REVIEWS) {
+                ReviewsController reviewsCtrl = loader.getController();
+                reviewsCtrl.setService(new ReviewService()); // This should set the service
             }
-            // Replace center content of BorderPane
+
             mainLayout.setCenter(view);
 
         } catch (Exception e) {

@@ -1,83 +1,56 @@
+// PlaceMapDTO.java
 package com.wakeb.yusradmin.dto;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class PlaceMapDTO {
-    private long id;
-    private String placeName;
-    private String longitude;
+    private Long id;
+    private String name; // This should match your PlaceDto's 'name' field
     private String latitude;
-    private String category; // Using String instead of Enum for simplicity
-    private List<String> accessibilityFeatures = new ArrayList<>();
+    private String longitude;
+    private String category;
     private String imageUrl;
+    private List<String> accessibilityFeatures;
 
-    public PlaceMapDTO() {
-    }
+    // Constructors, getters, and setters
+    public PlaceMapDTO() {}
 
-    public PlaceMapDTO(long id, String placeName, String longitude, String latitude, String category, String imageUrl) {
+    public PlaceMapDTO(Long id, String name, String latitude, String longitude,
+                       String category, String imageUrl) {
         this.id = id;
-        this.placeName = placeName;
-        this.longitude = longitude;
+        this.name = name;
         this.latitude = latitude;
+        this.longitude = longitude;
         this.category = category;
         this.imageUrl = imageUrl;
     }
 
-    // Getters and Setters
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
+    // Add getPlaceName() method to match what your map expects
     public String getPlaceName() {
-        return placeName;
+        return name;
     }
 
-    public void setPlaceName(String placeName) {
-        this.placeName = placeName;
-    }
+    // Getters and setters for all fields
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public String getLongitude() {
-        return longitude;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setLongitude(String longitude) {
-        this.longitude = longitude;
-    }
+    public String getLatitude() { return latitude; }
+    public void setLatitude(String latitude) { this.latitude = latitude; }
 
-    public String getLatitude() {
-        return latitude;
-    }
+    public String getLongitude() { return longitude; }
+    public void setLongitude(String longitude) { this.longitude = longitude; }
 
-    public void setLatitude(String latitude) {
-        this.latitude = latitude;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getCategory() {
-        return category;
-    }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
-    public List<String> getAccessibilityFeatures() {
-        return accessibilityFeatures;
-    }
-
+    public List<String> getAccessibilityFeatures() { return accessibilityFeatures; }
     public void setAccessibilityFeatures(List<String> accessibilityFeatures) {
         this.accessibilityFeatures = accessibilityFeatures;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
     }
 }

@@ -24,7 +24,6 @@ public class MapController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupMap();
-        loadSamplePlaces();
     }
 
     private void setupMap() {
@@ -102,27 +101,6 @@ public class MapController implements Initializable {
         });
     }
 
-    private void loadSamplePlaces() {
-        placesData.clear();
-
-        PlaceMapDTO place1 = new PlaceMapDTO(1, "مطعم الريان", "24.7136", "46.6753", "مطعم", "restaurant.jpg");
-        place1.setAccessibilityFeatures(Arrays.asList("WHEELCHAIR_ACCESS", "BRAILLE_MENU"));
-
-        PlaceMapDTO place2 = new PlaceMapDTO(2, "مقهى النجوم", "24.7236", "46.6853", "مقهى", "cafe.jpg");
-        place2.setAccessibilityFeatures(Arrays.asList("WHEELCHAIR_ACCESS"));
-
-        PlaceMapDTO place3 = new PlaceMapDTO(3, "متحف التراث", "24.7036", "46.6653", "متحف", "museum.jpg");
-        place3.setAccessibilityFeatures(Arrays.asList("WHEELCHAIR_ACCESS", "AUDIO_GUIDE", "SIGN_LANGUAGE"));
-
-        PlaceMapDTO place4 = new PlaceMapDTO(4, "سوق الحرف", "24.7336", "46.6953", "سوق", "market.jpg");
-        place4.setAccessibilityFeatures(Arrays.asList("WHEELCHAIR_ACCESS", "BRAILLE_SIGNS"));
-
-        PlaceMapDTO place5 = new PlaceMapDTO(5, "مطعم البحار", "24.6936", "46.6553", "مطعم", "seafood.jpg");
-        place5.setAccessibilityFeatures(Arrays.asList("WHEELCHAIR_ACCESS", "LARGE_PRINT_MENU"));
-
-        placesData.addAll(place1, place2, place3, place4, place5);
-    }
-
     public void updateMapMarkers() {
         if (webEngine == null) return;
 
@@ -165,8 +143,10 @@ public class MapController implements Initializable {
 
     // Public method to update places from other controllers
     public void setPlacesData(java.util.List<PlaceMapDTO> places) {
-        placesData.setAll(places);
-        updateMapMarkers();
+        if (places != null) {
+            placesData.setAll(places);
+            updateMapMarkers();
+        }
     }
 
     // Public method to refresh map

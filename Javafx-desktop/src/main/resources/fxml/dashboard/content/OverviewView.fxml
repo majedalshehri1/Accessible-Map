@@ -128,14 +128,5 @@
                 </columns>
             </TableView>
         </VBox>
-
-        <!-- Map Section -->
-        <VBox styleClass="section-card" spacing="10">
-            <HBox alignment="CENTER_RIGHT" spacing="10">
-                <FontIcon iconLiteral="fas-map-marker-alt" iconSize="20" />
-                <Label text="خريطة الأماكن" styleClass="section-title"/>
-            </HBox>
-            <StackPane fx:id="mapContainer" prefHeight="400" style="-fx-max-height: 400;"/>
-        </VBox>
     </VBox>
 </VBox>

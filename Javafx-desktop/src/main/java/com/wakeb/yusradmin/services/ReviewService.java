@@ -28,21 +28,19 @@ import java.util.List;
  * Returns JavaFX Tasks so calls are non-blocking.
  */
 public class ReviewService {
-
-    private final AuthService authService;
+    private final AuthService authService = AuthService.getInstance();
     private final HttpClient http;
     private final Gson gson = new Gson();
     /** e.g., http://localhost:8081/api/admin */
     private final String adminBase;
 
-    public ReviewService(AuthService authService) {
-        this.authService = authService;
+    public ReviewService() {
         this.http = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
-        String base = authService.getBaseUrl();                 // provide this in AuthService
+        String base = authService.getBaseUrl();
         if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
-        this.adminBase = base + "/api/admin";
+        this.adminBase = base + "/admin";  // ✅ Add this
     }
 
     // ---------------------------
