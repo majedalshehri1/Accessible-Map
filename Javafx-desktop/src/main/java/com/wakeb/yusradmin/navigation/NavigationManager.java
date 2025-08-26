@@ -140,6 +140,7 @@ public class NavigationManager {
         fxmlPaths.put(SceneType.USERS, "/fxml/dashboard/content/UsersView.fxml");
         fxmlPaths.put(SceneType.REVIEWS, "/fxml/dashboard/content/ReviewsView.fxml");
         fxmlPaths.put(SceneType.PLACES, "/fxml/dashboard/content/PlacesView.fxml");
+        fxmlPaths.put(SceneType.MAP, "/fxml/dashboard/content/MapView.fxml");
 
         // Map SceneTypes to CSS files
         cssPaths.put(SceneType.LOGIN, "/css/main.css");
@@ -148,6 +149,7 @@ public class NavigationManager {
         cssPaths.put(SceneType.USERS, "/css/main.css");
         cssPaths.put(SceneType.REVIEWS, "/css/main.css");
         cssPaths.put(SceneType.PLACES, "/css/main.css");
+        cssPaths.put(SceneType.MAP, "/css/main.css");
     }
 
 

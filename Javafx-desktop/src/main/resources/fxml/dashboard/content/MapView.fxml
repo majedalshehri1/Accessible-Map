@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.web.WebView?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
+<?import javafx.scene.layout.StackPane?>
+
+<VBox xmlns="http://javafx.com/javafx/24.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.wakeb.yusradmin.controllers.MapController"
+      spacing="10" style="-fx-padding: 20;">
+
+    <Label text="خريطة الأماكن" styleClass="section-title">
+        <graphic>
+            <FontIcon iconLiteral="fas-map-marker-alt" iconSize="20" />
+        </graphic>
+    </Label>
+
+    <StackPane style="-fx-max-height: 600;">
+        <WebView fx:id="mapWebView" />
+    </StackPane>
+</VBox>

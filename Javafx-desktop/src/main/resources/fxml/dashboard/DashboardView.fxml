@@ -15,6 +15,7 @@
   Controller: com.wakeb.yusradmin.controllers.MainController
 -->
 
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 <BorderPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="600.0" prefWidth="1000.0" styleClass="app-root" stylesheets="@../../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.MainController">
 
     <!-- ===================== RIGHT: Sidebar ===================== -->
@@ -76,6 +77,14 @@
                         <ToggleButton fx:id="reviewsBtn" maxWidth="Infinity" onAction="#handleReviews" prefHeight="40.0" styleClass="nav-btn" text="إدارة التقييمات" toggleGroup="$sideNav" />
 
                         <ToggleButton fx:id="placesBtn" maxWidth="Infinity" onAction="#handlePlaces" prefHeight="40.0" styleClass="nav-btn" text="إدارة الأماكن" toggleGroup="$sideNav" />
+                        <ToggleButton fx:id="mapBtn" maxWidth="Infinity" onAction="#handleMapView"
+                                      prefHeight="40.0" styleClass="nav-btn">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-map" iconSize="18" />
+                            </graphic>
+                            <text>خريطة الأماكن</text>
+                            <toggleGroup>$sideNav</toggleGroup>
+                        </ToggleButton>
                     </children>
                 </VBox>
 
