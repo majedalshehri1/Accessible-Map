@@ -11,7 +11,7 @@ public class ApiClient {
 
     private final String baseUrl;
     private final HttpClient client = HttpClient.newBuilder()
-            .connectTimeout(Duration.ofSeconds(5))
+            .connectTimeout(Duration.ofSeconds(15))
             .build();
     private final ObjectMapper om = new ObjectMapper();
 
@@ -62,6 +62,7 @@ public class ApiClient {
     // In ApiClient.java, add this method:
     public HttpResponse<String> getRaw(String path) throws Exception {
         var req = base(path).GET().build();
+        System.out.println("Requesting URL: " + req.uri()); // Add this line for debugging
         return client.send(req, HttpResponse.BodyHandlers.ofString());
     }
 }

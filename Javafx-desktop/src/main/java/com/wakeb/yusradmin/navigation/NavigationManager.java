@@ -1,13 +1,11 @@
 package com.wakeb.yusradmin.navigation;
 
 import com.wakeb.yusradmin.controllers.MapController;
+import com.wakeb.yusradmin.controllers.OverviewController;
 import com.wakeb.yusradmin.controllers.ReviewsController;
 import com.wakeb.yusradmin.controllers.UsersController;
 import com.wakeb.yusradmin.dto.PlaceMapDTO;
-import com.wakeb.yusradmin.services.ApiClient;
-import com.wakeb.yusradmin.services.PlaceService;
-import com.wakeb.yusradmin.services.ReviewService;
-import com.wakeb.yusradmin.services.UserServiceHTTP;
+import com.wakeb.yusradmin.services.*;
 import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -125,7 +123,11 @@ public class NavigationManager {
             if (viewType == SceneType.USERS) {
                 UsersController ctrl = loader.getController();
                 ctrl.setService(new UserServiceHTTP(new ApiClient(apiBase)));
-            } else if (viewType == SceneType.MAP) {
+            } else if (viewType == SceneType.OVERVIEWS) {
+                OverviewController oc = loader.getController();
+                oc.setService(new StatsServiceHttp(new ApiClient(apiBase)));
+            }
+            else if (viewType == SceneType.MAP) {
                 MapController mapCtrl = loader.getController();
                 PlaceService placeService = new PlaceService();
                 Task<List<PlaceMapDTO>> task = placeService.getAllPlacesAsync();

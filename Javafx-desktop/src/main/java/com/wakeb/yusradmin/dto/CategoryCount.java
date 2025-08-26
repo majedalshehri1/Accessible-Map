@@ -2,17 +2,16 @@ package com.wakeb.yusradmin.dto;
 
 public class CategoryCount {
     private String category;
-    private Long count; // Use Long instead of Integer
+    private int count;
 
-    public CategoryCount(String category, Long count) {
+    public CategoryCount(String category, int count) {
         this.category = category;
         this.count = count;
     }
 
-    // Getters and setters
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
 
-    public Long getCount() { return count; }
-    public void setCount(Long count) { this.count = count; }
+    public int getCount() { return count; }
+    public void setCount(int count) { this.count = count; }
 }
