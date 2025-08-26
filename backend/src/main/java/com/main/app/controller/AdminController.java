@@ -4,11 +4,9 @@ import com.main.app.dto.*;
 import com.main.app.model.Place;
 import com.main.app.model.Review;
 import com.main.app.model.User;
-import com.main.app.service.AdminService;
-import com.main.app.service.PlaceService;
-import com.main.app.service.ReviewService;
-import com.main.app.service.UserService;
+import com.main.app.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -26,6 +24,16 @@ public class AdminController {
     private final PlaceService placeService;
     private final AdminService adminService;
     private final UserService userService;
+    private final AuthService authService;
+
+
+    @PostMapping("/loginAdmin")
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
+        var result = authService.login(req);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, result.cookie().toString())
+                .body(result.body());
+    }
 
     @GetMapping("/all/reviews")
     public ResponseEntity<List<ReviewResponseDTO>> allReviews() {
@@ -117,7 +125,7 @@ public class AdminController {
 
     @GetMapping("places/top")
     public ResponseEntity<List<TopPlaceDto>> getTopPlaces() {
-        return ResponseEntity.ok(adminService.getTopPlaces(3));
+        return ResponseEntity.ok(adminService.getTopPlaces(5));
     }
 
     @PutMapping("users/{id}/block")
