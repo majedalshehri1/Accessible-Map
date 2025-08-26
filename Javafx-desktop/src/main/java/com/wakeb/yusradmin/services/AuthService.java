@@ -6,78 +6,64 @@ import com.wakeb.yusradmin.dto.LoginRequest;
 import com.wakeb.yusradmin.models.User;
 import javafx.concurrent.Task;
 
-import java.io.IOException;
-import java.net.ConnectException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.net.http.HttpTimeoutException;
 import java.time.LocalDateTime;
 import java.util.prefs.Preferences;
 
 /**
  * AuthService
  *
- * - Singleton service that handles authentication & session state.
- * - Talks to backend (login, validate) and persists the session locally.
- * - Exposes async JavaFX Tasks so UI stays responsive.
+ * Responsibilities:
+ * - Handles authentication logic (login, logout).
+ * - Stores/loads tokens and user session from Preferences.
+ * - Exposes async Tasks for network operations (non-blocking).
+ *
+ * Currently:
+ * - Methods are scaffolded (loginAsync, logoutAsync, isAuthenticated).
+ * - TODO: Connect with actual backend API.
  */
 public class AuthService {
+    private final HttpClient httpClient;
+    private final Gson gson;
+    private final String baseUrl;
+    private final Preferences preferences;
 
-
-    // Singleton pattern (only one instance)
-    private static final AuthService INSTANCE = new AuthService();
-    public static AuthService getInstance() { return INSTANCE; }
-
-
-    // HTTP & JSON helpers
-    private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final Gson gson = new Gson();
-
-    // Backend endpoints (adjust if needed)
-    private final String baseUrl = "http://localhost:8081/api";
-    private final String validatePath = "/auth/me"; // or "/auth/validate"
-
-    // Local storage for session persistence
-    private final Preferences preferences = Preferences.userNodeForPackage(AuthService.class);
-
-
-    // In-memory session state
     private String currentToken;
     private User currentUser;
     private LocalDateTime tokenExpiry;
 
-    /**
-     * Private ctor (singleton):
-     * - Load any stored session.
-     * - Immediately validate it against the backend.
-     */
-    private AuthService() {
-        loadStoredAuth();
-        validateSessionSync(); // if server down/invalid → clears session
+    // Constructor
+    public AuthService() {
+        this.httpClient = HttpClient.newHttpClient();
+        this.gson = new Gson();
+        this.baseUrl = "https://api.yourapp.com/v1"; // TODO(team): move to config
+        this.preferences = Preferences.userNodeForPackage(AuthService.class);
+        loadStoredAuth(); // Restore any stored session
     }
 
-
-    // Public API for UI layer
     /**
-     * Login:
-     * - POST /auth/login with email/password.
-     * - On 2xx: extract token, set temporary session, validate it with backend, then persist.
-     * - Returns LoginResult via JavaFX Task.
+     * Async login Task
+     * - Builds request
+     * - Sends to backend
+     * - Parses response
+     *
+     * TODO(team): Adjust based on actual API contract.
      */
     public Task<LoginResult> loginAsync(LoginRequest loginRequest) {
         return new Task<>() {
             @Override
             protected LoginResult call() throws Exception {
                 updateMessage("Authenticating...");
+                updateProgress(0, 100);
 
                 // Build request body
                 JsonObject body = new JsonObject();
                 body.addProperty("email", loginRequest.getEmail());
                 body.addProperty("password", loginRequest.getPassword());
 
-                // HTTP request
                 HttpRequest request = HttpRequest.newBuilder()
                         .uri(URI.create(baseUrl + "/auth/login"))
                         .header("Content-Type", "application/json")
@@ -281,9 +267,6 @@ public class AuthService {
         }
     }
 
-    /**
-     * Clear in-memory + persisted session fully.
-     */
     private void clearAuth() {
         currentToken = null;
         currentUser = null;
@@ -293,14 +276,14 @@ public class AuthService {
         preferences.remove("current_user");
     }
 
-    // DTO for login results
-
+    /**
+     * Result wrapper for login
+     */
     public static class LoginResult {
         private final boolean success;
         private final User user;
         private final String message;
         private final String token;
-
 
         public LoginResult(boolean success, User user, String message, String token) {
             this.success = success;
@@ -308,9 +291,10 @@ public class AuthService {
             this.message = message;
             this.token = token;
         }
+
         public boolean isSuccess() { return success; }
-        public User getUser()      { return user; }
+        public User getUser() { return user; }
         public String getMessage() { return message; }
-        public String getToken()   { return token; }
+        public String getToken() { return token; }
     }
 }
