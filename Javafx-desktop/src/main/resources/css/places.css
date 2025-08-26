@@ -1,0 +1,100 @@
+/* ========================================= */
+/* Root variables and Typography  */
+/* ========================================= */
+.root {
+    -primary-color: #007bff;
+    -success-color: #28a745;
+    -background-color: #f4f7f9;
+    -surface-color: #ffffff;
+    -border-color: #e6e8ee;
+    -text-color-primary: #343a40;
+    -text-color-secondary: #6b7280;
+}
+.container {
+    -fx-padding: 24;
+    -fx-spacing: 18;
+    -fx-background-color: -background-color;
+}
+.heading-1 {
+    -fx-font-size: 24px;
+    -fx-font-weight: bold;
+    -fx-text-fill: -text-color-primary;
+    -fx-padding: 0 0 12px 0;
+}
+/* ========================================= */
+/* Layout Components  */
+/* ========================================= */
+.toolbar {
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+/* ========================================= */
+/* Inputs and Buttons  */
+/* ========================================= */
+.input-field {
+    -fx-background-color: -surface-color;
+    -fx-border-color: -border-color;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: -text-color-secondary;
+}
+.combo-box-field {
+    -fx-background-color: -surface-color;
+    -fx-border-color: -border-color;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-font-size: 14px;
+}
+.combo-box-field .list-cell {
+    -fx-background-color: -surface-color;
+    -fx-text-fill: -text-color-primary;
+}
+.button-primary {
+    -fx-background-radius: 8px;
+    -fx-background-color: -primary-color;
+    -fx-text-fill: white;
+    -fx-padding: 8px 18px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.button-primary:hover {
+    -fx-background-color: derive(-primary-color, -10%);
+}
+.button-success {
+    -fx-background-radius: 8px;
+    -fx-background-color: -success-color;
+    -fx-text-fill: white;
+    -fx-padding: 8px 18px;
+    -fx-font-size: 14px;
+    -fx-font-weight: bold;
+}
+.button-success:hover {
+    -fx-background-color: derive(-success-color, -10%);
+}
+/* ========================================= */
+/* Table  */
+/* ========================================= */
+.data-table .column-header-background {
+    -fx-background-color: -surface-color;
+    -fx-border-color: -border-color;
+    -fx-border-width: 0 0 1px 0;
+}
+.data-table .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+.data-table .column-header .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.data-table .table-cell {
+    -fx-border-color: -border-color;
+    -fx-border-width: 0 0 1px 0;
+    -fx-padding: 10px 8px;
+}

@@ -23,7 +23,6 @@ public class App extends Application {
 
             primaryStage.setTitle("yusr Admin App");
 
-
             primaryStage.show();
 
         } catch (Exception e) {

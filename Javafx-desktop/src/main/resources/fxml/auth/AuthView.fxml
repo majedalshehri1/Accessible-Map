@@ -11,7 +11,7 @@
 
 
 
-<HBox alignment="CENTER" prefHeight="600.0" prefWidth="1000.0" spacing="32.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.LoginController">
+<HBox alignment="CENTER" prefHeight="600.0" prefWidth="1000.0" spacing="32.0" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.PlacesController">
 
 
    <children>
@@ -55,7 +55,7 @@
                </children>
             </VBox>
 
-            <Button fx:id="loginButton" maxWidth="Infinity" onAction="#handleLogin" prefHeight="44.0" styleClass="button" text="تسجيل الدخول" />
+            <Button fx:id="loginButton" maxWidth="Infinity" prefHeight="44.0" styleClass="button" text="تسجيل الدخول" />
 
          </children>
       </VBox>
