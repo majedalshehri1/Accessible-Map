@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx/24.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="com.wakeb.yusradmin.controllers.PlacesController"
+      alignment="TOP_RIGHT" spacing="12" nodeOrientation="RIGHT_TO_LEFT">
+    <Label text="الأماكن" styleClass="title"/>
+    <TableView prefHeight="480">
+        <columns>
+            <TableColumn text="الاسم"     prefWidth="240"/>
+            <TableColumn text="الفئة"     prefWidth="160"/>
+            <TableColumn text="المدينة"   prefWidth="140"/>
+            <TableColumn text="الحالة"    prefWidth="120"/>
+        </columns>
+    </TableView>
+</VBox>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<VBox xmlns="http://javafx.com/javafx/24.0.1"
+      xmlns:fx="http://javafx.com/fxml/1"
+        fx:controller="com.wakeb.yusradmin.controllers.ReviewsController"
+      alignment="TOP_RIGHT" spacing="12" nodeOrientation="RIGHT_TO_LEFT">
+    <Label styleClass="title" text="التعليقات" />
+    <TableView prefHeight="480">
+        <columns>
+            <TableColumn prefWidth="220" text="المكان" />
+            <TableColumn prefWidth="140" text="المستخدم" />
+            <TableColumn prefWidth="100" text="التقييم" />
+            <TableColumn prefWidth="140" text="التاريخ" />
+            <TableColumn prefWidth="120" text="الحالة" />
+        </columns>
+    </TableView>
+</VBox>
