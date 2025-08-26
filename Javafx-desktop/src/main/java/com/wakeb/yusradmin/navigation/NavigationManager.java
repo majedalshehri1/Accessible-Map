@@ -118,6 +118,13 @@ public class NavigationManager {
                 UsersController ctrl = loader.getController();
                 ctrl.setService(new UserServiceHTTP(new ApiClient(apiBase)));
             }
+            if (viewType == SceneType.OVERVIEWS) {
+                var ctrl = loader.getController(); // OverviewController
+                if (ctrl instanceof com.wakeb.yusradmin.controllers.OverviewController oc) {
+                    var api = new com.wakeb.yusradmin.services.ApiClient("http://localhost:8081");
+                    oc.setService(new com.wakeb.yusradmin.services.StatsServiceHttp(api));
+                }
+            }
             // Replace center content of BorderPane
             mainLayout.setCenter(view);
 

@@ -1,15 +1,29 @@
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.*;
+import com.wakeb.yusradmin.services.StatsServiceHttp;
+import com.wakeb.yusradmin.services.UserServiceHTTP;
+import com.wakeb.yusradmin.util.FXUtil;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
+import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
+import javafx.scene.shape.Circle;
 
 import java.net.URL;
+import java.util.Map;
 import java.util.ResourceBundle;
 // Dummy data purpose for overview
 
@@ -19,6 +33,9 @@ public class OverviewController implements Initializable {
     @FXML private Label totalReviewsLabel;
     @FXML private Label totalPlacesLabel;
     @FXML private Label avgRatingLabel;
+    @FXML private StackPane chartHost;
+    @FXML private javafx.scene.control.ProgressIndicator loading;
+    private StatsServiceHttp service;
 
     @FXML private TableView<ReviewResponseDTO> reviewsTableView;
     @FXML private TableView<CategoryCount> placesByCategoryTable;
@@ -32,11 +49,76 @@ public class OverviewController implements Initializable {
     private final ObservableList<CategoryCount> placesCategoryData = FXCollections.observableArrayList();
     private final ObservableList<CategoryCount> reviewsCategoryData = FXCollections.observableArrayList();
 
+    public void setService(StatsServiceHttp s) {
+        this.service = s;
+         loadChart();}
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTables();
         loadDashboardData();
         loadCategoryStats();
+    }
+    private void loadChart() {
+        if (service == null) return;
+
+        var task = new Task<Map<String, Integer>>() {
+            @Override protected Map<String, Integer> call() throws Exception {
+                return service.placesByCategory();
+            }
+        };
+
+        task.setOnRunning(e -> loading.setVisible(true));
+        task.setOnSucceeded(e -> {
+            loading.setVisible(false);
+            renderDoughnut(task.getValue());
+        });
+        task.setOnFailed(e -> {
+            loading.setVisible(false);
+            FXUtil.error("Load Stats Failed",
+                    task.getException() != null ? task.getException().getMessage() : "Unknown error");
+        });
+
+        new Thread(task, "load-stats").start();
+    }
+
+    //Charts Place By Category
+    private void renderDoughnut(Map<String,Integer> stats) {
+        PieChart pie = new PieChart();
+
+        stats.forEach((name, count) -> {
+            String label = name + " (" + count + ")";
+            pie.getData().add(new PieChart.Data(label, count));
+        });
+
+        pie.setLegendVisible(true);
+        pie.setLabelsVisible(true);
+
+        chartHost.getChildren().setAll(pie);
+
+        Circle hole = new Circle();
+        hole.setManaged(false);
+        hole.setMouseTransparent(true);
+
+        hole.radiusProperty().bind(
+                Bindings.min(chartHost.widthProperty(), chartHost.heightProperty()).multiply(0.28)
+        );
+
+        hole.setFill(resolveBackgroundColor(chartHost));
+
+        StackPane.setAlignment(hole, Pos.CENTER);
+        chartHost.getChildren().add(hole);
+    }
+
+    //Background Color From Desktop
+    private Color resolveBackgroundColor(Region r) {
+        Background bg = r.getBackground();
+        if (bg != null && !bg.getFills().isEmpty()) {
+            Paint p = bg.getFills().get(0).getFill();
+            if (p instanceof Color c) return c;
+        }
+        if (r.getScene() != null && r.getScene().getFill() instanceof Color c2) return c2;
+        return Color.WHITE;
     }
 
     private void setupTables() {

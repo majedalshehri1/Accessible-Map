@@ -10,6 +10,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.kordamp.ikonli.javafx.FontIcon?>
 
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.control.ProgressIndicator?>
 <VBox alignment="TOP_RIGHT" nodeOrientation="RIGHT_TO_LEFT" spacing="12" stylesheets="@../../../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.OverviewController">
 
     <HBox alignment="CENTER_RIGHT">
@@ -81,6 +83,19 @@
                     </columns>
                 </TableView>
             </VBox>
+
+
+            <!-- Pie Charts -->
+            <VBox spacing="16" style="-fx-padding:18;" nodeOrientation="RIGHT_TO_LEFT">
+
+                <Label text="نظرة عامة" styleClass="h1"/>
+
+                <StackPane fx:id="chartHost" prefHeight="380" style="-fx-background-color: transparent;">
+                    <ProgressIndicator fx:id="loading" visible="false"/>
+                </StackPane>
+
+            </VBox>
+
 
             <!-- Reviews by Category -->
             <VBox styleClass="section-card">
