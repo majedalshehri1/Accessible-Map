@@ -11,6 +11,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.net.URL;
 import java.util.ResourceBundle;
+// Dummy data purpose for overview
 
 public class OverviewController implements Initializable {
 
@@ -23,7 +24,8 @@ public class OverviewController implements Initializable {
     @FXML private TableView<CategoryCount> placesByCategoryTable;
     @FXML private TableView<CategoryCount> reviewsByCategoryTable;
 
-    @FXML private ProgressIndicator loadingIndicator;
+    // Comment out or remove the loadingIndicator since it's not in FXML
+    // @FXML private ProgressIndicator loadingIndicator;
 
     //private final AdminService adminService = new AdminService();
     private final ObservableList<ReviewResponseDTO> reviewsData = FXCollections.observableArrayList();
@@ -78,7 +80,14 @@ public class OverviewController implements Initializable {
     }
 
     private void loadDashboardData() {
-        setLoading(true);
+        // Comment out setLoading since we don't have loadingIndicator
+        // setLoading(true);
+
+        // For testing/demo purposes, set some dummy data
+        registeredUsersLabel.setText("120 حساب");
+        totalReviewsLabel.setText("450 تعليق");
+        totalPlacesLabel.setText("85 مكان");
+        avgRatingLabel.setText("4.2");
 
 //        // Load statistics
 //        adminService.loadDashboardStats().thenAccept(stats -> {
@@ -105,6 +114,15 @@ public class OverviewController implements Initializable {
     }
 
     private void loadCategoryStats() {
+        // For testing/demo purposes, set some dummy data
+        placesCategoryData.add(new CategoryCount("مطاعم", 25));
+        placesCategoryData.add(new CategoryCount("مقاهي", 18));
+        placesCategoryData.add(new CategoryCount("متاحف", 12));
+
+        reviewsCategoryData.add(new CategoryCount("مطاعم", 150));
+        reviewsCategoryData.add(new CategoryCount("مقاهي", 120));
+        reviewsCategoryData.add(new CategoryCount("متاحف", 80));
+
         // Load places by category
 //        adminService.loadPlacesByCategory().thenAccept(list -> {
 //            Platform.runLater(() -> placesCategoryData.setAll(list));
@@ -131,10 +149,11 @@ public class OverviewController implements Initializable {
         avgRatingLabel.setText(String.format("%.1f", stats.getAverageRating()));
     }
 
-    private void setLoading(boolean loading) {
-        loadingIndicator.setVisible(loading);
-        loadingIndicator.setProgress(loading ? -1 : 0);
-    }
+    // Comment out setLoading since we don't have loadingIndicator
+    // private void setLoading(boolean loading) {
+    //     loadingIndicator.setVisible(loading);
+    //     loadingIndicator.setProgress(loading ? -1 : 0);
+    // }
 
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
