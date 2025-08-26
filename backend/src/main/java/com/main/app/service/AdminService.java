@@ -1,9 +1,6 @@
 package com.main.app.service;
 
-import com.main.app.dto.PlaceDto;
-import com.main.app.dto.ReviewRequestDTO;
-import com.main.app.dto.ReviewResponseDTO;
-import com.main.app.dto.TopPlaceDto;
+import com.main.app.dto.*;
 import com.main.app.model.Place;
 import com.main.app.model.Review;
 import com.main.app.model.User;
@@ -53,14 +50,32 @@ public class AdminService {
          place.setLatitude(dto.getLatitude());
          place.setPlaceCategory(dto.getCategory());
 
+
         return placeRepository.save(place);
     }
+
+    public User adminUpdateUser(Long userId , UserDto dto){
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        user.setUserName(dto.getUserName());
+        user.setUserEmail(dto.getUserEmail());
+        user.setUserRole(dto.getHasRole());
+        user.setIsBlocked(dto.getIsBlocked());
+
+        return userRepository.save(user);
+    }
+
 
     public void deleteReview(Long reviewId){
         reviewRepository.deleteById(reviewId);
     }
     public void deletePlace(Long placeId){
         placeRepository.deleteById(placeId);
+    }
+
+    public void deleteUser(Long userId){
+        userRepository.deleteById(userId);
     }
 
     public long countAllPlaces(){
@@ -71,6 +86,13 @@ public class AdminService {
     }
     public long countAllUsers(){
         return userRepository.count();
+    }
+
+    public List<User> searchUserByEmail(String email){
+        if(email.isEmpty())
+            throw new UsernameNotFoundException(email);
+
+        return userRepository.searchByUserEmailContainingIgnoreCase(email);
     }
 
     public List<TopPlaceDto> getTopPlaces(int limit){

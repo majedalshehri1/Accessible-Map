@@ -1,6 +1,10 @@
 package com.wakeb.yusradmin.navigation;
 
+import com.wakeb.yusradmin.controllers.UsersController;
+import com.wakeb.yusradmin.services.ApiClient;
+import com.wakeb.yusradmin.services.UserServiceHTTP;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -20,6 +24,9 @@ import java.util.Map;
 public class NavigationManager {
     // Singleton instance
     private static NavigationManager navigationManager;
+
+    private String apiBase = "http://localhost:8081";
+    public void setApiBase(String base) { this.apiBase = base; }
 
     // Main stage for the app
     private Stage primaryStage;
@@ -107,6 +114,10 @@ public class NavigationManager {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPaths.get(viewType)));
             Pane view = loader.load();
 
+            if (viewType == SceneType.USERS) {
+                UsersController ctrl = loader.getController();
+                ctrl.setService(new UserServiceHTTP(new ApiClient(apiBase)));
+            }
             // Replace center content of BorderPane
             mainLayout.setCenter(view);
 
@@ -138,4 +149,6 @@ public class NavigationManager {
         cssPaths.put(SceneType.REVIEWS, "/css/main.css");
         cssPaths.put(SceneType.PLACES, "/css/main.css");
     }
+
+
 }

@@ -1,29 +1,17 @@
 package com.wakeb.yusradmin.dto;
 
-/**
- * LoginRequest
- *
- * DTO (Data Transfer Object) used to send login credentials to the backend.
- *
- * - username: The email/username entered by the user
- * - password: The password entered by the user
- *
- * Note:
- * This class is just a container (no logic).
- */
+/** Carries login form data from UI to AuthService. */
 public class LoginRequest {
-    private String username;
+    private String email;
     private String password;
 
-    // Constructor
-    public LoginRequest(String username, String password) {
-        this.username = username;
+    public LoginRequest(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
-    // Getters and Setters
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
