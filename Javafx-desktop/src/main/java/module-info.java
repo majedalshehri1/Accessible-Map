@@ -12,6 +12,7 @@ module com.wakeb.yusradmin {
 
     requires com.google.gson;
     requires java.net.http;
+    requires java.management;
 
     // Allow FXML to access controllers
 
