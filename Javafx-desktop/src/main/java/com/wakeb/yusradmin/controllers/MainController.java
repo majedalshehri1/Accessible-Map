@@ -9,17 +9,21 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.control.ToggleGroup;
 
 /**
  * MainController
+ *
+ * - Owns the app shell (sidebar + content area) after login.
+ * - Reads session from AuthService and injects user info (name/email/avatar).
+ * - Handles sidebar navigation to center views.
+ * - Handles Logout (clear session + navigate back to LOGIN).
  */
 public class MainController {
 
     // Header labels (inside sidebar) for user info
-    @FXML private Label displayNameLabel;
-    @FXML private Label emailLabel;
-    @FXML private Label avatarLabel;
+    @FXML private Label displayNameLabel;  // user display name
+    @FXML private Label emailLabel;        // user email
+    @FXML private Label avatarLabel;       // first letter avatar
 
     // Sidebar ToggleButton
     @FXML private ToggleButton overviewBtn;
@@ -30,38 +34,30 @@ public class MainController {
     // Logout button
     @FXML private Button logoutButton;
 
-    // ToggleGroup for navigation buttons
-    private ToggleGroup sideNav;
-
     // Services
     private NavigationManager navigationManager;
-    private AuthService auth;
+    private AuthService auth; // singleton
 
+    // Lifecycle
+    /**
+     * Called by JavaFX after FXML is loaded:
+     * - Grab singletons.
+     * - Populate header with current user if session is valid.
+     */
     @FXML
     private void initialize() {
         navigationManager = NavigationManager.getInstance();
         auth = AuthService.getInstance();
-
-        // Create and setup ToggleGroup programmatically
-        setupToggleGroup();
-
         populateUserHeader();
+        // Optionally: open default center view here (e.g., Overview)
+        // navigationManager.navigateToView(SceneType.OVERVIEWS);
     }
 
-    private void setupToggleGroup() {
-        sideNav = new ToggleGroup();
-
-        // Add all toggle buttons to the same group
-        overviewBtn.setToggleGroup(sideNav);
-        usersBtn.setToggleGroup(sideNav);
-        reviewsBtn.setToggleGroup(sideNav);
-        placesBtn.setToggleGroup(sideNav);
-
-        // Select the overview button by default
-        overviewBtn.setSelected(true);
-    }
-
-    // ... rest of your existing code remains the same ...
+    // Add user info in sidebar header
+    /**
+     * Fill name/email/avatar from current session (username + email only).
+     * Falls back to placeholders if no valid session.
+     */
     private void populateUserHeader() {
         User u = auth.getCurrentUser();
         if (u == null) {
@@ -71,23 +67,30 @@ public class MainController {
             return;
         }
 
-        String name  = safe(u.getUsername(), "—");
-        String email = safe(u.getEmail(), "");
+        String name  = safe(u.getUserName(), "—");
+        String email = safe(u.getUserEmail(), "");
         setSafeText(displayNameLabel, name);
         setSafeText(emailLabel, email);
 
-        String source = firstNonEmpty(u.getUsername(), u.getEmail());
+        // Avatar = first letter from username (then email) if available
+        String source = firstNonEmpty(u.getUserName(), u.getUserEmail());
         String letter = (source != null && !source.isBlank())
                 ? source.trim().substring(0, 1)
                 : "؟";
         setSafeText(avatarLabel, letter);
     }
 
+    // Sidebar navigation handlers to center views
     @FXML private void handleOverviews() { navigationManager.navigateToView(SceneType.OVERVIEWS); }
     @FXML private void handleUsers()     { navigationManager.navigateToView(SceneType.USERS); }
     @FXML private void handleReviews()   { navigationManager.navigateToView(SceneType.REVIEWS); }
     @FXML private void handlePlaces()    { navigationManager.navigateToView(SceneType.PLACES); }
 
+    // Logout handler - async clear session + navigate to LOGIN
+    /**
+     * Clear session (async) and navigate to LOGIN regardless of server outcome.
+     * Button is temporarily disabled to prevent double-clicks.
+     */
     @FXML
     private void handleLogout() {
         if (logoutButton != null) logoutButton.setDisable(true);
@@ -105,6 +108,7 @@ public class MainController {
         new Thread(logoutTask, "logout-thread").start();
     }
 
+    // Utility methods
     private static void setSafeText(Label label, String text) {
         if (label != null) label.setText(text == null ? "" : text);
     }
