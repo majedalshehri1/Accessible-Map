@@ -22,7 +22,7 @@
             <Label text="إدارة الحسابات" styleClass="h1"/>
 
             <HBox spacing="8">
-                <TextField fx:id="searchField" promptText="ابحث بالاسم " HBox.hgrow="ALWAYS"/>
+                <TextField fx:id="searchField" promptText="ابحث بالايميل " HBox.hgrow="ALWAYS"/>
                 <Button text="بحث" />
             </HBox>
 

@@ -91,7 +91,7 @@ public class NavigationManager {
             // Load CSS (if exists)
             String cssPath = cssPaths.get(sceneType);
             if (cssPath != null) {
-                scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+                scene.getStylesheets().addAll(getClass().getResource("/css/main.css").toExternalForm(), getClass().getResource(cssPath).toExternalForm());
                 System.out.println("Applied CSS: " + cssPath);
             } else {
                 System.out.println("No CSS found for scene: " + sceneType);
@@ -128,6 +128,7 @@ public class NavigationManager {
         }
 
         try {
+            // Load new FXML view
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPaths.get(viewType)));
             Pane view = loader.load();
 
@@ -137,20 +138,6 @@ public class NavigationManager {
             } else if (viewType == SceneType.OVERVIEWS) {
                 OverviewController oc = loader.getController();
                 oc.setService(new StatsServiceHttp(new ApiClient(apiBase)));
-            }
-            else if (viewType == SceneType.MAP) {
-                MapController mapCtrl = loader.getController();
-                PlaceService placeService = new PlaceService();
-                Task<List<PlaceMapDTO>> task = placeService.getAllPlacesAsync();
-                task.setOnSucceeded(e -> {
-                    List<PlaceMapDTO> places = task.getValue();
-                    mapCtrl.setPlacesData(places);
-                });
-                task.setOnFailed(e -> {
-                    System.err.println("Failed to load places: " + task.getException().getMessage());
-                    // You might want to show an alert to the user here
-                });
-                new Thread(task).start();
             } else if (viewType == SceneType.REVIEWS) {
                 ReviewsController reviewsCtrl = loader.getController();
                 reviewsCtrl.setService(new ReviewService()); // This should set the service
@@ -185,8 +172,8 @@ public class NavigationManager {
         cssPaths.put(SceneType.OVERVIEWS, "/css/main.css");
         cssPaths.put(SceneType.USERS, "/css/main.css");
         cssPaths.put(SceneType.REVIEWS, "/css/main.css");
-        cssPaths.put(SceneType.PLACES, "/css/main.css");
         cssPaths.put(SceneType.MAP, "/css/main.css");
+        cssPaths.put(SceneType.PLACES, "/css/places.css");
     }
 
 

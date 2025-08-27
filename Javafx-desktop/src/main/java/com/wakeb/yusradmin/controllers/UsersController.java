@@ -5,7 +5,7 @@ import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.util.UserActionCell;
-import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -30,6 +30,15 @@ public class UsersController {
     private final ObservableList<User> data = FXCollections.observableArrayList();
     private UserService service;
 
+    private static final double[] COLUMN_WIDTH_PERCENTAGES = {
+            0.12, // ID
+            0.15, // Name
+            0.12, // Email
+            0.22, // Role
+            0.12, // Status
+            0.23  // Actions
+    };
+
     public void setService(UserService s) {
         this.service = s;
         refresh();
@@ -41,8 +50,7 @@ public class UsersController {
         colName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserName()));
         colEmail.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserEmail()));
         colRole.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getRole()));
-        colStatus.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().isBlocked() ? "BLOCKED" : "ACTIVE"));
+        colStatus.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().isBlocked() ? "محظور" : "نشط"));
 
         table.setItems(data);
         table.setPlaceholder(new Label("No users"));
@@ -51,8 +59,17 @@ public class UsersController {
                 this::onBlockToggle, this::onEdit, this::onDelete
         ));
 
-        searchField.setOnAction(e -> refresh());
+        bindColumnsWidth();
 
+        searchField.setOnAction(e -> refresh());
+    }
+
+    private void bindColumnsWidth() {
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
+        colActions.setMinWidth(240);
+        colActions.setPrefWidth(240);
+        colActions.setMaxWidth(240);
     }
 
     public void refresh() {
@@ -87,9 +104,9 @@ public class UsersController {
 
     private void onEdit(User u) {
         TextInputDialog dlg = new TextInputDialog(u.getUserName());
-        dlg.setTitle("Edit User");
+        dlg.setTitle("تعديل المستخدم");
         dlg.setHeaderText(null);
-        dlg.setContentText("New username:");
+        dlg.setContentText("الاسم الجديد");
         dlg.showAndWait().ifPresent(name -> {
             u.setUserName(name);
             Task<Void> t = new Task<>() {

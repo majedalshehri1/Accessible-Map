@@ -11,6 +11,7 @@ module com.wakeb.yusradmin {
     requires com.fasterxml.jackson.annotation;
 
     requires com.google.gson;
+    opens com.wakeb.yusradmin.dto to com.google.gson;
     requires java.net.http;
     requires java.management;
 
@@ -19,7 +20,6 @@ module com.wakeb.yusradmin {
     requires org.kordamp.ikonli.fontawesome5;
 
     // Allow FXML to access controllers
-
     opens com.wakeb.yusradmin.controllers to javafx.fxml;
 
     // Allow Gson to reflect on model classes

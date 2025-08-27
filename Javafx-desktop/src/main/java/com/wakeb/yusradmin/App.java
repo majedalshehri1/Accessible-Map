@@ -2,6 +2,7 @@ package com.wakeb.yusradmin;
 
 import com.wakeb.yusradmin.navigation.NavigationManager;
 import com.wakeb.yusradmin.navigation.SceneType;
+import com.wakeb.yusradmin.utils.HostServicesSinglton;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
@@ -21,6 +22,8 @@ public class App extends Application {
 
     @Override
     public void start(Stage primaryStage) {
+        HostServicesSinglton.setHostServices(this.getHostServices());
+
         try {
             // Get singleton instance of NavigationManager
             NavigationManager navigationManager = NavigationManager.getInstance();
@@ -39,6 +42,7 @@ public class App extends Application {
             navigationManager.navigateToScene(SceneType.LOGIN);
 
             primaryStage.setTitle("yusr Admin App");
+
             primaryStage.show();
 
         } catch (Exception e) {
