@@ -1,14 +1,19 @@
 package com.wakeb.yusradmin.controllers;
 
-import com.wakeb.yusradmin.dto.*;
+import com.wakeb.yusradmin.dto.TopPlaceDto;
 import com.wakeb.yusradmin.models.ReviewResponseDTO;
 import com.wakeb.yusradmin.services.StatsServiceHttp;
+import javafx.application.Platform;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.chart.BarChart;
+import javafx.scene.chart.CategoryAxis;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.XYChart;
 import javafx.fxml.Initializable;
-import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -21,8 +26,10 @@ import javafx.scene.shape.Circle;
 import javafx.beans.binding.Bindings;
 
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 public class OverviewController implements Initializable {
 
@@ -31,16 +38,13 @@ public class OverviewController implements Initializable {
     @FXML private Label totalPlacesLabel;
 
     @FXML private TableView<ReviewResponseDTO> reviewsTableView;
-    @FXML private TableView<CategoryCount> placesByCategoryTable;
-    @FXML private TableView<CategoryCount> reviewsByCategoryTable;
-
     @FXML private StackPane chartHost;
+    @FXML private StackPane topPlacesChartHost;
     @FXML private ProgressIndicator loading;
 
     private StatsServiceHttp service;
+
     private final ObservableList<ReviewResponseDTO> reviewsData = FXCollections.observableArrayList();
-    private final ObservableList<CategoryCount> placesCategoryData = FXCollections.observableArrayList();
-    private final ObservableList<CategoryCount> reviewsCategoryData = FXCollections.observableArrayList();
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -49,9 +53,7 @@ public class OverviewController implements Initializable {
 
     public void setService(StatsServiceHttp service) {
         this.service = service;
-        loadDashboardData();
-        loadCategoryStats();
-        loadChart();
+        refreshData();
     }
 
     private void setupTables() {
@@ -69,7 +71,13 @@ public class OverviewController implements Initializable {
         ratingColumn.setCellValueFactory(new PropertyValueFactory<>("rating"));
 
         TableColumn<ReviewResponseDTO, String> dateColumn = new TableColumn<>("التاريخ");
-        dateColumn.setCellValueFactory(new PropertyValueFactory<>("createdAt"));
+        // Use reviewDate instead of createdAt
+        dateColumn.setCellValueFactory(cellData -> {
+            String dateStr = cellData.getValue().reviewDate;
+            if (dateStr == null) return new SimpleStringProperty("");
+            // Optional: format date nicely
+            return new SimpleStringProperty(dateStr.replace("T", " "));
+        });
 
         reviewsTableView.getColumns().setAll(userColumn, placeColumn, descriptionColumn, ratingColumn, dateColumn);
         reviewsTableView.setItems(reviewsData);
@@ -91,23 +99,22 @@ public class OverviewController implements Initializable {
     @FXML
     private void refreshData() {
         loadDashboardData();
-        loadCategoryStats();
-        loadChart();
+        loadChart();          // category chart
+        loadTopPlacesChart(); // chart for TopPlaceDto
     }
 
     private void loadDashboardData() {
+
         if (service == null) return;
 
-        Task<Void> task = new Task<Void>() {
+        Task<Void> task = new Task<>() {
             @Override
             protected Void call() throws Exception {
                 try {
-                    // Get counts from service
                     long usersCount = service.getTotalUsers();
                     long reviewsCount = service.getTotalReviews();
                     long placesCount = service.getTotalPlaces();
-
-                    // Get recent reviews
+                    // Pull reviews from last 24 hours
                     var recentReviews = service.getRecentReviews();
 
                     // Update UI on JavaFX thread
@@ -118,51 +125,15 @@ public class OverviewController implements Initializable {
                         totalPlacesLabel.setText(placesCount+ "");
 
                         // Update reviews table
+                    Platform.runLater(() -> {
+                        registeredUsersLabel.setText(usersCount + " حساب");
+                        totalReviewsLabel.setText(reviewsCount + " تعليق");
+                        totalPlacesLabel.setText(placesCount + " مكان");
                         reviewsData.setAll(recentReviews);
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
-                    javafx.application.Platform.runLater(() -> {
-                        showError("خطأ في تحميل البيانات", e.getMessage());
-                    });
-                }
-                return null;
-            }
-        };
-
-        new Thread(task).start();
-    }
-
-    private void loadCategoryStats() {
-        if (service == null) return;
-
-        Task<Void> task = new Task<Void>() {
-            @Override
-            protected Void call() throws Exception {
-                try {
-                    // Get category data from service
-                    Map<String, Integer> placesByCategory = service.placesByCategory();
-                    Map<String, Integer> reviewsByCategory = service.reviewsByCategory();
-
-                    // Update UI on JavaFX thread
-                    javafx.application.Platform.runLater(() -> {
-                        // Update places by category table
-                        placesCategoryData.clear();
-                        placesByCategory.forEach((category, count) -> {
-                            placesCategoryData.add(new CategoryCount(category, count));
-                        });
-
-                        // Update reviews by category table
-                        reviewsCategoryData.clear();
-                        reviewsByCategory.forEach((category, count) -> {
-                            reviewsCategoryData.add(new CategoryCount(category, count));
-                        });
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    javafx.application.Platform.runLater(() -> {
-                        showError("خطأ في تحميل الإحصائيات", e.getMessage());
-                    });
+                    Platform.runLater(() -> showError("خطأ في تحميل البيانات", e.getMessage()));
                 }
                 return null;
             }
@@ -174,7 +145,7 @@ public class OverviewController implements Initializable {
     private void loadChart() {
         if (service == null) return;
 
-        Task<Map<String, Integer>> task = new Task<Map<String, Integer>>() {
+        Task<Map<String, Integer>> task = new Task<>() {
             @Override
             protected Map<String, Integer> call() throws Exception {
                 return service.placesByCategory();
@@ -184,13 +155,33 @@ public class OverviewController implements Initializable {
         task.setOnRunning(e -> loading.setVisible(true));
         task.setOnSucceeded(e -> {
             loading.setVisible(false);
-            Map<String, Integer> stats = task.getValue();
-            renderDoughnutChart(stats);
+            renderDoughnutChart(task.getValue());
         });
         task.setOnFailed(e -> {
             loading.setVisible(false);
-            showError("خطأ في تحميل الرسم البياني",
-                    task.getException() != null ? task.getException().getMessage() : "Unknown error");
+            showError("خطأ في تحميل الرسم البياني", task.getException().getMessage());
+        });
+
+        new Thread(task).start();
+    }
+
+    private void loadTopPlacesChart() {
+        if (service == null) return;
+
+        Task<List<TopPlaceDto>> task = new Task<>() {
+            @Override
+            protected List<TopPlaceDto> call() throws Exception {
+                return service.getTopPlaces();
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            List<TopPlaceDto> topPlaces = task.getValue();
+            renderTopPlacesChart(topPlaces);
+        });
+
+        task.setOnFailed(e -> {
+            showError("خطأ في تحميل رسم بياني لأفضل الأماكن", task.getException().getMessage());
         });
 
         new Thread(task).start();
@@ -198,13 +189,9 @@ public class OverviewController implements Initializable {
 
     private void renderDoughnutChart(Map<String, Integer> stats) {
         PieChart pieChart = new PieChart();
-
-        // Add data to the pie chart
-        stats.forEach((category, count) -> {
-            String label = category + " (" + count + ")";
-            pieChart.getData().add(new PieChart.Data(label, count));
-        });
-
+        stats.forEach((category, count) ->
+                pieChart.getData().add(new PieChart.Data(category + " (" + count + ")", count))
+        );
         pieChart.setLegendVisible(true);
         pieChart.setLabelsVisible(true);
 
@@ -212,32 +199,39 @@ public class OverviewController implements Initializable {
         chartHost.getChildren().clear();
         chartHost.getChildren().add(pieChart);
 
-        // Create a hole in the middle for doughnut effect
-        Circle hole = new Circle();
-        hole.setManaged(false);
-        hole.setMouseTransparent(true);
-
-        // Bind the hole size to the chart size
-        hole.radiusProperty().bind(
-                Bindings.min(chartHost.widthProperty(), chartHost.heightProperty())
-                        .multiply(0.28)
-        );
-
-        // Set hole color to match background
-        hole.setFill(resolveBackgroundColor(chartHost));
-
-        // Add the hole to the chart host
-        StackPane.setAlignment(hole, Pos.CENTER);
-        chartHost.getChildren().add(hole);
+        // Circle hole code has been removed as requested
     }
-    private Color resolveBackgroundColor(Region r) {
-        Background bg = r.getBackground();
-        if (bg != null && !bg.getFills().isEmpty()) {
-            Paint p = bg.getFills().get(0).getFill();
-            if (p instanceof Color c) return c;
+
+    private void renderTopPlacesChart(List<TopPlaceDto> topPlaces) {
+        // Filter out null values and ensure proper ordering
+        List<TopPlaceDto> filteredPlaces = topPlaces.stream()
+                .filter(dto -> dto != null &&
+                        dto.getPlaceName() != null &&
+                        dto.getReviewCount() != null)
+                .sorted((d1, d2) -> Long.compare(d2.getReviewCount(), d1.getReviewCount())) // Descending order
+                .collect(Collectors.toList());
+
+        CategoryAxis yAxis = new CategoryAxis(); // Place names
+        NumberAxis xAxis = new NumberAxis();     // Review counts
+        xAxis.setLabel("عدد التقييمات");
+        yAxis.setLabel("اسم المكان");
+
+        BarChart<Number, String> barChart = new BarChart<>(xAxis, yAxis);
+        barChart.setTitle("أفضل 5 أماكن حسب عدد التقييمات");
+        barChart.setLegendVisible(false);
+
+        XYChart.Series<Number, String> series = new XYChart.Series<>();
+        for (TopPlaceDto dto : filteredPlaces) {
+            if (dto.getPlaceName() != null && dto.getAvgRating() != null) {  // <-- use average
+                series.getData().add(new XYChart.Data<>(dto.getAvgRating(), dto.getPlaceName()));
+            }
         }
-        if (r.getScene() != null && r.getScene().getFill() instanceof Color c2) return c2;
-        return Color.WHITE;
+
+        barChart.getData().add(series);
+
+        // Replace content of host with the chart
+        topPlacesChartHost.getChildren().clear();
+        topPlacesChartHost.getChildren().add(barChart);
     }
 
     private void showError(String title, String message) {

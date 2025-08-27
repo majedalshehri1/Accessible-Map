@@ -35,7 +35,7 @@
 
         <VBox spacing="20" style="-fx-padding: 0 20 20 20;">
 
-            
+
 
                 <!-- Users Card -->
                 <VBox alignment="TOP_RIGHT" maxWidth="Infinity" styleClass="stat-card" HBox.hgrow="ALWAYS">
@@ -53,10 +53,56 @@
                 </VBox>
 
 
+        <!-- Category Statistics Row -->
+        <HBox alignment="CENTER" spacing="10.0">
+            <!-- Chart Section (Replaces the Places by Category table) -->
+            <VBox styleClass="section-card" prefWidth="400">
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <FontIcon iconLiteral="fas-layer-group" iconSize="20" />
+                    <Label styleClass="section-title" text="الأماكن حسب الفئة" />
+                </HBox>
+                <StackPane fx:id="chartHost" prefHeight="380" style="-fx-background-color: transparent;">
+                    <ProgressIndicator fx:id="loading" visible="false"/>
+                </StackPane>
+            </VBox>
 
+            <!-- Top Places Table -->
+            <VBox styleClass="section-card" prefWidth="400">
+                <HBox alignment="CENTER_RIGHT" spacing="10">
+                    <FontIcon iconLiteral="fas-chart-bar" iconSize="20" />
+                    <Label styleClass="section-title" text="أفضل 5 أماكن تقييم" />
+                </HBox>
+                <StackPane fx:id="topPlacesChartHost" prefHeight="380" style="-fx-background-color: transparent;">
+                    <ProgressIndicator visible="false"/>
+                </StackPane>
+            </VBox>
+        </HBox>
 
-
-
+        <!-- Latest Reviews -->
+        <VBox styleClass="section-card">
+            <HBox alignment="CENTER_RIGHT" spacing="10">
+                <FontIcon iconLiteral="fas-clock" iconSize="20" text="" />
+                <Label styleClass="section-title" text="أحدث التعليقات" />
+            </HBox>
+            <TableView fx:id="reviewsTableView" style="-fx-max-height: 300;">
+                <columns>
+                    <TableColumn prefWidth="120" text="المستخدم">
+                        <cellValueFactory><PropertyValueFactory property="userName" /></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn prefWidth="150" text="المكان">
+                        <cellValueFactory><PropertyValueFactory property="placeName" /></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn prefWidth="200" text="التعليق">
+                        <cellValueFactory><PropertyValueFactory property="description" /></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn prefWidth="80" text="التقييم">
+                        <cellValueFactory><PropertyValueFactory property="rating" /></cellValueFactory>
+                    </TableColumn>
+                    <TableColumn prefWidth="120" text="التاريخ">
+                        <cellValueFactory><PropertyValueFactory property="createdAt" /></cellValueFactory>
+                    </TableColumn>
+                </columns>
+            </TableView>
         </VBox>
     </VBox>
-</AnchorPane>
+</VBox>
