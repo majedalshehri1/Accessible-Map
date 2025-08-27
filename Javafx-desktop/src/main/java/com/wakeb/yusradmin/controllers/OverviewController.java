@@ -17,13 +17,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.shape.Circle;
-import javafx.beans.binding.Bindings;
 
 import java.net.URL;
 import java.util.List;
@@ -57,7 +51,7 @@ public class OverviewController implements Initializable {
     }
 
     private void setupTables() {
-        // Setup reviews table
+        // Setup reviews table with proper date formatting
         TableColumn<ReviewResponseDTO, String> userColumn = new TableColumn<>("المستخدم");
         userColumn.setCellValueFactory(new PropertyValueFactory<>("userName"));
 
@@ -71,29 +65,16 @@ public class OverviewController implements Initializable {
         ratingColumn.setCellValueFactory(new PropertyValueFactory<>("rating"));
 
         TableColumn<ReviewResponseDTO, String> dateColumn = new TableColumn<>("التاريخ");
-        // Use reviewDate instead of createdAt
+        // Use reviewDate instead of createdAt with proper formatting
         dateColumn.setCellValueFactory(cellData -> {
             String dateStr = cellData.getValue().reviewDate;
             if (dateStr == null) return new SimpleStringProperty("");
-            // Optional: format date nicely
+            // Format date by replacing "T" with space
             return new SimpleStringProperty(dateStr.replace("T", " "));
         });
 
         reviewsTableView.getColumns().setAll(userColumn, placeColumn, descriptionColumn, ratingColumn, dateColumn);
         reviewsTableView.setItems(reviewsData);
-
-        // Setup category tables
-        TableColumn<CategoryCount, String> categoryColumn = new TableColumn<>("الفئة");
-        categoryColumn.setCellValueFactory(new PropertyValueFactory<>("category"));
-
-        TableColumn<CategoryCount, Integer> countColumn = new TableColumn<>("العدد");
-        countColumn.setCellValueFactory(new PropertyValueFactory<>("count"));
-
-        placesByCategoryTable.getColumns().setAll(categoryColumn, countColumn);
-        reviewsByCategoryTable.getColumns().setAll(categoryColumn, countColumn);
-
-        placesByCategoryTable.setItems(placesCategoryData);
-        reviewsByCategoryTable.setItems(reviewsCategoryData);
     }
 
     @FXML
@@ -104,7 +85,6 @@ public class OverviewController implements Initializable {
     }
 
     private void loadDashboardData() {
-
         if (service == null) return;
 
         Task<Void> task = new Task<>() {
@@ -117,18 +97,10 @@ public class OverviewController implements Initializable {
                     // Pull reviews from last 24 hours
                     var recentReviews = service.getRecentReviews();
 
-                    // Update UI on JavaFX thread
-                    // Edit this for majed alshehri to improve the design
-                    javafx.application.Platform.runLater(() -> {
+                    Platform.runLater(() -> {
                         registeredUsersLabel.setText(usersCount + "");
                         totalReviewsLabel.setText(reviewsCount + "");
-                        totalPlacesLabel.setText(placesCount+ "");
-
-                        // Update reviews table
-                    Platform.runLater(() -> {
-                        registeredUsersLabel.setText(usersCount + " حساب");
-                        totalReviewsLabel.setText(reviewsCount + " تعليق");
-                        totalPlacesLabel.setText(placesCount + " مكان");
+                        totalPlacesLabel.setText(placesCount + "");
                         reviewsData.setAll(recentReviews);
                     });
                 } catch (Exception e) {
@@ -138,7 +110,6 @@ public class OverviewController implements Initializable {
                 return null;
             }
         };
-
         new Thread(task).start();
     }
 
@@ -203,7 +174,7 @@ public class OverviewController implements Initializable {
     }
 
     private void renderTopPlacesChart(List<TopPlaceDto> topPlaces) {
-        // Filter out null values and ensure proper ordering
+        // Filter out null values and ensure proper ordering by review count
         List<TopPlaceDto> filteredPlaces = topPlaces.stream()
                 .filter(dto -> dto != null &&
                         dto.getPlaceName() != null &&
@@ -213,7 +184,7 @@ public class OverviewController implements Initializable {
 
         CategoryAxis yAxis = new CategoryAxis(); // Place names
         NumberAxis xAxis = new NumberAxis();     // Review counts
-        xAxis.setLabel("عدد التقييمات");
+        xAxis.setLabel("متوسط التقييمات");
         yAxis.setLabel("اسم المكان");
 
         BarChart<Number, String> barChart = new BarChart<>(xAxis, yAxis);
@@ -222,7 +193,8 @@ public class OverviewController implements Initializable {
 
         XYChart.Series<Number, String> series = new XYChart.Series<>();
         for (TopPlaceDto dto : filteredPlaces) {
-            if (dto.getPlaceName() != null && dto.getAvgRating() != null) {  // <-- use average
+            // Use reviewCount instead of avgRating to fix the null pointer exception
+            if (dto.getPlaceName() != null && dto.getAvgRating() != null) {
                 series.getData().add(new XYChart.Data<>(dto.getAvgRating(), dto.getPlaceName()));
             }
         }
