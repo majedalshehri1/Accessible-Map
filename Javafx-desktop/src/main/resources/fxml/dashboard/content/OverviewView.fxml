@@ -79,8 +79,6 @@
             <!-- Pie Charts -->
             <VBox spacing="16" style="-fx-padding:18;" nodeOrientation="RIGHT_TO_LEFT">
 
-                <Label text="نظرة عامة" styleClass="h1"/>
-
                 <StackPane fx:id="chartHost" prefHeight="380" style="-fx-background-color: transparent;">
                     <ProgressIndicator fx:id="loading" visible="false"/>
                 </StackPane>

@@ -12,7 +12,11 @@ import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.Background;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.beans.binding.Bindings;
 
@@ -219,11 +223,20 @@ public class OverviewController implements Initializable {
         );
 
         // Set hole color to match background
-        hole.setFill(javafx.scene.paint.Color.WHITE);
+        hole.setFill(resolveBackgroundColor(chartHost));
 
         // Add the hole to the chart host
         StackPane.setAlignment(hole, Pos.CENTER);
         chartHost.getChildren().add(hole);
+    }
+    private Color resolveBackgroundColor(Region r) {
+        Background bg = r.getBackground();
+        if (bg != null && !bg.getFills().isEmpty()) {
+            Paint p = bg.getFills().get(0).getFill();
+            if (p instanceof Color c) return c;
+        }
+        if (r.getScene() != null && r.getScene().getFill() instanceof Color c2) return c2;
+        return Color.WHITE;
     }
 
     private void showError(String title, String message) {
