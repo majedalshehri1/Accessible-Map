@@ -5,7 +5,7 @@ import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.util.UserActionCell;
-import javafx.application.Platform;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -30,6 +30,15 @@ public class UsersController {
     private final ObservableList<User> data = FXCollections.observableArrayList();
     private UserService service;
 
+    private static final double[] COLUMN_WIDTH_PERCENTAGES = {
+            0.12, // ID
+            0.15, // Name
+            0.12, // Email
+            0.22, // Role
+            0.12, // Status
+            0.23  // Actions
+    };
+
     public void setService(UserService s) {
         this.service = s;
         refresh();
@@ -37,12 +46,12 @@ public class UsersController {
 
     @FXML
     public void initialize() {
+        // أعمدة البيانات
         colId.setCellValueFactory(c -> new SimpleLongProperty(c.getValue().getId()).asObject());
         colName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserName()));
         colEmail.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserEmail()));
         colRole.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getRole()));
-        colStatus.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().isBlocked() ? "محظور" : "نشط"));
+        colStatus.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().isBlocked() ? "محظور" : "نشط"));
 
         table.setItems(data);
         table.setPlaceholder(new Label("No users"));
@@ -51,8 +60,21 @@ public class UsersController {
                 this::onBlockToggle, this::onEdit, this::onDelete
         ));
 
-        searchField.setOnAction(e -> refresh());
+        bindColumnsWidth();
 
+        searchField.setOnAction(e -> refresh());
+    }
+
+    private void bindColumnsWidth() {
+        ReadOnlyDoubleProperty w = table.widthProperty();
+        colId     .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[0]).subtract(1));
+        colName   .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[1]).subtract(1));
+        colEmail  .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[2]).subtract(1));
+        colRole   .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[3]).subtract(1));
+        colStatus .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[4]).subtract(1));
+        colActions.prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[5]).subtract(1));
+
+        colActions.setMinWidth(100);
     }
 
     public void refresh() {
