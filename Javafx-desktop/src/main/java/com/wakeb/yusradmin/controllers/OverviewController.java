@@ -84,6 +84,8 @@ public class OverviewController implements Initializable {
         loadDashboardData();
         loadChart();          // category chart
         loadTopPlacesChart(); // chart for TopPlaceDto
+        loadDashboardData();
+
     }
 
     private void loadDashboardData() {
@@ -199,7 +201,7 @@ public class OverviewController implements Initializable {
         yAxis.setLabel("اسم المكان");
 
         BarChart<Number, String> barChart = new BarChart<>(xAxis, yAxis);
-        barChart.setTitle("أفضل 5 أماكن حسب عدد التقييمات");
+        barChart.setTitle("أفضل 5 أماكن تقييما");
         barChart.setLegendVisible(false);
 
         XYChart.Series<Number, String> series = new XYChart.Series<>();
