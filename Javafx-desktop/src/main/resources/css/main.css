@@ -496,3 +496,38 @@
 
 .table-row-cell:odd { -fx-background-color: rgba(0,0,0,0.015); }
 .table-row-cell:selected { -fx-background-color: -fx-accent; -fx-text-fill: white; }
+.data-table .column-header-background {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e6e8ee;
+    -fx-border-width: 0 0 1px 0;
+}
+.data-table .column-header {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+    -fx-border-color: #e6e8ee;
+    -fx-border-width: 0 1px 0 0;
+}
+.toolbar {
+    -fx-spacing: 12;
+    -fx-alignment: CENTER_LEFT;
+}
+.input-field {
+    -fx-background-color: #ffffff;
+    -fx-border-color: #e6e8ee;
+    -fx-border-width: 1px;
+    -fx-border-radius: 8px;
+    -fx-background-radius: 8px;
+    -fx-padding: 8px 12px;
+    -fx-font-size: 14px;
+    -fx-prompt-text-fill: #6b7280;
+}
+.data-table .column-header .label {
+    -fx-font-weight: bold;
+    -fx-font-size: 12px;
+}
+
+.data-table .table-cell {
+    -fx-border-color: #e6e8ee;
+    -fx-border-width: 0 1px 1px 0;
+    -fx-padding: 10px 8px;
+}
