@@ -493,3 +493,6 @@
 .btn-danger:hover{
     -fx-background-color: #c9302c;
 }
+
+.table-row-cell:odd { -fx-background-color: rgba(0,0,0,0.015); }
+.table-row-cell:selected { -fx-background-color: -fx-accent; -fx-text-fill: white; }
