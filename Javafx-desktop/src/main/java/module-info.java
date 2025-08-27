@@ -3,16 +3,20 @@ module com.wakeb.yusradmin {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
+    requires javafx.web;
     requires java.prefs;
 
-
-    requires com.fasterxml.jackson.core;
+    // JSON libraries
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
 
     requires com.google.gson;
     requires java.net.http;
     requires java.management;
+
+    // Ikonli Font Icons (if using them)
+    requires org.kordamp.ikonli.javafx;
+    requires org.kordamp.ikonli.fontawesome5;
 
     // Allow FXML to access controllers
 
@@ -29,7 +33,5 @@ module com.wakeb.yusradmin {
     exports com.wakeb.yusradmin;
     exports com.wakeb.yusradmin.controllers;
     exports com.wakeb.yusradmin.models;
-
-
-
+    exports com.wakeb.yusradmin.dto;
 }

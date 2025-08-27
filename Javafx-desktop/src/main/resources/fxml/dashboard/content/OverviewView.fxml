@@ -53,15 +53,6 @@
                 </HBox>
                 <Label fx:id="totalPlacesLabel" styleClass="stat-value" text="0 مكان" />
             </VBox>
-
-            <!-- Rating Card -->
-            <VBox styleClass="stat-card">
-                <HBox alignment="CENTER" spacing="10">
-                    <FontIcon iconLiteral="fas-chart-line" iconSize="24" styleClass="stat-icon" />
-                    <Label styleClass="stat-title" text="متوسط التقييمات" />
-                </HBox>
-                <Label fx:id="avgRatingLabel" styleClass="stat-value" text="0.0" />
-            </VBox>
         </HBox>
 
         <!-- Category Statistics Row -->

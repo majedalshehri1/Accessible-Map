@@ -1,11 +1,8 @@
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.*;
+import com.wakeb.yusradmin.models.ReviewResponseDTO;
 import com.wakeb.yusradmin.services.StatsServiceHttp;
-import com.wakeb.yusradmin.services.UserServiceHTTP;
-import com.wakeb.yusradmin.util.FXUtil;
-import javafx.application.Platform;
-import javafx.beans.binding.Bindings;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
@@ -15,110 +12,42 @@ import javafx.geometry.Pos;
 import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Background;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
+import javafx.beans.binding.Bindings;
 
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
-// Dummy data purpose for overview
 
 public class OverviewController implements Initializable {
 
     @FXML private Label registeredUsersLabel;
     @FXML private Label totalReviewsLabel;
     @FXML private Label totalPlacesLabel;
-    @FXML private Label avgRatingLabel;
-    @FXML private StackPane chartHost;
-    @FXML private javafx.scene.control.ProgressIndicator loading;
-    private StatsServiceHttp service;
 
     @FXML private TableView<ReviewResponseDTO> reviewsTableView;
     @FXML private TableView<CategoryCount> placesByCategoryTable;
     @FXML private TableView<CategoryCount> reviewsByCategoryTable;
 
-    // Comment out or remove the loadingIndicator since it's not in FXML
-    // @FXML private ProgressIndicator loadingIndicator;
+    @FXML private StackPane chartHost;
+    @FXML private ProgressIndicator loading;
 
-    //private final AdminService adminService = new AdminService();
+    private StatsServiceHttp service;
     private final ObservableList<ReviewResponseDTO> reviewsData = FXCollections.observableArrayList();
     private final ObservableList<CategoryCount> placesCategoryData = FXCollections.observableArrayList();
     private final ObservableList<CategoryCount> reviewsCategoryData = FXCollections.observableArrayList();
 
-    public void setService(StatsServiceHttp s) {
-        this.service = s;
-         loadChart();}
-
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         setupTables();
+    }
+
+    public void setService(StatsServiceHttp service) {
+        this.service = service;
         loadDashboardData();
         loadCategoryStats();
-    }
-    private void loadChart() {
-        if (service == null) return;
-
-        var task = new Task<Map<String, Integer>>() {
-            @Override protected Map<String, Integer> call() throws Exception {
-                return service.placesByCategory();
-            }
-        };
-
-        task.setOnRunning(e -> loading.setVisible(true));
-        task.setOnSucceeded(e -> {
-            loading.setVisible(false);
-            renderDoughnut(task.getValue());
-        });
-        task.setOnFailed(e -> {
-            loading.setVisible(false);
-            FXUtil.error("Load Stats Failed",
-                    task.getException() != null ? task.getException().getMessage() : "Unknown error");
-        });
-
-        new Thread(task, "load-stats").start();
-    }
-
-    //Charts Place By Category
-    private void renderDoughnut(Map<String,Integer> stats) {
-        PieChart pie = new PieChart();
-
-        stats.forEach((name, count) -> {
-            String label = name + " (" + count + ")";
-            pie.getData().add(new PieChart.Data(label, count));
-        });
-
-        pie.setLegendVisible(true);
-        pie.setLabelsVisible(true);
-
-        chartHost.getChildren().setAll(pie);
-
-        Circle hole = new Circle();
-        hole.setManaged(false);
-        hole.setMouseTransparent(true);
-
-        hole.radiusProperty().bind(
-                Bindings.min(chartHost.widthProperty(), chartHost.heightProperty()).multiply(0.28)
-        );
-
-        hole.setFill(resolveBackgroundColor(chartHost));
-
-        StackPane.setAlignment(hole, Pos.CENTER);
-        chartHost.getChildren().add(hole);
-    }
-
-    //Background Color From Desktop
-    private Color resolveBackgroundColor(Region r) {
-        Background bg = r.getBackground();
-        if (bg != null && !bg.getFills().isEmpty()) {
-            Paint p = bg.getFills().get(0).getFill();
-            if (p instanceof Color c) return c;
-        }
-        if (r.getScene() != null && r.getScene().getFill() instanceof Color c2) return c2;
-        return Color.WHITE;
+        loadChart();
     }
 
     private void setupTables() {
@@ -159,83 +88,143 @@ public class OverviewController implements Initializable {
     private void refreshData() {
         loadDashboardData();
         loadCategoryStats();
+        loadChart();
     }
 
     private void loadDashboardData() {
-        // Comment out setLoading since we don't have loadingIndicator
-        // setLoading(true);
+        if (service == null) return;
 
-        // For testing/demo purposes, set some dummy data
-        registeredUsersLabel.setText("120 حساب");
-        totalReviewsLabel.setText("450 تعليق");
-        totalPlacesLabel.setText("85 مكان");
-        avgRatingLabel.setText("4.2");
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    // Get counts from service
+                    long usersCount = service.getTotalUsers();
+                    long reviewsCount = service.getTotalReviews();
+                    long placesCount = service.getTotalPlaces();
 
-//        // Load statistics
-//        adminService.loadDashboardStats().thenAccept(stats -> {
-//            Platform.runLater(() -> {
-//                updateStatistics(stats);
-//                setLoading(false);
-//            });
-//        }).exceptionally(ex -> {
-//            Platform.runLater(() -> {
-//                showError("خطأ", "فشل في تحميل الإحصائيات: " + ex.getMessage());
-//                setLoading(false);
-//            });
-//            return null;
-//        });
-//
-//        // Load latest reviews
-//        adminService.loadLatestReviews().thenAccept(reviews -> {
-//            Platform.runLater(() -> reviewsData.setAll(reviews));
-//        }).exceptionally(ex -> {
-//            Platform.runLater(() ->
-//                    showError("خطأ", "فشل في تحميل التعليقات: " + ex.getMessage()));
-//            return null;
-//        });
+                    // Get recent reviews
+                    var recentReviews = service.getRecentReviews();
+
+                    // Update UI on JavaFX thread
+                    javafx.application.Platform.runLater(() -> {
+                        registeredUsersLabel.setText(usersCount + " حساب");
+                        totalReviewsLabel.setText(reviewsCount + " تعليق");
+                        totalPlacesLabel.setText(placesCount + " مكان");
+
+                        // Update reviews table
+                        reviewsData.setAll(recentReviews);
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    javafx.application.Platform.runLater(() -> {
+                        showError("خطأ في تحميل البيانات", e.getMessage());
+                    });
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
     }
 
     private void loadCategoryStats() {
-        // For testing/demo purposes, set some dummy data
-        placesCategoryData.add(new CategoryCount("مطاعم", 25));
-        placesCategoryData.add(new CategoryCount("مقاهي", 18));
-        placesCategoryData.add(new CategoryCount("متاحف", 12));
+        if (service == null) return;
 
-        reviewsCategoryData.add(new CategoryCount("مطاعم", 150));
-        reviewsCategoryData.add(new CategoryCount("مقاهي", 120));
-        reviewsCategoryData.add(new CategoryCount("متاحف", 80));
+        Task<Void> task = new Task<Void>() {
+            @Override
+            protected Void call() throws Exception {
+                try {
+                    // Get category data from service
+                    Map<String, Integer> placesByCategory = service.placesByCategory();
+                    Map<String, Integer> reviewsByCategory = service.reviewsByCategory();
 
-        // Load places by category
-//        adminService.loadPlacesByCategory().thenAccept(list -> {
-//            Platform.runLater(() -> placesCategoryData.setAll(list));
-//        }).exceptionally(ex -> {
-//            Platform.runLater(() ->
-//                    showError("خطأ", "فشل في تحميل إحصائيات الأماكن: " + ex.getMessage()));
-//            return null;
-//        });
-//
-//        // Load reviews by category
-//        adminService.loadReviewsByCategory().thenAccept(list -> {
-//            Platform.runLater(() -> reviewsCategoryData.setAll(list));
-//        }).exceptionally(ex -> {
-//            Platform.runLater(() ->
-//                    showError("خطأ", "فشل في تحميل إحصائيات التقييمات: " + ex.getMessage()));
-//            return null;
-//        });
+                    // Update UI on JavaFX thread
+                    javafx.application.Platform.runLater(() -> {
+                        // Update places by category table
+                        placesCategoryData.clear();
+                        placesByCategory.forEach((category, count) -> {
+                            placesCategoryData.add(new CategoryCount(category, count));
+                        });
+
+                        // Update reviews by category table
+                        reviewsCategoryData.clear();
+                        reviewsByCategory.forEach((category, count) -> {
+                            reviewsCategoryData.add(new CategoryCount(category, count));
+                        });
+                    });
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    javafx.application.Platform.runLater(() -> {
+                        showError("خطأ في تحميل الإحصائيات", e.getMessage());
+                    });
+                }
+                return null;
+            }
+        };
+
+        new Thread(task).start();
     }
 
-    private void updateStatistics(DashboardStats stats) {
-        registeredUsersLabel.setText(stats.getTotalUsers() + " حساب");
-        totalReviewsLabel.setText(stats.getTotalReviews() + " تعليق");
-        totalPlacesLabel.setText(stats.getTotalPlaces() + " مكان");
-        avgRatingLabel.setText(String.format("%.1f", stats.getAverageRating()));
+    private void loadChart() {
+        if (service == null) return;
+
+        Task<Map<String, Integer>> task = new Task<Map<String, Integer>>() {
+            @Override
+            protected Map<String, Integer> call() throws Exception {
+                return service.placesByCategory();
+            }
+        };
+
+        task.setOnRunning(e -> loading.setVisible(true));
+        task.setOnSucceeded(e -> {
+            loading.setVisible(false);
+            Map<String, Integer> stats = task.getValue();
+            renderDoughnutChart(stats);
+        });
+        task.setOnFailed(e -> {
+            loading.setVisible(false);
+            showError("خطأ في تحميل الرسم البياني",
+                    task.getException() != null ? task.getException().getMessage() : "Unknown error");
+        });
+
+        new Thread(task).start();
     }
 
-    // Comment out setLoading since we don't have loadingIndicator
-    // private void setLoading(boolean loading) {
-    //     loadingIndicator.setVisible(loading);
-    //     loadingIndicator.setProgress(loading ? -1 : 0);
-    // }
+    private void renderDoughnutChart(Map<String, Integer> stats) {
+        PieChart pieChart = new PieChart();
+
+        // Add data to the pie chart
+        stats.forEach((category, count) -> {
+            String label = category + " (" + count + ")";
+            pieChart.getData().add(new PieChart.Data(label, count));
+        });
+
+        pieChart.setLegendVisible(true);
+        pieChart.setLabelsVisible(true);
+
+        // Clear the chart host and add the pie chart
+        chartHost.getChildren().clear();
+        chartHost.getChildren().add(pieChart);
+
+        // Create a hole in the middle for doughnut effect
+        Circle hole = new Circle();
+        hole.setManaged(false);
+        hole.setMouseTransparent(true);
+
+        // Bind the hole size to the chart size
+        hole.radiusProperty().bind(
+                Bindings.min(chartHost.widthProperty(), chartHost.heightProperty())
+                        .multiply(0.28)
+        );
+
+        // Set hole color to match background
+        hole.setFill(javafx.scene.paint.Color.WHITE);
+
+        // Add the hole to the chart host
+        StackPane.setAlignment(hole, Pos.CENTER);
+        chartHost.getChildren().add(hole);
+    }
 
     private void showError(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.ERROR);
