@@ -152,3 +152,9 @@
 .small-cell-button-danger:hover {
     -fx-background-color: derive(#dc3545, -10%);
 }
+
+.search-button {
+    -fx-background-color: #008ED1;
+    -fx-text-fill: white;
+    -fx-background-radius: 8px;
+}
