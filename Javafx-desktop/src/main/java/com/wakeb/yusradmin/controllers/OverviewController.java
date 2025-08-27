@@ -111,10 +111,11 @@ public class OverviewController implements Initializable {
                     var recentReviews = service.getRecentReviews();
 
                     // Update UI on JavaFX thread
+                    // Edit this for majed alshehri to improve the design
                     javafx.application.Platform.runLater(() -> {
-                        registeredUsersLabel.setText(usersCount + " حساب");
-                        totalReviewsLabel.setText(reviewsCount + " تعليق");
-                        totalPlacesLabel.setText(placesCount + " مكان");
+                        registeredUsersLabel.setText(usersCount + "");
+                        totalReviewsLabel.setText(reviewsCount + "");
+                        totalPlacesLabel.setText(placesCount+ "");
 
                         // Update reviews table
                         reviewsData.setAll(recentReviews);
