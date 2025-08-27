@@ -171,7 +171,7 @@ public class NavigationManager {
         cssPaths.put(SceneType.MAIN, "/css/main.css");
         cssPaths.put(SceneType.OVERVIEWS, "/css/main.css");
         cssPaths.put(SceneType.USERS, "/css/main.css");
-        cssPaths.put(SceneType.REVIEWS, "/css/main.css");
+        cssPaths.put(SceneType.REVIEWS, "/css/places.css");
         cssPaths.put(SceneType.MAP, "/css/main.css");
         cssPaths.put(SceneType.PLACES, "/css/places.css");
     }

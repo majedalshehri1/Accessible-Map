@@ -64,8 +64,6 @@ public class ReviewsController implements Initializable {
             private final HBox box         = new HBox(6, editBtn, deleteBtn);
             {
                 box.setAlignment(Pos.CENTER);
-                editBtn.setStyle("-fx-background-color:#e5e7eb; -fx-background-radius:6;");
-                deleteBtn.setStyle("-fx-background-color:#fee2e2; -fx-text-fill:#991b1b; -fx-background-radius:6;");
             }
             @Override
             protected void updateItem(ReviewRow row, boolean empty) {
