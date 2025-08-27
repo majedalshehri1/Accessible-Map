@@ -219,7 +219,7 @@ public class PlacesController {
     }
 
     private String buildGoogleMapsUrl(String latitude, String longitude) {
-        return "https://www.google.com/maps/@" + latitude + "," + longitude + ",12z";
+        return "https://www.google.com/maps/@" + latitude + "," + longitude + ",18z";
     }
 
     private void onLinkClick(Place place) {
