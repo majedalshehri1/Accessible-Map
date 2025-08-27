@@ -46,7 +46,6 @@ public class UsersController {
 
     @FXML
     public void initialize() {
-        // أعمدة البيانات
         colId.setCellValueFactory(c -> new SimpleLongProperty(c.getValue().getId()).asObject());
         colName.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserName()));
         colEmail.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserEmail()));
@@ -66,15 +65,11 @@ public class UsersController {
     }
 
     private void bindColumnsWidth() {
-        ReadOnlyDoubleProperty w = table.widthProperty();
-        colId     .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[0]).subtract(1));
-        colName   .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[1]).subtract(1));
-        colEmail  .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[2]).subtract(1));
-        colRole   .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[3]).subtract(1));
-        colStatus .prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[4]).subtract(1));
-        colActions.prefWidthProperty().bind(w.multiply(COLUMN_WIDTH_PERCENTAGES[5]).subtract(1));
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
 
-        colActions.setMinWidth(100);
+        colActions.setMinWidth(240);
+        colActions.setPrefWidth(240);
+        colActions.setMaxWidth(240);
     }
 
     public void refresh() {
