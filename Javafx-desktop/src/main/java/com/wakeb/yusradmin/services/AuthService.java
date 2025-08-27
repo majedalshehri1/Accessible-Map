@@ -313,4 +313,12 @@ public class AuthService {
         public String getMessage() { return message; }
         public String getToken()   { return token; }
     }
+    // In AuthService.java, add these methods:
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public String getBearerToken() {
+        return isAuthenticated() ? "Bearer " + currentToken : null;
+    }
 }

@@ -31,4 +31,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
            GROUP BY p.placeCategory
            """)
     List<Object[]> countReviewsByCategory();
+
+
 }

@@ -4,7 +4,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -33,7 +35,8 @@ public class Review {
     private User user;
 
     @Column(name = "review_date")
-    private OffsetDateTime reviewDate = OffsetDateTime.now();
+    @CreationTimestamp
+    private LocalDateTime reviewDate;
 
 
 }
