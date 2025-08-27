@@ -20,7 +20,7 @@ public class ImageCell extends TableCell<Place, Void> {
     protected void updateItem(Void unused, boolean empty) {
         super.updateItem(unused, empty);
 
-        if (empty || getCurrentPlace() == null) {
+        if (empty || getCurrentPlace() == null || !getCurrentPlace().getImageUrl().startsWith("https")) {
             setText(null);
             setGraphic(null);
             return;

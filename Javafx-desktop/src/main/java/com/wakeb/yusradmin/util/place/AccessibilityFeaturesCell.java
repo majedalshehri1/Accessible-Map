@@ -2,6 +2,7 @@ package com.wakeb.yusradmin.util.place;
 
 import com.wakeb.yusradmin.models.Place;
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
+import javafx.geometry.Pos;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
@@ -25,6 +26,7 @@ public class AccessibilityFeaturesCell extends TableCell<Place, Void> {
             FlowPane flowPane = new FlowPane();
             flowPane.setHgap(5);
             flowPane.setVgap(5);
+            flowPane.setAlignment(Pos.CENTER);
 
             AccessibilityFeatures[] accessibilityFeatures = place.getAccessibilityFeatures();
 
@@ -35,6 +37,7 @@ public class AccessibilityFeaturesCell extends TableCell<Place, Void> {
             }
 
             setGraphic(flowPane);
+            setText(null);
         }
     }
 

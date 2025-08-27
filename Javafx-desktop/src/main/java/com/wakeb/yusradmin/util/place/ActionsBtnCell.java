@@ -21,8 +21,8 @@ public class ActionsBtnCell extends TableCell<Place, Void> {
         this.onDelete = onDelete;
 
         hBox.getStyleClass().add("place-actions-box");
-        deleteBtn.getStyleClass().addAll("small-cell-button", "small-cell-button-secondary");
-        updateBtn.getStyleClass().addAll("small-cell-button", "small-cell-button-danger");
+        deleteBtn.getStyleClass().addAll("small-cell-button", "small-cell-button-danger");
+        updateBtn.getStyleClass().addAll("small-cell-button", "small-cell-button-secondary");
 
         deleteBtn.setOnAction(e -> {
             Place place = getCurrentPlace();
