@@ -79,7 +79,7 @@ public class NavigationManager {
             // Load CSS (if exists)
             String cssPath = cssPaths.get(sceneType);
             if (cssPath != null) {
-                scene.getStylesheets().add(getClass().getResource(cssPath).toExternalForm());
+                scene.getStylesheets().addAll(getClass().getResource("/css/main.css").toExternalForm(), getClass().getResource(cssPath).toExternalForm());
                 System.out.println("Applied CSS: " + cssPath);
             } else {
                 System.out.println("No CSS found for scene: " + sceneType);
@@ -147,7 +147,7 @@ public class NavigationManager {
         cssPaths.put(SceneType.OVERVIEWS, "/css/main.css");
         cssPaths.put(SceneType.USERS, "/css/main.css");
         cssPaths.put(SceneType.REVIEWS, "/css/main.css");
-        cssPaths.put(SceneType.PLACES, "/css/main.css");
+        cssPaths.put(SceneType.PLACES, "/css/places.css");
     }
 
 

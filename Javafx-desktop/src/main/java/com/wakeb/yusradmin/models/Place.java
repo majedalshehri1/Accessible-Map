@@ -1,5 +1,8 @@
 package com.wakeb.yusradmin.models;
 
+import com.wakeb.yusradmin.utils.AccessibilityFeatures;
+import com.wakeb.yusradmin.utils.CATEGORY;
+
 import java.util.Arrays;
 
 public class Place {
@@ -7,11 +10,11 @@ public class Place {
     public String placeName;
     public String longitude;
     public String latitude;
-    public String category;
-    public String[] accessibilityFeatures;
+    public CATEGORY category;
+    public AccessibilityFeatures[] accessibilityFeatures;
     public String imageUrl;
 
-    public Place(long id, String placeName, String longitude, String latitude, String category, String[] accessibilityFeatures, String imageUrl) {
+    public Place(long id, String placeName, String longitude, String latitude, CATEGORY category, AccessibilityFeatures[] accessibilityFeatures, String imageUrl) {
         this.id = id;
         this.placeName = placeName;
         this.longitude = longitude;
@@ -53,19 +56,19 @@ public class Place {
         this.latitude = latitude;
     }
 
-    public String getCategory() {
+    public CATEGORY getCategory() {
         return category;
     }
 
-    public void setCategory(String category) {
+    public void setCategory(CATEGORY category) {
         this.category = category;
     }
 
-    public String[] getAccessibilityFeatures() {
+    public AccessibilityFeatures[] getAccessibilityFeatures() {
         return accessibilityFeatures;
     }
 
-    public void setAccessibilityFeatures(String[] accessibilityFeatures) {
+    public void setAccessibilityFeatures(AccessibilityFeatures[] accessibilityFeatures) {
         this.accessibilityFeatures = accessibilityFeatures;
     }
 

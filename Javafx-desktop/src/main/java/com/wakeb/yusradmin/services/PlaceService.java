@@ -1,11 +1,15 @@
 package com.wakeb.yusradmin.services;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
 import com.wakeb.yusradmin.models.Place;
+import com.wakeb.yusradmin.utils.AccessibilityFeatures;
+import com.wakeb.yusradmin.utils.AccessibilityFeaturesTypeAdapter;
 import com.wakeb.yusradmin.utils.CATEGORY;
+import com.wakeb.yusradmin.utils.CategoryTypeAdapter;
 import javafx.concurrent.Task;
 
 import java.io.IOException;
@@ -23,7 +27,10 @@ public class PlaceService {
 
     public PlaceService() {
         this.httpClient = HttpClient.newHttpClient();
-        this.gson = new Gson();
+        this.gson = new GsonBuilder()
+                .registerTypeAdapter(CATEGORY.class, new CategoryTypeAdapter())
+                .registerTypeAdapter(AccessibilityFeatures[].class, new AccessibilityFeaturesTypeAdapter())
+                .create();
         this.baseUrl = "http://localhost:8081/api";
     }
 
@@ -165,7 +172,7 @@ public class PlaceService {
         };
     }
 
-    public Task<Void> deletePlaceById(int id) {
+    public Task<Void> deletePlaceById(long id) {
         return new Task<Void>() {
             @Override
             protected Void call() throws Exception {
@@ -259,6 +266,9 @@ public class PlaceService {
 
     private RuntimeException handleAPIErrors(int statusCode) {
         switch (statusCode) {
+            case 400:
+                return new IllegalArgumentException("Bad Request");
+
             case 401:
                 return new SecurityException("Authentication required");
 

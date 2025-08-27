@@ -11,15 +11,10 @@ module com.wakeb.yusradmin {
     requires com.fasterxml.jackson.annotation;
 
     requires com.google.gson;
-<<<<<<< HEAD
-    opens com.wakeb.yusradmin.models to com.google.gson;
     opens com.wakeb.yusradmin.dto to com.google.gson;
-=======
     requires java.net.http;
 
     // Allow FXML to access controllers
-
->>>>>>> main
     opens com.wakeb.yusradmin.controllers to javafx.fxml;
 
     // Allow Gson to reflect on model classes
