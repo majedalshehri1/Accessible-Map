@@ -18,6 +18,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+// Font-related additions
+import javafx.scene.text.Font;
+import java.util.Objects;
+
 /**
  * NavigationManager is responsible for:
  * - Handling scene navigation (switching between standalone scenes like login)
@@ -42,6 +46,9 @@ public class NavigationManager {
     // Maps for storing scene/view FXML & CSS paths
     private Map<SceneType, String> fxmlPaths;
     private Map<SceneType, String> cssPaths;
+
+    // Internal state to load the font only once
+    private static boolean fontsLoaded = false;
 
     /**
      * Private constructor to enforce Singleton pattern.
@@ -89,6 +96,10 @@ public class NavigationManager {
             } else {
                 System.out.println("No CSS found for scene: " + sceneType);
             }
+
+            // Load the fonts and enforce using Cairo on the scene root
+            ensureFontsLoaded();
+            applyFontToScene(scene);
 
             // Set scene to stage
             primaryStage.setScene(scene);
@@ -179,4 +190,19 @@ public class NavigationManager {
     }
 
 
+
+    // Load Cairo font files from resources only once
+    private void ensureFontsLoaded() {
+        if (fontsLoaded) return;
+        Font.loadFont(Objects.requireNonNull(
+                getClass().getResourceAsStream("/fonts/Cairo-Regular.ttf")), 12);
+        Font.loadFont(Objects.requireNonNull(
+                getClass().getResourceAsStream("/fonts/Cairo-Bold.ttf")), 12);
+        fontsLoaded = true;
+    }
+
+    // Force the font on the scene root (affects all child elements)
+    private void applyFontToScene(Scene scene) {
+        scene.getRoot().setStyle("-fx-font-family: 'Cairo';");
+    }
 }
