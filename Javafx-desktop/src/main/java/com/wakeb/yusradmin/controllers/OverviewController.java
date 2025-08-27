@@ -4,6 +4,7 @@ import com.wakeb.yusradmin.dto.TopPlaceDto;
 import com.wakeb.yusradmin.models.ReviewResponseDTO;
 import com.wakeb.yusradmin.services.StatsServiceHttp;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -18,6 +19,7 @@ import javafx.scene.chart.PieChart;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
+import javafx.scene.shape.Circle;
 
 import java.net.URL;
 import java.util.List;
@@ -165,6 +167,15 @@ public class OverviewController implements Initializable {
         );
         pieChart.setLegendVisible(true);
         pieChart.setLabelsVisible(true);
+
+        // Bind the pie chart size to the host size
+        Circle hole = new Circle();
+        hole.setManaged(false);
+        hole.setMouseTransparent(true);
+
+        hole.radiusProperty().bind(
+                Bindings.min(chartHost.widthProperty(), chartHost.heightProperty()).multiply(0.50)
+        );
 
         // Clear the chart host and add the pie chart
         chartHost.getChildren().clear();
