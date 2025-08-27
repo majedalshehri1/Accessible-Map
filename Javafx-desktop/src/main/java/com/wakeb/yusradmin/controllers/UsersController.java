@@ -42,7 +42,7 @@ public class UsersController {
         colEmail.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getUserEmail()));
         colRole.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getRole()));
         colStatus.setCellValueFactory(c ->
-                new SimpleStringProperty(c.getValue().isBlocked() ? "BLOCKED" : "ACTIVE"));
+                new SimpleStringProperty(c.getValue().isBlocked() ? "محظور" : "نشط"));
 
         table.setItems(data);
         table.setPlaceholder(new Label("No users"));
@@ -87,9 +87,9 @@ public class UsersController {
 
     private void onEdit(User u) {
         TextInputDialog dlg = new TextInputDialog(u.getUserName());
-        dlg.setTitle("Edit User");
+        dlg.setTitle("تعديل المستخدم");
         dlg.setHeaderText(null);
-        dlg.setContentText("New username:");
+        dlg.setContentText("الاسم الجديد");
         dlg.showAndWait().ifPresent(name -> {
             u.setUserName(name);
             Task<Void> t = new Task<>() {
