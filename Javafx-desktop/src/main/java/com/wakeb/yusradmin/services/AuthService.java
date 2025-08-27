@@ -92,7 +92,6 @@ public class AuthService {
                 if (response.statusCode() / 100 == 2) {
                     JsonObject json = gson.fromJson(response.body(), JsonObject.class);
 
-                    // Token may be "token" or "accessToken"
                     String token = json.has("token") && !json.get("token").isJsonNull()
                             ? json.get("token").getAsString()
                             : (json.has("accessToken") && !json.get("accessToken").isJsonNull()
@@ -102,16 +101,20 @@ public class AuthService {
                         return new LoginResult(false, null, "Token missing in response.", null);
                     }
 
-                    // Set temp session, then validate with backend
                     currentToken = token;
                     tokenExpiry = LocalDateTime.now().plusHours(8);
 
-                    if (!validateSessionSync()) { // server says invalid (or server down)
+                    if (!validateSessionSync()) {
                         clearAuth();
                         return new LoginResult(false, null, "Unable to validate session.", null);
                     }
 
-                    // Persist valid session
+                    if (currentUser == null || currentUser.getRole() == null
+                            || !currentUser.getRole().trim().equalsIgnoreCase("ADMIN")) {
+                        clearAuth();
+                        return new LoginResult(false, null, "Admins only. Access denied.", null);
+                    }
+
                     storeAuth(currentToken, currentUser, tokenExpiry);
 
                     String message = json.has("message") && !json.get("message").isJsonNull()
@@ -120,6 +123,7 @@ public class AuthService {
 
                     return new LoginResult(true, currentUser, message, currentToken);
                 }
+
 
                 // Non-2xx → failed
                 String msg = "Login failed: " + response.statusCode();
@@ -199,10 +203,21 @@ public class AuthService {
                         ? json.get("username").getAsString() : null;
                 String email = json.has("email") && !json.get("email").isJsonNull()
                         ? json.get("email").getAsString() : null;
-                currentUser = new User(username, email);
+                String role = null;
+                if (json.has("role") && !json.get("role").isJsonNull())
+                    role = json.get("role").getAsString();
+                else if (json.has("hasRole") && !json.get("hasRole").isJsonNull())
+                    role = json.get("hasRole").getAsString();
+
+                if (role != null) role = role.trim();
+
+                User u = new User();
+                u.setUserName(username);
+                u.setUserEmail(email);
+                u.setRole(role);
+                currentUser = u;
                 return true;
             } catch (Exception ignore) {
-                // Unexpected payload → treat as invalid to stay safe
                 clearAuth();
                 return false;
             }
@@ -286,6 +301,7 @@ public class AuthService {
         private final String message;
         private final String token;
 
+
         public LoginResult(boolean success, User user, String message, String token) {
             this.success = success;
             this.user = user;
@@ -296,5 +312,13 @@ public class AuthService {
         public User getUser()      { return user; }
         public String getMessage() { return message; }
         public String getToken()   { return token; }
+    }
+    // In AuthService.java, add these methods:
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public String getBearerToken() {
+        return isAuthenticated() ? "Bearer " + currentToken : null;
     }
 }

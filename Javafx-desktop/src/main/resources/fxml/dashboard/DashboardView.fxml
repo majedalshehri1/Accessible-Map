@@ -9,45 +9,55 @@
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
+<?import org.kordamp.ikonli.javafx.FontIcon?>
 
 <!--
   Main layout (RIGHT = sidebar, CENTER = content)
   Controller: com.wakeb.yusradmin.controllers.MainController
 -->
 
-<BorderPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="600.0" prefWidth="1000.0" styleClass="app-root" stylesheets="@../../css/main.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.MainController">
+<BorderPane nodeOrientation="LEFT_TO_RIGHT" prefHeight="600.0" prefWidth="1000.0"
+            styleClass="app-root" stylesheets="@../../css/main.css"
+            xmlns="http://javafx.com/javafx/24.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.wakeb.yusradmin.controllers.MainController">
 
     <!-- ===================== RIGHT: Sidebar ===================== -->
     <right>
         <VBox alignment="TOP_RIGHT" prefWidth="260" spacing="12" styleClass="sidebar">
 
-            <!-- small top padding -->
-            <VBox spacing="4" />
-            <Region prefHeight="41.0" prefWidth="223.0" />
+            <!-- Declare shared ToggleGroup -->
+            <fx:define>
+                <ToggleGroup fx:id="sideNav"/>
+            </fx:define>
 
-            <!--
-              Sidebar header: shows display name, email, and avatar letter.
-              MainController will set these via fx:id after successful login.
-            -->
+            <!-- small top padding -->
+            <VBox spacing="4"/>
+            <Region prefHeight="41.0" prefWidth="223.0"/>
+
+            <!-- Sidebar header: user info -->
             <HBox alignment="TOP_RIGHT" prefHeight="55.0" prefWidth="223.0" style="-fx-spacing: 20;">
                 <children>
                     <VBox nodeOrientation="LEFT_TO_RIGHT" spacing="4">
                         <children>
-                            <Label fx:id="displayNameLabel" alignment="TOP_LEFT" contentDisplay="RIGHT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="18.0" prefWidth="169.0" style="-fx-font-weight: bold;" text="—" />
-                            <Label fx:id="emailLabel" alignment="TOP_LEFT" nodeOrientation="RIGHT_TO_LEFT" prefHeight="13.0" prefWidth="169.0" styleClass="muted" text="—" />
+                            <Label fx:id="displayNameLabel" alignment="TOP_LEFT" contentDisplay="RIGHT"
+                                   nodeOrientation="RIGHT_TO_LEFT" prefHeight="18.0" prefWidth="169.0"
+                                   style="-fx-font-weight: bold;" text="—"/>
+                            <Label fx:id="emailLabel" alignment="TOP_LEFT" nodeOrientation="RIGHT_TO_LEFT"
+                                   prefHeight="13.0" prefWidth="169.0" styleClass="muted" text="—"/>
                         </children>
                     </VBox>
 
                     <VBox alignment="TOP_RIGHT" prefHeight="44.0" prefWidth="53.0">
                         <children>
-                            <!-- Avatar: first letter of username (set by controller) -->
-                            <Label fx:id="avatarLabel" contentDisplay="RIGHT" prefHeight="41.0" prefWidth="43.0" styleClass="bg-logo" text="؟" />
+                            <Label fx:id="avatarLabel" contentDisplay="RIGHT" prefHeight="41.0" prefWidth="43.0"
+                                   styleClass="bg-logo" text="؟"/>
                         </children>
                     </VBox>
                 </children>
             </HBox>
 
-            <Region prefHeight="10.0" prefWidth="223.0" />
+            <Region prefHeight="10.0" prefWidth="223.0"/>
 
             <!-- ===================== Sidebar sections ===================== -->
             <VBox styleClass="vbox-sidbar-sections">
@@ -55,55 +65,58 @@
                 <!-- ===== Section: General ===== -->
                 <VBox styleClass="section-group">
                     <children>
-                        <Label alignment="TOP_RIGHT" prefHeight="22.0" prefWidth="311.0" styleClass="section-title" text="عام" />
-                        <ToggleButton fx:id="overviewBtn" maxWidth="Infinity" onAction="#handleOverviews" prefHeight="40.0" selected="true" styleClass="nav-btn" text="نظرة عامة">
-                     <toggleGroup>
-                        <ToggleGroup fx:id="sideNav" />
-                     </toggleGroup></ToggleButton>
+                        <Label alignment="TOP_RIGHT" prefHeight="22.0" prefWidth="311.0"
+                               styleClass="section-title" text="عام"/>
+                        <ToggleButton fx:id="overviewBtn" maxWidth="Infinity" onAction="#handleOverviews"
+                                      prefHeight="40.0" selected="true" styleClass="nav-btn"
+                                      text="نظرة عامة" toggleGroup="$sideNav"/>
                     </children>
                 </VBox>
 
-                <!-- Divider between groups -->
-                <Region prefWidth="200" styleClass="section-divider" />
+                <Region prefWidth="200" styleClass="section-divider"/>
 
                 <!-- ===== Section: Management ===== -->
                 <VBox styleClass="section-group">
                     <children>
-                        <Label alignment="TOP_RIGHT" prefHeight="22.0" prefWidth="435.0" styleClass="section-title" text="الإدارة" />
+                        <Label alignment="TOP_RIGHT" prefHeight="22.0" prefWidth="435.0"
+                               styleClass="section-title" text="الإدارة"/>
 
-                        <ToggleButton fx:id="usersBtn" maxWidth="Infinity" onAction="#handleUsers" prefHeight="40.0" styleClass="nav-btn" text="إدارة الحسابات" toggleGroup="$sideNav" />
+                        <ToggleButton fx:id="usersBtn" maxWidth="Infinity" onAction="#handleUsers"
+                                      prefHeight="40.0" styleClass="nav-btn"
+                                      text="إدارة الحسابات" toggleGroup="$sideNav"/>
 
-                        <ToggleButton fx:id="reviewsBtn" maxWidth="Infinity" onAction="#handleReviews" prefHeight="40.0" styleClass="nav-btn" text="إدارة التقييمات" toggleGroup="$sideNav" />
+                        <ToggleButton fx:id="reviewsBtn" maxWidth="Infinity" onAction="#handleReviews"
+                                      prefHeight="40.0" styleClass="nav-btn"
+                                      text="إدارة التقييمات" toggleGroup="$sideNav"/>
 
-                        <ToggleButton fx:id="placesBtn" maxWidth="Infinity" onAction="#handlePlaces" prefHeight="40.0" styleClass="nav-btn" text="إدارة الأماكن" toggleGroup="$sideNav" />
+                        <ToggleButton fx:id="placesBtn" maxWidth="Infinity" onAction="#handlePlaces"
+                                      prefHeight="40.0" styleClass="nav-btn"
+                                      text="إدارة الأماكن" toggleGroup="$sideNav"/>
+
+                        <ToggleButton fx:id="mapBtn" maxWidth="Infinity" onAction="#handleMapView"
+                                      prefHeight="40.0" styleClass="nav-btn" toggleGroup="$sideNav">
+                            <graphic>
+                                <FontIcon iconLiteral="fas-map" iconSize="18"/>
+                            </graphic>
+                            <text>خريطة الأماكن</text>
+                        </ToggleButton>
                     </children>
                 </VBox>
 
             </VBox>
 
             <!-- push logout button to bottom -->
-            <Region prefHeight="71.0" prefWidth="223.0" VBox.vgrow="ALWAYS" />
+            <Region prefHeight="71.0" prefWidth="223.0" VBox.vgrow="ALWAYS"/>
 
-            <!--
-              Logout button (outlined style via .logout-btn CSS).
-              MainController should implement handleLogout() to clear session and navigate to LOGIN.
-            -->
-            <Button fx:id="logoutButton" maxWidth="Infinity" onAction="#handleLogout" styleClass="logout-btn" text="تسجيل خروج" />
-
-            <!--
-              One ToggleGroup for all sidebar nav buttons.
-              Ensures only one section is active at a time.
-            -->
-            <fx:define>
-                <ToggleGroup fx:id="sideNav" />
-            </fx:define>
+            <Button fx:id="logoutButton" maxWidth="Infinity" onAction="#handleLogout"
+                    styleClass="logout-btn" text="تسجيل خروج"/>
 
         </VBox>
     </right>
 
     <!-- ===================== CENTER: Content area ===================== -->
     <center>
-        <!-- Container where MainController swaps views (overview/users/reviews/places) -->
-        <StackPane fx:id="contentArea" alignment="TOP_RIGHT" prefHeight="560" prefWidth="740" styleClass="content" />
+        <StackPane fx:id="contentArea" alignment="TOP_RIGHT" prefHeight="560"
+                   prefWidth="740" styleClass="content"/>
     </center>
 </BorderPane>

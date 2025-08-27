@@ -1,8 +1,12 @@
 package com.wakeb.yusradmin.navigation;
 
+import com.wakeb.yusradmin.controllers.MapController;
+import com.wakeb.yusradmin.controllers.OverviewController;
+import com.wakeb.yusradmin.controllers.ReviewsController;
 import com.wakeb.yusradmin.controllers.UsersController;
-import com.wakeb.yusradmin.services.ApiClient;
-import com.wakeb.yusradmin.services.UserServiceHTTP;
+import com.wakeb.yusradmin.dto.PlaceMapDTO;
+import com.wakeb.yusradmin.services.*;
+import javafx.concurrent.Task;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -11,7 +15,12 @@ import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+
+// Font-related additions
+import javafx.scene.text.Font;
+import java.util.Objects;
 
 /**
  * NavigationManager is responsible for:
@@ -37,6 +46,9 @@ public class NavigationManager {
     // Maps for storing scene/view FXML & CSS paths
     private Map<SceneType, String> fxmlPaths;
     private Map<SceneType, String> cssPaths;
+
+    // Internal state to load the font only once
+    private static boolean fontsLoaded = false;
 
     /**
      * Private constructor to enforce Singleton pattern.
@@ -85,6 +97,10 @@ public class NavigationManager {
                 System.out.println("No CSS found for scene: " + sceneType);
             }
 
+            // Load the fonts and enforce using Cairo on the scene root
+            ensureFontsLoaded();
+            applyFontToScene(scene);
+
             // Set scene to stage
             primaryStage.setScene(scene);
 
@@ -103,6 +119,8 @@ public class NavigationManager {
      * Navigate within the MAIN layout only.
      * Changes the center content of the BorderPane without replacing the whole scene.
      */
+    // In NavigationManager.java, update the navigateToView method
+    // In NavigationManager.java, update the navigateToView method:
     public void navigateToView(SceneType viewType) {
         if (mainLayout == null) {
             System.err.println("Main layout not initialized!");
@@ -117,8 +135,14 @@ public class NavigationManager {
             if (viewType == SceneType.USERS) {
                 UsersController ctrl = loader.getController();
                 ctrl.setService(new UserServiceHTTP(new ApiClient(apiBase)));
+            } else if (viewType == SceneType.OVERVIEWS) {
+                OverviewController oc = loader.getController();
+                oc.setService(new StatsServiceHttp(new ApiClient(apiBase)));
+            } else if (viewType == SceneType.REVIEWS) {
+                ReviewsController reviewsCtrl = loader.getController();
+                reviewsCtrl.setService(new ReviewService()); // This should set the service
             }
-            // Replace center content of BorderPane
+
             mainLayout.setCenter(view);
 
         } catch (Exception e) {
@@ -140,6 +164,7 @@ public class NavigationManager {
         fxmlPaths.put(SceneType.USERS, "/fxml/dashboard/content/UsersView.fxml");
         fxmlPaths.put(SceneType.REVIEWS, "/fxml/dashboard/content/ReviewsView.fxml");
         fxmlPaths.put(SceneType.PLACES, "/fxml/dashboard/content/PlacesView.fxml");
+        fxmlPaths.put(SceneType.MAP, "/fxml/dashboard/content/MapView.fxml");
 
         // Map SceneTypes to CSS files
         cssPaths.put(SceneType.LOGIN, "/css/main.css");
@@ -147,8 +172,24 @@ public class NavigationManager {
         cssPaths.put(SceneType.OVERVIEWS, "/css/main.css");
         cssPaths.put(SceneType.USERS, "/css/main.css");
         cssPaths.put(SceneType.REVIEWS, "/css/main.css");
+        cssPaths.put(SceneType.MAP, "/css/main.css");
         cssPaths.put(SceneType.PLACES, "/css/places.css");
     }
 
 
+
+    // Load Cairo font files from resources only once
+    private void ensureFontsLoaded() {
+        if (fontsLoaded) return;
+        Font.loadFont(Objects.requireNonNull(
+                getClass().getResourceAsStream("/fonts/Cairo-Regular.ttf")), 12);
+        Font.loadFont(Objects.requireNonNull(
+                getClass().getResourceAsStream("/fonts/Cairo-Bold.ttf")), 12);
+        fontsLoaded = true;
+    }
+
+    // Force the font on the scene root (affects all child elements)
+    private void applyFontToScene(Scene scene) {
+        scene.getRoot().setStyle("-fx-font-family: 'Cairo';");
+    }
 }

@@ -11,8 +11,8 @@ import java.util.function.Consumer;
 public class UserActionCell extends TableCell<User, Void> {
 
     private final Button blockBtn   = new Button();
-    private final Button editBtn    = new Button("Edit");
-    private final Button deleteBtn  = new Button("Delete");
+    private final Button editBtn    = new Button("تعديل");
+    private final Button deleteBtn  = new Button("حذف");
     private final HBox box          = new HBox(8, blockBtn, editBtn, deleteBtn);
 
     private final Consumer<User> onToggleBlock;
@@ -27,7 +27,7 @@ public class UserActionCell extends TableCell<User, Void> {
         this.onDelete = onDelete;
 
         box.setPadding(new Insets(2, 0, 2, 0));
-        blockBtn.getStyleClass().add("btn-small");
+        blockBtn.getStyleClass().addAll("btn-small","btn-danger");
         editBtn.getStyleClass().add("btn-small");
         deleteBtn.getStyleClass().add("btn-small");
 
@@ -62,7 +62,7 @@ public class UserActionCell extends TableCell<User, Void> {
             return;
         }
 
-        blockBtn.setText(u.isBlocked() ? "Unblock" : "Block");
+        blockBtn.setText(u.isBlocked() ? "فك الحظر" : "حظر");
         setGraphic(box);
     }
 

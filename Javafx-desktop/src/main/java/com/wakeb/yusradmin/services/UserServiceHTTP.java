@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.wakeb.yusradmin.models.User;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.List;
 
 public class UserServiceHTTP implements UserService {
@@ -34,11 +35,11 @@ public class UserServiceHTTP implements UserService {
 
     @Override
     public void block(long userId) throws Exception {
-        api.put("/api/admin/users/" + userId + "/block", new Object(){}, null);
+        api.put("/api/admin/users/" + userId + "/block", null, null);
     }
 
     @Override
     public void unblock(long userId) throws Exception {
-        api.put("/api/admin/users/" + userId + "/unblock", new Object(){}, null);
+        api.put("/api/admin/users/" + userId + "/unblock", null, null);
     }
 }
