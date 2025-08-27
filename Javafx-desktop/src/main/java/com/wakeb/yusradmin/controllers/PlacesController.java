@@ -127,7 +127,7 @@ public class PlacesController {
         // TODO: bind progress and message properties
 
         fetchTask.setOnSucceeded(event -> {
-            this.places.setAll(fetchTask.getValue().get(1));
+            this.places.setAll(fetchTask.getValue());
             for (Place place : this.places) {
                 System.out.println(place);
             }
