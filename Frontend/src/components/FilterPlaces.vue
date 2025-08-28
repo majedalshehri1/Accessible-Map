@@ -4,51 +4,13 @@ import { CheckCircle, Coffee, Hospital, ShoppingBag, Trees, Utensils } from 'luc
 import Button from './ui/button/Button.vue';
 import { ref } from 'vue';
 import { toast } from 'vue-sonner';
-import { usePlaces } from '@/hooks/usePlaces';
 import placeServiecs from '@/services/placeServiecs';
+import { usePlacesStore } from '@/stores/placeStore';
+import { storeToRefs } from 'pinia';
 
-const formatPlace = (data) => {
-    console.log(data);
-
-    let rating = 0;
-    let reviewsCount = data.reviews.length;
-
-    const reviews = data.reviews.map(r => {
-        rating += r.rating
-
-        return {
-            id: r.id,
-            userName: r.userName,
-            rating: r.rating,
-            comment: r.description
-        }
-    });
-
-    rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
-
-    const placeFeatures = [];
-
-    data.accessibilityFeatures.forEach(pl => {
-        if (pl.isAvaliable) {
-            placeFeatures.push(pl.accessibillityType)
-        }
-    })
-
-    return {
-        id: data.id,
-        name: data.placeName,
-        lng: data.longitude,
-        lat: data.latitude,
-        placeCategory: data.placeCategory,
-        images: [data.imageUrl],
-        reviews,
-        placeFeatures,
-        rating,
-        reviewsCount
-    }
-}
-
-const { isLoadingPlaces, places, fetchAllPlaces } = usePlaces();
+const placesStore = usePlacesStore();
+const { isLoadingPlaces } = storeToRefs(placesStore);
+const { fetchAllPlaces, fetchPlacesByCategory } = usePlacesStore();
 
 const categories = [
     {
@@ -71,22 +33,22 @@ const categories = [
     },
 ]
 
-const asyncFunc = async (category) => {
-    const { data } = await placeServiecs.getPlacesByCategory(category.value);
-    const formatedData = data.map(formatPlace);
-    places.value = formatedData;
-    currentSelectedFilter.value = category
-};
-
-const handleClick = async (category) => {
+const handleFetch = async (category) => {
     if (category.value === "all") {
-        const fetchedPlaces = await fetchAllPlaces();
-        places.value = fetchedPlaces;
+        await fetchAllPlaces();
         currentSelectedFilter.value = categories[0];
         return;
     } else {
-        await asyncFunc(category)
+        await fetchPlacesByCategory(category.value);
+        currentSelectedFilter.value = category;
     }
+}
+
+const handleClick = (category) => {
+    toast.promise(() => handleFetch(category), {
+        loading: "تحميل...",
+        error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة"
+    })
 }
 
 const currentSelectedFilter = ref(categories[0])
@@ -96,7 +58,7 @@ const currentSelectedFilter = ref(categories[0])
 <template>
     <div
         class="absolute top-6 left-1/2 -translate-x-1/2 flex flex-wrap gap-2 max-w-64 sm:max-w-72 md:max-w-lg mx-auto z-[800]">
-        <Button v-for="category in categories" :key="category.id" @click="handleClick(category)"
+        <Button v-for="category in categories" :key="category.id" @click="handleClick(category)" :disabled="isLoadingPlaces"
             :variant="currentSelectedFilter.id === category.id ? '' : 'outline'" size="sm"
             class="relative flex-[1_1_0%]"
             :class="currentSelectedFilter.id === category.id && 'bg-blue-600 hover:bg-blue-700 ring-blue-300'">

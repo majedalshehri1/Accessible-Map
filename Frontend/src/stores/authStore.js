@@ -51,7 +51,6 @@ export const useAuthStore = defineStore("auth", {
       } catch {
         this.user = null;
       }
-      // delete jwt from cookies 
       
     },
     async updateUsername(newUsername) {

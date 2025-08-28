@@ -13,11 +13,7 @@ app.use(pinia)
 
 const auth = useAuthStore()
 
-try {
-  await auth.refreshProfile()
-} catch (_) {
-  
-}
+await auth.refreshProfile()
 
 app.use(router)
 app.mount('#app')

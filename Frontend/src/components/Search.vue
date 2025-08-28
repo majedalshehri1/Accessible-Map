@@ -4,51 +4,12 @@ import { ref, watch, onBeforeUnmount } from 'vue'
 import { toast } from 'vue-sonner'
 import SearchInput from './SearchInput.vue'
 import Button from './ui/button/Button.vue'
-import placeServiecs from "../services/placeServiecs"
-import { usePlaces } from '@/hooks/usePlaces'
+import { usePlacesStore } from '@/stores/placeStore'
+import { storeToRefs } from 'pinia'
 
-const formatPlace = (data) => {
-    console.log(data);
-
-    let rating = 0;
-    let reviewsCount = data.reviews.length;
-
-    const reviews = data.reviews.map(r => {
-        rating += r.rating
-
-        return {
-            id: r.id,
-            userName: r.userName,
-            rating: r.rating,
-            comment: r.description
-        }
-    });
-
-    rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
-
-    const placeFeatures = [];
-
-    data.reviews.forEach(pl => {
-        if (pl.isAvaliable) {
-            placeFeatures.push(pl.accessibillityType)
-        }
-    })
-
-    return {
-        id: data.id,
-        name: data.placeName,
-        lng: data.longitude,
-        lat: data.latitude,
-        placeCategory: data.placeCategory,
-        images: [data.imageUrl],
-        reviews,
-        placeFeatures,
-        rating,
-        reviewsCount
-    }
-}
-
-const { isLoadingPlaces, places, fetchAllPlaces } = usePlaces()
+const placesStore = usePlacesStore();
+const { places, isLoadingPlaces } = storeToRefs(placesStore);
+const { fetchAllPlaces, searchPlaceByQuery } = placesStore;
 
 const isOpen = ref(false)
 const searchQuery = ref('')
@@ -64,42 +25,41 @@ const closeSearch = () => {
     isOpen.value = false
 }
 
-const handleSearch = async (query) => {
-    if (query.length <= 2) {
-        const fetchedPlaces = await fetchAllPlaces();
-        places.value = fetchedPlaces;
-        return
-    }
-
-    // Cancel any previous request
-    if (controller) {
-        controller.abort()
-    }
-
-    controller = new AbortController()
-
-    try {
-        const { data } = await placeServiecs.getPlacesByQuery(query, { signal: controller.signal });
-        const formatedData = data.map(formatPlace);
-        places.value = formatedData;
-    } catch (err) {
-        if (err.name !== 'AbortError') {
-            console.error('Fetch error:', err)
-            toast.error("حدث خطأ اثناء تحميل البيانات")
+const handleSearch = (query) => {
+    if (query.length === 0) {
+        if (controller) {
+            controller.abort();
         }
+        return fetchAllPlaces();
     }
+
+    if (controller) {
+        controller.abort();
+    }
+
+    controller = new AbortController();
+
+    return searchPlaceByQuery(query, controller);
 }
 
-// Debounce search input
 watch(searchQuery, (newQuery) => {
     if (debounceTimeout) {
-        clearTimeout(debounceTimeout)
+        clearTimeout(debounceTimeout);
     }
 
     debounceTimeout = setTimeout(() => {
-        handleSearch(newQuery)
-    }, debounceDelay)
-})
+        toast.promise(() => handleSearch(newQuery), {
+            loading: "تحميل...",
+            success: 'تم البحث بنجاح!',
+            error: (err) => {
+                if (err.name !== 'AbortError') {
+                    return "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة";
+                }
+                return;
+            },
+        });
+    }, debounceDelay);
+});
 
 // Cleanup on unmount
 onBeforeUnmount(() => {
@@ -113,12 +73,12 @@ onBeforeUnmount(() => {
         <!-- Mobile Search Overlay -->
         <div v-show="isOpen" class="fixed inset-0 z-50 bg-white flex items-start pt-4 px-4 sm:hidden">
             <SearchInput :is-disabled="isLoadingPlaces" v-model="searchQuery" :showCloseButton="true"
-                @close="closeSearch" @search="handleSearch" />
+                @close="closeSearch" />
         </div>
 
         <!-- Desktop Search -->
         <div class="hidden sm:flex flex-1">
-            <SearchInput :is-disabled="isLoadingPlaces" v-model="searchQuery" @search="handleSearch" />
+            <SearchInput :is-disabled="isLoadingPlaces" v-model="searchQuery" />
         </div>
 
         <!-- Mobile Search Icon -->
