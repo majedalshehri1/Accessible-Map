@@ -1,156 +1,161 @@
 package com.wakeb.yusradmin.controllers;
 
+import com.sothawo.mapjfx.*;
+import com.sothawo.mapjfx.event.MapViewEvent;
+import com.sothawo.mapjfx.event.MarkerEvent;
+
 import com.wakeb.yusradmin.dto.PlaceMapDTO;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
-import javafx.concurrent.Worker;
+import com.wakeb.yusradmin.mappers.PlaceMappers;
+import com.wakeb.yusradmin.models.Place;
+import com.wakeb.yusradmin.services.PlaceService;
+
+import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
-import javafx.scene.web.WebEngine;
-import javafx.scene.web.WebView;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 
-import java.net.URL;
-import java.util.Arrays;
-import java.util.ResourceBundle;
+import java.util.*;
+import java.util.stream.Collectors;
 
-public class MapController implements Initializable {
+public class MapController {
+
+    @FXML private MapView mapView;
+    @FXML private Label latLabel, lngLabel;
+
+    private final List<Marker> markers = new ArrayList<>();
+    private final Map<Marker, MapLabel> infoLabels = new HashMap<>();
+
+    private final PlaceService placeService = new PlaceService();
 
     @FXML
-    private WebView mapWebView;
+    private void initialize() {
+        mapView.initialize();
 
-    private WebEngine webEngine;
-    private final ObservableList<PlaceMapDTO> placesData = FXCollections.observableArrayList();
+        mapView.initializedProperty().addListener((obs, was, is) -> {
+            if (!is) return;
 
-    @Override
-    public void initialize(URL location, ResourceBundle resources) {
-        setupMap();
-    }
+            Coordinate riyadh = new Coordinate(24.7136, 46.6753);
+            mapView.setCenter(riyadh);
+            mapView.setZoom(12);
 
-    private void setupMap() {
-        webEngine = mapWebView.getEngine();
+            refreshFromDatabase(); // first load
+        });
 
-        String htmlContent = """
-        <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <title>خريطة الأماكن</title>
-            <style>
-                #map { 
-                    height: 100%; 
-                    width: 100%; 
-                    border-radius: 8px;
-                }
-                body { margin: 0; padding: 0; }
-                html, body, #map { height: 100%; }
-            </style>
-            <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-            <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-        </head>
-        <body>
-            <div id="map"></div>
-            <script>
-                var map = L.map('map').setView([24.7136, 46.6753], 12);
-                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                    attribution: '&copy; OpenStreetMap contributors'
-                }).addTo(map);
-                
-                var markers = [];
-                
-                function addMarker(lat, lng, title, category, features) {
-                    var marker = L.marker([lat, lng]).addTo(map);
-                    var popupContent = "<b>" + title + "</b><br>" + 
-                                      "الفئة: " + category + "<br>";
-                    
-                    if (features && features.length > 0) {
-                        popupContent += "الميزات: " + features.join(", ");
-                    }
-                    
-                    marker.bindPopup(popupContent);
-                    markers.push(marker);
-                }
-                
-                function clearMarkers() {
-                    markers.forEach(function(marker) {
-                        map.removeLayer(marker);
-                    });
-                    markers = [];
-                }
-                
-                function setView(lat, lng, zoom) {
-                    map.setView([lat, lng], zoom);
-                }
-                
-                // Make functions globally available
-                window.mapFunctions = {
-                    addMarker: addMarker,
-                    clearMarkers: clearMarkers,
-                    setView: setView
-                };
-            </script>
-        </body>
-        </html>
-        """;
+        mapView.addEventHandler(MapViewEvent.MAP_POINTER_MOVED, e -> {
+            Coordinate c = e.getCoordinate();
+            if (c != null) {
+                latLabel.setText(String.format("%.6f", c.getLatitude()));
+                lngLabel.setText(String.format("%.6f", c.getLongitude()));
+            }
+        });
 
-        webEngine.loadContent(htmlContent);
+        mapView.addEventHandler(MarkerEvent.MARKER_CLICKED, e -> {
+            Marker m = e.getMarker();
+            if (m == null) return;
 
-        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
-            if (newState == Worker.State.SUCCEEDED) {
-                updateMapMarkers();
+            infoLabels.values().forEach(lbl -> lbl.setVisible(false));
+
+            MapLabel label = infoLabels.get(m);
+            if (label != null) {
+                label.setPosition(m.getPosition());
+                label.setVisible(true);
             }
         });
     }
 
-    public void updateMapMarkers() {
-        if (webEngine == null) return;
 
-        if (webEngine.getLoadWorker().getState() != Worker.State.SUCCEEDED) return;
+    @FXML
+    public void refreshFromDatabase() {
+        var task = placeService.getAllPlaces();
 
-        // Use the global function
-        webEngine.executeScript("if (window.mapFunctions) window.mapFunctions.clearMarkers();");
+        task.setOnSucceeded(ev -> {
+            List<Place> places = task.getValue();
 
-        for (PlaceMapDTO place : placesData) {
-            try {
-                double lat = Double.parseDouble(place.getLatitude());
-                double lng = Double.parseDouble(place.getLongitude());
+            // convert to DTOs
+            List<PlaceMapDTO> dtoList = places.stream()
+                    .map(PlaceMappers::toMapDTO)
+                    .flatMap(Optional::stream)
+                    .collect(Collectors.toList());
 
-                String featuresJsArray = "[]";
-                if (place.getAccessibilityFeatures() != null && !place.getAccessibilityFeatures().isEmpty()) {
-                    featuresJsArray = "['" + String.join("','", place.getAccessibilityFeatures()) + "']";
-                }
+            Platform.runLater(() -> renderPlaces(dtoList));
+        });
 
-                String script = String.format(
-                        "if (window.mapFunctions) window.mapFunctions.addMarker(%f, %f, '%s', '%s', %s);",
-                        lat, lng, place.getPlaceName(), place.getCategory(), featuresJsArray
-                );
-                webEngine.executeScript(script);
-            } catch (NumberFormatException e) {
-                System.err.println("Invalid coordinates for place: " + place.getPlaceName());
-            }
-        }
+        task.setOnFailed(ev -> {
+            Throwable ex = task.getException();
+            Platform.runLater(() -> {
+                clearPins();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Load Places");
+                alert.setHeaderText("Failed to load places");
+                alert.setContentText(ex != null ? ex.getMessage() : "Unknown error");
+                alert.show();
+            });
+        });
 
-        if (!placesData.isEmpty()) {
-            try {
-                PlaceMapDTO firstPlace = placesData.get(0);
-                double lat = Double.parseDouble(firstPlace.getLatitude());
-                double lng = Double.parseDouble(firstPlace.getLongitude());
-                webEngine.executeScript(String.format(
-                        "if (window.mapFunctions) window.mapFunctions.setView(%f, %f, 12);", lat, lng
-                ));
-            } catch (NumberFormatException ignored) {}
-        }
+        new Thread(task, "getAllPlaces").start();
     }
 
-    // Public method to update places from other controllers
-    public void setPlacesData(java.util.List<PlaceMapDTO> places) {
-        if (places != null) {
-            placesData.setAll(places);
-            updateMapMarkers();
+
+    private void renderPlaces(List<PlaceMapDTO> places) {
+        clearPins();
+        for (PlaceMapDTO p : places) {
+            Coordinate c = new Coordinate(p.getLat(), p.getLng());
+            addPin(c, p.getName(), p.getCategory());
         }
+        fitToMarkers();
     }
 
-    // Public method to refresh map
-    public void refreshMap() {
-        updateMapMarkers();
+    private void addPin(Coordinate c, String name, String category) {
+        Marker marker = Marker.createProvided(Marker.Provided.BLUE)
+                .setPosition(c)
+                .setVisible(true);
+
+        markers.add(marker);
+        mapView.addMarker(marker);
+
+        MapLabel label = new MapLabel(name + " • " + category)
+                .setPosition(c)
+                .setCssClass("map-label")
+                .setVisible(false);
+
+        mapView.addLabel(label);
+        infoLabels.put(marker, label);
+    }
+
+
+    private void fitToMarkers() {
+        if (markers.isEmpty()) return;
+
+        double minLat = Double.POSITIVE_INFINITY, maxLat = Double.NEGATIVE_INFINITY;
+        double minLng = Double.POSITIVE_INFINITY, maxLng = Double.NEGATIVE_INFINITY;
+
+        for (Marker m : markers) {
+            Coordinate c = m.getPosition();
+            minLat = Math.min(minLat, c.getLatitude());
+            maxLat = Math.max(maxLat, c.getLatitude());
+            minLng = Math.min(minLng, c.getLongitude());
+            maxLng = Math.max(maxLng, c.getLongitude());
+        }
+
+        Coordinate upperLeft  = new Coordinate(maxLat, minLng);
+        Coordinate lowerRight = new Coordinate(minLat, maxLng);
+        mapView.setExtent(Extent.forCoordinates(upperLeft, lowerRight)); // MapJFX 3.1.0
+    }
+
+
+    // more button actions
+    @FXML
+    private void addPinAtCenter() {
+        Coordinate center = mapView.getCenter();
+        if (center != null) addPin(center, "Custom", "Center");
+    }
+
+    @FXML
+    private void clearPins() {
+        infoLabels.values().forEach(label -> { label.setVisible(false); mapView.removeLabel(label); });
+        infoLabels.clear();
+
+        markers.forEach(mapView::removeMarker);
+        markers.clear();
     }
 }

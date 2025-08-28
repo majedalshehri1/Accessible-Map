@@ -6,6 +6,7 @@ module com.wakeb.yusradmin {
     requires javafx.web;
     requires java.prefs;
 
+
     // JSON libraries
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
@@ -14,6 +15,8 @@ module com.wakeb.yusradmin {
     opens com.wakeb.yusradmin.dto to com.google.gson;
     requires java.net.http;
     requires java.management;
+
+    requires com.sothawo.mapjfx; // MapJFX for map functionalities
 
     // Ikonli Font Icons (if using them)
     requires org.kordamp.ikonli.javafx;
