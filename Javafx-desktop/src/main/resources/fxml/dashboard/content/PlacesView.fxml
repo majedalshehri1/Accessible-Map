@@ -25,7 +25,7 @@
                 <children>
                     <TextField fx:id="searchField" promptText="بحث عن مكان..."
                                styleClass="input-field" HBox.hgrow="ALWAYS" />
-                    <Button fx:id="searchButton" styleClass="button-primary" text="بحث" />
+                    <Button fx:id="searchButton" styleClass="search-button" text="بحث" />
                     <Region HBox.hgrow="ALWAYS" />
                     <ComboBox fx:id="filterComboBox" prefWidth="150.0"
                               promptText="اختر فلتر..." styleClass="combo-box-field" />

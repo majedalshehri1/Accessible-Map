@@ -185,7 +185,7 @@ public class PlaceService {
                     updateMessage("deleting place...");
 
                     HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create(baseUrl + "/admin/delete/place" + id))
+                            .uri(URI.create(baseUrl + "/admin/delete/place/" + id))
                             .header("Content-Type", "application/json")
                             .DELETE()
                             .build();
@@ -233,7 +233,7 @@ public class PlaceService {
                     updateMessage("updating place...");
 
                     HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create(baseUrl + "/admin/delete/place" + placeId))
+                            .uri(URI.create(baseUrl + "/admin/update/place/" + placeId))
                             .header("Content-Type", "application/json")
                             .PUT(HttpRequest.BodyPublishers.ofString(jsonRequest))
                             .build();
@@ -250,6 +250,8 @@ public class PlaceService {
                         updateMessage("Place updated successfully.");
                         return gson.fromJson(response.body(), Place.class);
                     } else {
+                        System.out.println("statusCode: " + statusCode);
+                        System.out.println("statusMessage: " + response.body());
                         throw handleAPIErrors(statusCode);
                     }
                 } catch (InterruptedException e) {

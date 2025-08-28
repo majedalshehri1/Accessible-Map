@@ -86,35 +86,37 @@
     -fx-background-color: #ffffff;
     -fx-text-fill: #343a40;
 }
-.button-primary {
+.card-button {
     -fx-background-radius: 8px;
     -fx-background-color: #007bff;
     -fx-text-fill: white;
-    -fx-padding: 8px 18px;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-
-.button-primaryDelete {
-    -fx-background-radius: 8px;
-    -fx-background-color: red;
-    -fx-text-fill: white;
-    -fx-padding: 8px 18px;
-    -fx-font-size: 14px;
-    -fx-font-weight: bold;
-}
-
-.button-primaryBlocked {
-    -fx-background-radius: 8px;
-    -fx-background-color: red;
-    -fx-text-fill: white;
-    -fx-padding: 6px 16px;
+    -fx-padding: 4px 8px;
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
-.button-primary:hover {
+
+.card-button:hover {
     -fx-background-color: derive(#007bff, -10%);
+}
+.card-button__delete {
+    -fx-background-radius: 8px;
+    -fx-background-color: #dc3545;
+}
+
+.card-button__delete:hover {
+    -fx-background-color: derive(#dc3545, -10%);
+}
+
+.card-button__secondary {
+    -fx-background-radius: 8px;
+    -fx-border-radius: 8px;
+    -fx-background-color: white;
+    -fx-border-color: #007bff;
+    -fx-text-fill: #007bff;
+}
+
+.card-button__secondary:hover {
+    -fx-background-color: derive(white, -10%);
 }
 
 .scroll-pane {
@@ -216,7 +218,14 @@
 }
 
 .search-button {
-    -fx-background-color: #008ED1;
-    -fx-text-fill: white;
     -fx-background-radius: 8px;
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 6px 12px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+}
+
+.search-button:hover {
+    -fx-background-color: derive(#007bff, -10%);
 }
