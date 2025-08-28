@@ -4,6 +4,7 @@ import com.wakeb.yusradmin.navigation.NavigationManager;
 import com.wakeb.yusradmin.navigation.SceneType;
 import com.wakeb.yusradmin.utils.HostServicesSinglton;
 import javafx.application.Application;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
 // Font-related imports
