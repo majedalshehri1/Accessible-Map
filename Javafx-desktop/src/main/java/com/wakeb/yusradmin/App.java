@@ -17,7 +17,6 @@ import java.util.Objects;
  */
 public class App extends Application {
 
-    // Simple variable to ensure the font is loaded only once
     private static boolean fontsLoaded = false;
 
     @Override
@@ -25,17 +24,14 @@ public class App extends Application {
         HostServicesSinglton.setHostServices(this.getHostServices());
 
         try {
-            // Get singleton instance of NavigationManager
             NavigationManager navigationManager = NavigationManager.getInstance();
 
             navigationManager.initializeStage(primaryStage);
 
-            // Font loading and application to scenes
             ensureFontsLoaded();
-            // Attach a listener to apply the font and CSS file to any Scene shown on the stage
             primaryStage.sceneProperty().addListener((obs, oldScene, newScene) -> {
                 if (newScene != null) {
-                    applyFontAndCss(newScene); // Force the font on all scenes
+                    applyFontAndCss(newScene);
                 }
             });
 
@@ -46,7 +42,6 @@ public class App extends Application {
             primaryStage.show();
 
         } catch (Exception e) {
-            // Print any unexpected errors during startup
             e.printStackTrace();
         }
     }
@@ -57,7 +52,6 @@ public class App extends Application {
 
 
 
-    /** Loads Cairo font files from resources only once */
     private void ensureFontsLoaded() {
         if (fontsLoaded) return;
         Font.loadFont(Objects.requireNonNull(
