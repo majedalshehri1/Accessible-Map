@@ -27,9 +27,9 @@ public class UserActionCell extends TableCell<User, Void> {
         this.onDelete = onDelete;
 
         box.setPadding(new Insets(2, 0, 2, 0));
-        blockBtn.getStyleClass().addAll("btn-small","btn-danger");
-        editBtn.getStyleClass().add("btn-small");
-        deleteBtn.getStyleClass().add("btn-small");
+        blockBtn.getStyleClass().addAll("button-primaryBlocked","btn-small");
+        editBtn.getStyleClass().addAll("button-primaryUsers", "btn-small");
+        deleteBtn.getStyleClass().addAll("button-primaryUsers", "btn-small");
 
         blockBtn.setOnAction(e -> {
             User u = getCurrentRowUser();

@@ -2,170 +2,202 @@ package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
 import com.wakeb.yusradmin.models.Place;
-import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.PlaceService;
 import com.wakeb.yusradmin.util.FXUtil;
-import com.wakeb.yusradmin.util.place.AccessibilityFeaturesCell;
-import com.wakeb.yusradmin.util.place.ActionsBtnCell;
-import com.wakeb.yusradmin.util.place.ImageCell;
-import com.wakeb.yusradmin.util.place.LinkPlaceCell;
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
 import com.wakeb.yusradmin.utils.CATEGORY;
 import com.wakeb.yusradmin.utils.HostServicesSinglton;
 import javafx.application.Platform;
-import javafx.beans.property.ReadOnlyDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.*;
+import javafx.scene.text.Text;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class PlacesController {
-    @FXML
-    private TextField searchField;
-    @FXML
-    private Button searchButton;
-    @FXML
-    private ComboBox<CATEGORY> filterComboBox;
 
-    @FXML
-    private TableView<Place> placesTable;
-    @FXML
-    private TableColumn<Place, Void> photoColumn;
-    @FXML
-    private TableColumn<Place, String> nameColumn;
-    @FXML
-    private TableColumn<Place, String> typeColumn;
-    @FXML
-    private TableColumn<Place, Void> servicesColumn;
-    @FXML
-    private TableColumn<Place, Void> locationColumn;
-    @FXML
-    private TableColumn<Place, Void> actionsColumn;
+    // ====== عناصر الواجهة (نفس الترويسة) ======
+    @FXML private TextField searchField;
+    @FXML private Button searchButton;
+    @FXML private ComboBox<CATEGORY> filterComboBox;
 
+    // شبكة الكروت
+    @FXML private FlowPane cardsPane;
+    @FXML private ScrollPane cardsScroll;
+
+    // ====== بيانات وخدمات ======
     private PlaceService placeService;
-    private ObservableList<Place> places;
+    private final ObservableList<Place> places = FXCollections.observableArrayList();
 
-    private static final double[] COLUMN_WIDTH_PERCENTAGES = {0.12, 0.15, 0.12, 0.22, 0.12, 0.27};
+    // حجم الكرت والصورة
+    private static final double CARD_WIDTH  = 260;
+    private static final double IMAGE_HEIGHT = 150;
 
     @FXML
     private void initialize() {
-        System.out.println("PlacesController initialized");
         placeService = new PlaceService();
-        places = FXCollections.observableArrayList();
 
+        // خيارات الفلتر بالعربي
         filterComboBox.setItems(FXCollections.observableArrayList(CATEGORY.values()));
-        filterComboBox.setCellFactory(param -> new ListCell<CATEGORY>() {
-            @Override
-            protected void updateItem(CATEGORY item, boolean empty) {
+        filterComboBox.setCellFactory(list -> new ListCell<>() {
+            @Override protected void updateItem(CATEGORY item, boolean empty) {
+                super.updateItem(item, empty);
+                setText(empty || item == null ? null : item.getLabel());
+            }
+        });
+        filterComboBox.setButtonCell(new ListCell<>() {
+            @Override protected void updateItem(CATEGORY item, boolean empty) {
                 super.updateItem(item, empty);
                 setText(empty || item == null ? null : item.getLabel());
             }
         });
 
-        // Set the buttonCell to display the selected item's label
-        filterComboBox.setButtonCell(new ListCell<CATEGORY>() {
-            @Override
-            protected void updateItem(CATEGORY item, boolean empty) {
-                super.updateItem(item, empty);
-                setText(empty || item == null ? null : item.getLabel());
-            }
-        });
+        // أحداث البحث/الفلترة
+        searchButton.setOnAction(e -> loadPlaces());
+        searchField.setOnAction(e -> loadPlaces());
+        filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
 
-        ReadOnlyDoubleProperty tableWidthProperty = placesTable.widthProperty();
-
-        photoColumn.prefWidthProperty().bind(tableWidthProperty.multiply(COLUMN_WIDTH_PERCENTAGES[0]));
-        nameColumn.prefWidthProperty().bind(tableWidthProperty.multiply(COLUMN_WIDTH_PERCENTAGES[1]));
-        typeColumn.prefWidthProperty().bind(tableWidthProperty.multiply(COLUMN_WIDTH_PERCENTAGES[2]));
-        servicesColumn.prefWidthProperty().bind(tableWidthProperty.multiply(COLUMN_WIDTH_PERCENTAGES[3]));
-        locationColumn.prefWidthProperty().bind(tableWidthProperty.multiply(COLUMN_WIDTH_PERCENTAGES[4]));
-        actionsColumn.prefWidthProperty().bind(tableWidthProperty.multiply(COLUMN_WIDTH_PERCENTAGES[5]));
-
-        placesTable.setItems(places);
-
-        photoColumn.setCellFactory(c -> new ImageCell());
-        nameColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getPlaceName()));
-        typeColumn.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().getCategory().getLabel()));
-        servicesColumn.setCellFactory(c -> new AccessibilityFeaturesCell());
-        locationColumn.setCellFactory(c -> new LinkPlaceCell(this::onLinkClick));
-        actionsColumn.setCellFactory(c -> new ActionsBtnCell(this::onEdit, this::onDelete));
-
-        searchButton.setOnAction(e -> {
-            loadPlaces();
-        });
-
-        filterComboBox.valueProperty().addListener((observable, oldValue, newValue) -> {
-            loadPlaces();
-        });
-
+        // أول تحميل
         loadPlaces();
+
+
     }
 
+    // ====== تحميل الأماكن من الخدمة ======
     private void loadPlaces() {
-        // TODO: Set loading state to true
-        System.out.println("PlacesController loadPlaces");
-//        Task<List<Place>> fetchTask = placeService.getPlacesByName("دله");
         Task<List<Place>> fetchTask;
+        String q = searchField.getText();
 
-        if (searchField.getText() != null && !searchField.getText().isEmpty()) {
-            fetchTask = placeService.getPlacesByName(searchField.getText());
-        } else if (filterComboBox.getValue() != null
-                && filterComboBox.getSelectionModel().getSelectedItem() != null
-                && filterComboBox.getSelectionModel().getSelectedItem() != CATEGORY.ALL
-        ) {
-            System.out.println(filterComboBox.getSelectionModel().getSelectedItem());
-            fetchTask = placeService.getPlacesByCategory(filterComboBox.getSelectionModel().getSelectedItem());
+        if (q != null && !q.isBlank()) {
+            fetchTask = placeService.getPlacesByName(q);
+        } else if (filterComboBox.getValue() != null &&
+                filterComboBox.getValue() != CATEGORY.ALL) {
+            fetchTask = placeService.getPlacesByCategory(filterComboBox.getValue());
         } else {
-            filterComboBox.getSelectionModel().getSelectedItem();
             fetchTask = placeService.getAllPlaces();
         }
 
-        // TODO: bind progress and message properties
+        // (اختياري) Placeholder تحميل
+        showLoading(true);
 
-        fetchTask.setOnSucceeded(event -> {
-            this.places.setAll(fetchTask.getValue());
-            for (Place place : this.places) {
-                System.out.println(place);
-            }
+        fetchTask.setOnSucceeded(ev -> {
+            showLoading(false);
+            places.setAll(fetchTask.getValue());
+            renderCards();
         });
 
-        fetchTask.setOnFailed(e -> {
-            Platform.runLater(() -> {
-                // TODO: Set loading state to false
-                Throwable exception = fetchTask.getException();
-                handleErrors(exception);
-            });
+        fetchTask.setOnFailed(ev -> {
+            showLoading(false);
+            Throwable ex = fetchTask.getException();
+            handleErrors(ex);
         });
 
-        System.out.println("fetchTask started");
-
-        Thread fetchThread = new Thread(fetchTask);
-        fetchThread.setDaemon(true);
-        System.out.println("Fetch thread started");
-        fetchThread.start();
+        Thread t = new Thread(fetchTask, "load-places");
+        t.setDaemon(true);
+        t.start();
     }
 
+    // ====== رسم الكروت ======
+    private void renderCards() {
+        cardsPane.getChildren().clear();
+        List<Node> nodes = new ArrayList<>(places.size());
+        for (Place p : places) nodes.add(buildPlaceCard(p));
+        cardsPane.getChildren().addAll(nodes);
+    }
+
+    private Node buildPlaceCard(Place p) {
+        // الصورة
+        ImageView img = new ImageView();
+        img.setFitWidth(CARD_WIDTH);
+        img.setFitHeight(IMAGE_HEIGHT);
+        img.setPreserveRatio(false);
+        img.setSmooth(true);
+
+        if (p.getImageUrl() != null && !p.getImageUrl().isBlank()) {
+            // تحميل غير متزامن
+            Image image = new Image(p.getImageUrl(), CARD_WIDTH, IMAGE_HEIGHT, false, true, true);
+            img.setImage(image);
+        } else {
+            // خلفية بديلة لو ما فيه صورة
+            img.setStyle("-fx-background-color: #eceff1;");
+        }
+
+        // عنوان + ميتا
+        Label name = new Label(p.getPlaceName());
+        name.getStyleClass().add("card-title");
+
+       Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
+        meta.getStyleClass().add("card-meta");
+
+        // الخدمات كبادجات
+        FlowPane badges = new FlowPane(6, 6);
+        badges.getStyleClass().add("badges");
+        AccessibilityFeatures[] feats = p.getAccessibilityFeatures();
+        if (feats != null && feats.length > 0) {
+            for (AccessibilityFeatures f : feats) {
+                Label tag = new Label(f.getLabel());
+                tag.getStyleClass().add("badge");
+                badges.getChildren().add(tag);
+            }
+        } else {
+            Text t = new Text("لا توجد خدمات محددة");
+            t.getStyleClass().add("muted");
+            badges.getChildren().add(t);
+        }
+
+        // أزرار الإجراءات
+        Button edit = new Button("تعديل");
+        edit.getStyleClass().addAll("button-primary", "btn-small");
+        edit.setOnAction(e -> onEdit(p));
+
+        Button delete = new Button("حذف");
+        delete.getStyleClass().addAll("button-primaryDelete","btn-small");
+        delete.setOnAction(e -> onDelete(p));
+
+        Button map = new Button("عرض ");
+        map.getStyleClass().addAll("button-primary","btn-small");
+        map.setOnAction(e -> openOnMap(p));
+
+        HBox actions = new HBox(8, edit, delete, map);
+
+        map.setMaxWidth(Double.MAX_VALUE);
+        edit.setMaxWidth(Double.MAX_VALUE);
+        delete.setMaxWidth(Double.MAX_VALUE);
+
+        // تجميع الكرت
+        VBox card = new VBox(10, img, name, meta, badges, actions);
+        card.getStyleClass().add("place-card");
+        card.setPrefWidth(CARD_WIDTH);
+
+        return card;
+    }
+
+    private String formatLocation(Place p) {
+        String lat = p.getLatitude() == null ? "" : p.getLatitude();
+        String lng = p.getLongitude() == null ? "" : p.getLongitude();
+        return (lat.isBlank() || lng.isBlank()) ? "بدون إحداثيات" : (lat + ", " + lng);
+    }
+
+    // ====== إجراءات CRUD كما هي ======
     private void onDelete(Place place) {
         if (!FXUtil.confirm("Confirm Delete", "Delete place \"" + place.getPlaceName() + "\"?")) return;
-        Task<Void> deletePlaceTask = placeService.deletePlaceById(place.getId());
-        deletePlaceTask.setOnSucceeded(e -> loadPlaces());
-        deletePlaceTask.setOnFailed(e -> {
-            Platform.runLater(() -> {
-                // TODO: Set loading state to false
-                Throwable exception = deletePlaceTask.getException();
-                handleErrors(exception);
-            });
-        });
-        Thread deletePlaceThread = new Thread(deletePlaceTask);
-        deletePlaceThread.setDaemon(true);
-        System.out.println("delete thread started");
-        deletePlaceThread.start();
 
-        // TODO: bind progress and message properties
+        Task<Void> task = placeService.deletePlaceById(place.getId());
+        task.setOnSucceeded(e -> loadPlaces());
+        task.setOnFailed(e -> handleErrors(task.getException()));
+
+        Thread t = new Thread(task, "delete-place");
+        t.setDaemon(true);
+        t.start();
     }
 
     private void onEdit(Place place) {
@@ -175,55 +207,43 @@ public class PlacesController {
         dlg.setContentText("New Place Name:");
         dlg.showAndWait().ifPresent(name -> {
             place.setPlaceName(name);
-            Task<Place> editPlaceTask = placeService.updatePlaceById(new PlaceUpdateDto(place.getId(), name, place.getCategory().getValue()));
-            editPlaceTask.setOnSucceeded(e -> loadPlaces());
-            editPlaceTask.setOnFailed(e -> {
-                Platform.runLater(() -> {
-                    // TODO: Set loading state to false
-                    Throwable exception = editPlaceTask.getException();
-                    handleErrors(exception);
-                });
-            });
+            Task<Place> task = placeService.updatePlaceById(
+                    new PlaceUpdateDto(place.getId(), name,
+                            place.getCategory() != null ? place.getCategory().getValue() : null)
+            );
+            task.setOnSucceeded(e -> loadPlaces());
+            task.setOnFailed(e -> handleErrors(task.getException()));
 
-            Thread editPlaceThread = new Thread(editPlaceTask);
-            editPlaceThread.setDaemon(true);
-            System.out.println("edit thread started");
-            editPlaceThread.start();
+            Thread t = new Thread(task, "edit-place");
+            t.setDaemon(true);
+            t.start();
         });
     }
 
-    // method to handle errors and calls the showAlert() method
-    private void handleErrors(Throwable error) {
-        String errorMessage;
-        System.out.println("error: " + error.getMessage());
-
-        if (error instanceof SecurityException) {
-            errorMessage = "Authentication required. Please login.";
-        } else if (error instanceof IllegalArgumentException) {
-            errorMessage = "Invalid request. Please try again.";
-        } else if (error instanceof IOException) {
-            errorMessage = "Network Error. Please try again.";
-        } else {
-            errorMessage = "unknown error. Please try again.";
+    private void openOnMap(Place place) {
+        String lat = place.getLatitude();
+        String lng = place.getLongitude();
+        if (lat == null || lng == null || lat.isBlank() || lng.isBlank()) {
+            FXUtil.error("خطأ", "إحداثيات الموقع غير متوفرة");
+            return;
         }
-
-        showAlert("Error", errorMessage, Alert.AlertType.ERROR);
+        String url = "https://www.google.com/maps/@" + lat + "," + lng + ",18z";
+        HostServicesSinglton.getHostServices().showDocument(url);
     }
 
-    private void showAlert(String title, String message, Alert.AlertType alertType) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    // ====== مساعدات ======
+    private void handleErrors(Throwable error) {
+        String msg;
+        if (error instanceof SecurityException) msg = "Authentication required. Please login.";
+        else if (error instanceof IllegalArgumentException) msg = "Invalid request. Please try again.";
+        else if (error instanceof IOException) msg = "Network Error. Please try again.";
+        else msg = "unknown error. Please try again.";
+        FXUtil.error("Error", msg);
     }
 
-    private String buildGoogleMapsUrl(String latitude, String longitude) {
-        return "https://www.google.com/maps/@" + latitude + "," + longitude + ",18z";
-    }
-
-    private void onLinkClick(Place place) {
-        String mapUrl = buildGoogleMapsUrl(place.getLatitude(), place.getLongitude());
-        HostServicesSinglton.getHostServices().showDocument(mapUrl);
+    private void showLoading(boolean loading) {
+        if (loading) {
+            cardsPane.getChildren().setAll(new Label("... جاري التحميل"));
+        }
     }
 }

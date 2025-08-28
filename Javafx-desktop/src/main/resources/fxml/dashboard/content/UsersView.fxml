@@ -13,6 +13,7 @@
 <?import javafx.scene.control.Pagination?>
 <?import javafx.scene.layout.Region?>
 <BorderPane xmlns="http://javafx.com/javafx/24.0.1"
+            stylesheets="@../../../css/places.css"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.wakeb.yusradmin.controllers.UsersController"
             nodeOrientation="RIGHT_TO_LEFT">
