@@ -61,7 +61,6 @@ public class PlacesController {
             }
         });
 
-        // أحداث البحث/الفلترة
         searchButton.setOnAction(e -> loadPlaces());
         searchField.setOnAction(e -> loadPlaces());
         filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
@@ -86,7 +85,6 @@ public class PlacesController {
             fetchTask = placeService.getAllPlaces();
         }
 
-        // (اختياري) Placeholder تحميل
         showLoading(true);
 
         fetchTask.setOnSucceeded(ev -> {
