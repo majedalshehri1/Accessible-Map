@@ -53,7 +53,7 @@ public class UsersController {
         colStatus.setCellValueFactory(c -> new SimpleStringProperty(c.getValue().isBlocked() ? "محظور" : "نشط"));
 
         table.setItems(data);
-        table.setPlaceholder(new Label("No users"));
+        table.setPlaceholder(new Label("جاري التحميل..."));
 
         colActions.setCellFactory(tc -> new UserActionCell(
                 this::onBlockToggle, this::onEdit, this::onDelete
