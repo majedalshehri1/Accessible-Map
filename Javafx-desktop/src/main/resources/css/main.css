@@ -471,6 +471,51 @@
     -fx-cursor: hand;
     -fx-font-size: 10px;
 }
+/* حاوية الدايـلوغ */
+.modern-dialog.dialog-pane {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 14;
+    -fx-padding: 18;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.15), 18, 0, 0, 6);
+}
+
+/* ترويسة الدايـلوغ (مخفية أصلاً لأن HeaderText=null) */
+.modern-dialog:header *.header-panel {
+    -fx-background-color: transparent;
+    -fx-padding: 0;
+}
+
+/* نص المحتوى وحقل النص */
+.modern-dialog .content.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #333;
+}
+.modern-dialog .text-field {
+    -fx-background-color: #fff;
+    -fx-border-color: #e6e8ee;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 10 12;
+    -fx-font-size: 14px;
+}
+
+/* شريط الأزرار */
+.modern-dialog .button-bar .button {
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+/* زر ثانوي (إلغاء) */
+.button-secondary {
+    -fx-background-color: #f1f3f5;
+    -fx-text-fill: #2d3436;
+    -fx-border-color: #e6e8ee;
+}
+.button-secondary:hover {
+    -fx-background-color: #e9ecef;
+}
 
 .logout-btn:hover {
     -fx-background-color: rgba(229, 229, 229, 0.27) !important;

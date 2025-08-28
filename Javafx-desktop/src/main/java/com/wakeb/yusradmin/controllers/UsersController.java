@@ -105,8 +105,29 @@ public class UsersController {
     private void onEdit(User u) {
         TextInputDialog dlg = new TextInputDialog(u.getUserName());
         dlg.setTitle("تعديل المستخدم");
-        dlg.setHeaderText(null);
+        dlg.setHeaderText(null);                 // بدون هيدر
+        dlg.setGraphic(null);                    // بدون أيقونة افتراضية
         dlg.setContentText("الاسم الجديد");
+
+        DialogPane pane = dlg.getDialogPane();
+        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
+        pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+        pane.getStyleClass().add("modern-dialog");
+
+        if (table.getScene() != null) {
+            dlg.initOwner(table.getScene().getWindow());
+        }
+
+        Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
+        okBtn.setText("حفظ");
+        okBtn.getStyleClass().addAll("button-primary");
+
+        Button cancelBtn = (Button) pane.lookupButton(ButtonType.CANCEL);
+        cancelBtn.setText("إلغاء");
+        cancelBtn.getStyleClass().addAll("button-secondary");
+
+        dlg.getEditor().setPromptText("أدخل الاسم");
+
         dlg.showAndWait().ifPresent(name -> {
             u.setUserName(name);
             Task<Void> t = new Task<>() {
