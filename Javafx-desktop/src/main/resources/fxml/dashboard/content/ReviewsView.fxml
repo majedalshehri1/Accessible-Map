@@ -9,7 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane nodeOrientation="RIGHT_TO_LEFT" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.ReviewsController">
+<BorderPane nodeOrientation="RIGHT_TO_LEFT" stylesheets="@../../../css/places.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.ReviewsController">
 
     <center>
         <VBox spacing="14" style="-fx-padding:18;">
