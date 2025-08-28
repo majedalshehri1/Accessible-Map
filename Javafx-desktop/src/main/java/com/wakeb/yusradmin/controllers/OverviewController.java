@@ -20,6 +20,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.StackPane;
 import javafx.scene.shape.Circle;
+import com.wakeb.yusradmin.utils.CATEGORY;
 
 import java.net.URL;
 import java.util.List;
@@ -162,28 +163,27 @@ public class OverviewController implements Initializable {
         new Thread(task).start();
     }
 
+    private String arabicLabel(String key) {
+        try {
+            return CATEGORY.valueOf(key).getLabel();
+        } catch (Exception ignore) {
+            return key; // fallback
+        }
+    }
+
     private void renderDoughnutChart(Map<String, Integer> stats) {
         PieChart pieChart = new PieChart();
-        stats.forEach((category, count) ->
-                pieChart.getData().add(new PieChart.Data(category + " (" + count + ")", count))
-        );
+
+        stats.forEach((categoryEn, count) -> {
+            String labelAr = arabicLabel(categoryEn);
+            pieChart.getData().add(new PieChart.Data(labelAr + " (" + count + ")", count));
+        });
+
         pieChart.setLegendVisible(true);
         pieChart.setLabelsVisible(true);
 
-        // Bind the pie chart size to the host size
-        Circle hole = new Circle();
-        hole.setManaged(false);
-        hole.setMouseTransparent(true);
-
-        hole.radiusProperty().bind(
-                Bindings.min(chartHost.widthProperty(), chartHost.heightProperty()).multiply(0.50)
-        );
-
-        // Clear the chart host and add the pie chart
         chartHost.getChildren().clear();
         chartHost.getChildren().add(pieChart);
-
-        // Circle hole code has been removed as requested
     }
 
     private void renderTopPlacesChart(List<TopPlaceDto> topPlaces) {

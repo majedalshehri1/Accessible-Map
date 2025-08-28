@@ -33,7 +33,7 @@
                     <TableColumn fx:id="colActions" prefWidth="220" text="الإجراءات" styleClass="table-column-header" />
                 </columns>
                 <placeholder>
-                    <Label text="لا توجد بيانات" />
+                    <Label text="جاري التحميل..." />
                 </placeholder>
             </TableView>
         </VBox>
