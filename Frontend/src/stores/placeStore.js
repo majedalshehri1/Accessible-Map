@@ -17,12 +17,8 @@ const formatPlace = (data) => {
     };
   });
   rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
-  const placeFeatures = [];
-  (data.placeFeatures || data.accessibilityFeatures || data.reviews).forEach(pl => {
-    if (pl.isAvaliable) {
-      placeFeatures.push(pl.accessibillityType);
-    }
-  });
+  const placeFeatures = data.placeFeatures || data.accessibilityFeatures || data.reviews;
+  
   return {
     id: data.id,
     name: data.placeName,

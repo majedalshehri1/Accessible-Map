@@ -33,6 +33,8 @@ const categories = {
 
 }
 
+console.log(selectedPlace.value);
+
 </script>
 
 <template>
