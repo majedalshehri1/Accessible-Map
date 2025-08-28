@@ -14,9 +14,9 @@
             <Label fx:id="latLabel" prefWidth="120"/>
             <Label text="Lng:"/>
             <Label fx:id="lngLabel" prefWidth="120"/>
-            <Button text="Refresh" onAction="#refreshFromDatabase"/>
+            <Button text="تحديث" onAction="#refreshFromDatabase"/>
 <!--            <Button text="Add Pin @ Center" onAction="#addPinAtCenter"/>-->
-            <Button text="Clear Pins" onAction="#clearPins"/>
+            <Button text="تنظيف" onAction="#clearPins"/>
         </ToolBar>
     </top>
 

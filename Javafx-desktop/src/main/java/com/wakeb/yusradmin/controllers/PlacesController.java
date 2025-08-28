@@ -65,7 +65,6 @@ public class PlacesController {
             }
         });
 
-        // أحداث البحث/الفلترة
         searchButton.setOnAction(e -> loadPlaces());
         filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
 
@@ -87,7 +86,6 @@ public class PlacesController {
             fetchTask = placeService.getAllPlaces();
         }
 
-        // (اختياري) Placeholder تحميل
         showLoading(true);
 
         fetchTask.setOnSucceeded(ev -> {
@@ -107,7 +105,6 @@ public class PlacesController {
         t.start();
     }
 
-    // ====== رسم الكروت ======
     private void renderCards() {
         cardsPane.getChildren().clear();
         List<Node> nodes = new ArrayList<>(places.size());
@@ -124,15 +121,12 @@ public class PlacesController {
         img.setSmooth(true);
 
         if (p.getImageUrl() != null && !p.getImageUrl().isBlank()) {
-            // تحميل غير متزامن
             Image image = new Image(p.getImageUrl(), CARD_WIDTH, IMAGE_HEIGHT, false, true, true);
             img.setImage(image);
         } else {
-            // خلفية بديلة لو ما فيه صورة
             img.setStyle("-fx-background-color: #eceff1;");
         }
 
-        // عنوان + ميتا
         Label name = new Label(p.getPlaceName());
         name.getStyleClass().add("card-title");
 
