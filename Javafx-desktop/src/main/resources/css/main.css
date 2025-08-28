@@ -603,6 +603,7 @@
     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.06), 10, 0, 0, 3);
 }
 
+
 .chart,
 .chart-content,
 .chart-legend,
@@ -629,6 +630,53 @@
     -fx-alignment: CENTER_LEFT;
 }
 }
+/* ====== ستايل Alerts ====== */
+.custom-alert {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);
+}
+
+.custom-alert .content.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #d32f2f;   /* أحمر للتنبيه */
+    -fx-font-weight: bold;
+}
+
+.custom-alert .button {
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+    -fx-font-size: 14px;
+}
+
+.button-primary {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+}
+.button-primary:hover {
+    -fx-background-color: #0056b3;
+}
+.custom-alert {
+    -fx-background-color: #ffffff;
+    -fx-background-radius: 12;
+    -fx-padding: 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.18), 12, 0, 0, 4);
+}
+.custom-alert .content.label {
+    -fx-font-size: 14px;
+    -fx-text-fill: #d32f2f;
+    -fx-font-weight: bold;
+}
+.button-primary {
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-background-radius: 8;
+    -fx-padding: 8 16;
+    -fx-font-weight: bold;
+}
+.button-primary:hover { -fx-background-color: #0056b3; }
 .input-field {
     -fx-background-color: #ffffff;
     -fx-border-color: #e6e8ee;

@@ -71,7 +71,7 @@ public class LoginController {
 
         if (email.isEmpty() || password.isEmpty()) {
             showError("Please enter email and password.");
-            showAlert(Alert.AlertType.ERROR, "Login Error", "Please enter email and password.");
+            showStyledAlert(Alert.AlertType.ERROR, "Login Error", "Please enter email and password.");
             return;
         }
 
@@ -100,15 +100,15 @@ public class LoginController {
                 if (isAdmin) {
                     navigationManager.navigateToScene(SceneType.MAIN);
                 } else {
-                    showError("Admins only. Access denied.");
-                    showAlert(Alert.AlertType.ERROR, "Access Denied", "You must be an ADMIN.");
+                    showError("حظر الوصول , يجب أن تكون مسؤول");
+                    showStyledAlert(Alert.AlertType.ERROR, "حظر الوصول", "يجب أن تكون مسؤول.");
                 }
             } else {
                 String msg = (result.getMessage() == null || result.getMessage().isBlank())
                         ? "Login failed. Please try again."
-                        : "Login failed: " + result.getMessage();
+                        : "فشل تسجيل الدخول , غير مسموح يجب أن تكون مسؤول";
                 showError(msg);
-                showAlert(Alert.AlertType.ERROR, "Login Failed", msg);
+                showStyledAlert(Alert.AlertType.ERROR, "Login Failed", msg);
             }
         });
 
@@ -117,7 +117,7 @@ public class LoginController {
             String msg = "Login error: " +
                     (loginTask.getException() != null ? loginTask.getException().getMessage() : "Unknown");
             showError(msg);
-            showAlert(Alert.AlertType.ERROR, "Login Error", msg);
+            showStyledAlert(Alert.AlertType.ERROR, "Login Error", msg);
         });
 
         // Run on a background thread
@@ -134,18 +134,48 @@ public class LoginController {
 
     /** Show inline error text under the form. */
     private void showError(String message) {
+        // أظهر الرسالة في الـ Label (لو موجود)
         if (errorLabel != null) {
             errorLabel.setText(message);
             errorLabel.setVisible(true);
         }
+
+        // Alert مخصّص بنفس ستايلنا
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("خطأ");
+        alert.setHeaderText(null);
+        alert.setContentText(message);
+
+        DialogPane pane = alert.getDialogPane();
+        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT); // للعربي
+        pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+        pane.getStyleClass().add("custom-alert");
+
+        Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
+        okBtn.setText("حسناً");
+        okBtn.getStyleClass().add("button-primary");
+
+        alert.showAndWait();
     }
 
     /** Simple alert dialog for critical messages. */
-    private void showAlert(Alert.AlertType type, String title, String content) {
+    private void showStyledAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
+
+        // نجيب الـ DialogPane ونطبّق ستايل
+        DialogPane pane = alert.getDialogPane();
+        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT); // عربي
+        pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
+        pane.getStyleClass().add("custom-alert");
+
+        // نغير النصوص للأزرار
+        Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
+        okBtn.setText("حسناً");
+        okBtn.getStyleClass().add("button-primary");
+
         alert.showAndWait();
     }
 }
