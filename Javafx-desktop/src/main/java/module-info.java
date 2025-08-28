@@ -3,7 +3,6 @@ module com.wakeb.yusradmin {
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires javafx.web;
     requires java.prefs;
 
 
