@@ -1,7 +1,10 @@
 package com.main.app.repository;
 
+import com.main.app.Enum.Role;
+import com.main.app.dto.UserDto;
 import com.main.app.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -15,4 +18,14 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserName(String newUsername);
 
     List<User> searchByUserEmailContainingIgnoreCase(String userEmail);
+
+    @Query("""
+           select new com.main.app.dto.UserDto(
+               u.userId, u.userName, u.userEmail, u.userRole, u.isBlocked
+           )
+           from User u
+           where upper(u.userRole) = 'USER'
+           """)
+    List<UserDto> findOnlyUsers();
+
 }

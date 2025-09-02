@@ -1,14 +1,11 @@
 package com.main.app.dto;
-import com.main.app.Enum.AccessibillityType;
-import com.main.app.Enum.Category;
 import com.main.app.Enum.Role;
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class UserDto {
     private Long userId;
     private String userName;
@@ -16,4 +13,5 @@ public class UserDto {
     private Role hasRole;
     private Boolean isBlocked;
 
+    public UserDto() {}
 }

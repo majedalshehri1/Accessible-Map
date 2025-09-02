@@ -1,5 +1,6 @@
 package com.main.app.service;
 
+import com.main.app.Enum.Role;
 import com.main.app.dto.ReviewResponseDTO;
 import com.main.app.dto.UserDto;
 import com.main.app.model.Review;
@@ -59,4 +60,10 @@ public class UserService implements UserDetailsService {
     public List<UserDto> getAllUser() {
         return userRepository.findAll().stream().map(this::convertToDTO).toList();
     }
+
+    public List<UserDto> findOnlyUsers() {
+        return userRepository.findOnlyUsers();
+
+    }
+
 }
