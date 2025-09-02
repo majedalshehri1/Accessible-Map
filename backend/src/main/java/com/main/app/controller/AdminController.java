@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/admin")
-//@PreAuthorize("hasRole('ADMIN')")
+@PreAuthorize("hasRole('ADMIN')")
 @RequiredArgsConstructor
 public class AdminController {
 
@@ -38,7 +38,7 @@ public class AdminController {
 
     @GetMapping("/all/users")
     public ResponseEntity<List<UserDto>> getAllUsers(){
-        return ResponseEntity.ok(userService.getAllUser());
+        return ResponseEntity.ok(userService.findOnlyUsers());
     }
 
     @GetMapping("/count/places")
