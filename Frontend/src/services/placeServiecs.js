@@ -16,7 +16,7 @@ export default {
     getPlacesByCategory(category) {
         return axiosClient.get(`/place/category?category=${encodeURIComponent(category)}`)
     },
-    getPlacesByQuery(query) {
-        return axiosClient.get(`/place/search?search=${query}`)
+    getPlacesByQuery(query, config = {}) {
+        return axiosClient.get(`/place/search?search=${query}`, config)
     }
 }

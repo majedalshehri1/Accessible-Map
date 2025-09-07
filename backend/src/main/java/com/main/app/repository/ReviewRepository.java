@@ -17,4 +17,20 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Double findAverageRatingByPlace(@Param("place") Place place);
     List<Review> findByUser_UserId(Long userId);
 
+
+    @Query(value = "SELECT * FROM Review r " +
+            "WHERE r.review_date >= NOW() - INTERVAL '24 HOURS'",
+            nativeQuery = true)
+    List<Review> findAllFromLast24Hours();
+
+
+    @Query("""
+           SELECT p.placeCategory AS category, COUNT(r) AS count
+           FROM Review r
+           JOIN r.place p
+           GROUP BY p.placeCategory
+           """)
+    List<Object[]> countReviewsByCategory();
+
+
 }

@@ -1,10 +1,15 @@
 <script setup>
 import { onMounted, ref, watch } from 'vue';
 import L from "leaflet";
-import { useGeolocation } from '@vueuse/core';
-import { usePlaces } from '@/hooks/usePlaces';
 
-const { places, openPlaceDetails, fetchAllPlaces } = usePlaces();
+import { useGeolocation } from '@vueuse/core';
+import { usePlacesStore } from '@/stores/placeStore';
+import { storeToRefs } from 'pinia';
+import { toast } from 'vue-sonner';
+
+const placesStore = usePlacesStore();
+const { places } = storeToRefs(placesStore);
+const { openPlaceDetails, fetchAllPlaces } = placesStore;
 
 const map = ref();
 const mapContainer = ref();
@@ -50,8 +55,10 @@ onMounted(async () => {
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map.value);
 
-  const fetchedPlaces = await fetchAllPlaces();
-  places.value = fetchedPlaces;
+  toast.promise(fetchAllPlaces, {
+    loading: "تحميل...",
+    error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة"
+  });
 });
 
 watch(places, () => {

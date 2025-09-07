@@ -3,11 +3,13 @@ package com.main.app.controller;
 import com.main.app.Enum.Role;
 import com.main.app.Exceptions.DuplicateEmailException;
 import com.main.app.Exceptions.DuplicateUsernameException;
+import com.main.app.Exceptions.LockedUserException;
 import com.main.app.dto.AuthRequest;
 import com.main.app.model.User;
 import com.main.app.dto.AuthResponse;
 import com.main.app.dto.RegisterRequest;
 import com.main.app.repository.UserRepository;
+import com.main.app.service.AuthService;
 import com.main.app.service.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,52 +34,9 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-
-    
-//    @PostMapping("/register")
-//    public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
-//        if (userRepository.existsByUserEmail(request.getEmail())) {
-//            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, " Email already in use");
-//        }
-//
-//        User user = new User();
-//        user.setUserName(request.getUsername());
-//        user.setUserEmail(request.getEmail());
-//        user.setPasswordHash(passwordEncoder.encode(request.getPassword()));
-//
-//        User savedUser = userRepository.save(user);
-//
-//        String jwtToken = jwtService.generateAccessToken(savedUser);
-//
-//        return ResponseEntity.ok(new AuthResponse(jwtToken));
-//    }
-//
-//    @PostMapping("/login")
-//    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-//        authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(
-//                        request.getEmail(),
-//                        request.getPassword()
-//                )
-//        );
-//
-//        User user = userRepository.findByUserEmail(request.getEmail())
-//                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-//
-//        String jwtToken = jwtService.generateAccessToken(user);
-//        return ResponseEntity.ok(new AuthResponse(jwtToken));
-//    }
+    private final AuthService authService;
 
 
-    private ResponseCookie buildJwtCookie(String token) {
-        return ResponseCookie.from("jwt", token)
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(60L * 60 * 24 * 30)
-                .build();
-    }
 
 @PostMapping("/register")
 public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -98,12 +57,13 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
     User savedUser = userRepository.save(user);
 
     String jwtToken = jwtService.generateAccessToken(savedUser);
-    ResponseCookie cookie = buildJwtCookie(jwtToken);
+    ResponseCookie cookie = authService.buildJwtCookie(jwtToken);
     AuthResponse body = new AuthResponse(
             jwtToken,
             savedUser.getUserId(),
             savedUser.getUserName(),
-            savedUser.getUserEmail()
+            savedUser.getUserEmail(),
+            savedUser.getUserRole()
     );
     return ResponseEntity.ok()
             .header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -112,29 +72,13 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
 }
 
     @PostMapping("/login")
-    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest request) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
-
-        User user = userRepository.findByUserEmail(request.getEmail())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
-        String jwtToken = jwtService.generateAccessToken(user);
-        ResponseCookie cookie = buildJwtCookie(jwtToken);
-        AuthResponse body = new AuthResponse(
-                jwtToken,
-                user.getUserId(),
-                user.getUserName(),
-                user.getUserEmail()
-        );
+    public ResponseEntity<AuthResponse> login(@RequestBody AuthRequest req) {
+        var result = authService.login(req);
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .body(body);
+                .header(HttpHeaders.SET_COOKIE, result.cookie().toString())
+                .body(result.body());
     }
+
     @PostMapping("/logout")
     public ResponseEntity<Void> logout() {
         ResponseCookie clear = ResponseCookie.from("jwt", "")
@@ -160,7 +104,11 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
         return ResponseEntity.ok(Map.of(
                 "id", user.getUserId(),
                 "username", user.getUserName(),
-                "email", user.getUserEmail()
+                "email", user.getUserEmail(),
+                "role", user.getUserRole()
         ));
     }
+
+
+
 }

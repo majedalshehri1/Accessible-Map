@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane nodeOrientation="RIGHT_TO_LEFT" stylesheets="@../../../css/places.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.ReviewsController">
+
+    <center>
+        <VBox spacing="14" style="-fx-padding:18;">
+            <Label styleClass="h1" text="إدارة التقييمات" />
+
+            <HBox styleClass="toolbar">
+                <TextField fx:id="searchField" promptText="ابحث بالاسم" styleClass="input-field" HBox.hgrow="ALWAYS" />
+                <Button fx:id="searchBtn" text="بحث" />
+            </HBox>
+
+            <TableView fx:id="table" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colId" prefWidth="70" text="ID" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colUsername" prefWidth="190" text="المستخدم" styleClass="table-column-header" />
+                    <TableColumn fx:id="colPlace" prefWidth="260" text="المكان" styleClass="table-column-header" />
+                    <TableColumn fx:id="colReview" prefWidth="110" text="التقييم" styleClass="table-column-header" />
+                    <TableColumn fx:id="colDescription" text="الوصف" prefWidth="300" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colDate" prefWidth="140" text="التاريخ" styleClass="table-column-header" />
+                    <TableColumn fx:id="colStatus" prefWidth="120" text="الحالة" visible="false" styleClass="table-column-header" />
+                    <!-- عمود الإجراءات -->
+                    <TableColumn fx:id="colActions" prefWidth="220" text="الإجراءات" styleClass="table-column-header" />
+                </columns>
+                <placeholder>
+                    <Label text="جاري التحميل..." />
+                </placeholder>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

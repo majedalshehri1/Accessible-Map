@@ -2,10 +2,11 @@
 import { ref } from 'vue';
 
 import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
 import { Star, Plus } from 'lucide-vue-next'
 
 import ReviewForm from './ReviewForm.vue';
+import { useAuthStore } from '@/stores/authStore';
+import { storeToRefs } from 'pinia';
 
 defineProps({
     rating: {
@@ -22,15 +23,10 @@ defineProps({
     },
 })
 
-const showReviewForm = ref(false);
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
-const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('ar-EG', {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric'
-    })
-}
+const showReviewForm = ref(false);
 
 const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, i) => i < rating)
@@ -53,14 +49,14 @@ const formatArabicNumber = (number) => {
             </div>
             <p class="text-sm text-zinc-400">بناء على {{ formatArabicNumber(reviewsCount) }} تقييم</p>
 
-            <Button @click="showReviewForm = true" class="mt-4 bg-blue-600 hover:bg-blue-700 ring-blue-300" size="sm">
+            <Button v-if="!!user" @click="showReviewForm = true" class="mt-4 bg-blue-600 hover:bg-blue-700 ring-blue-300" size="sm">
                 <Plus class="h-4 w-4 mr-2" />
                 اضف تقييم
             </Button>
         </div>
 
         <!-- Reviews List -->
-        <div class="space-y-4">
+        <div class="space-y-4" v-if="reviews.length !== 0">
             <h4 class="font-semibold">اخر التقييمات</h4>
             <div v-for="review in reviews" :key="review.id" class="border rounded-lg p-4 space-y-2">
                 <div class="flex items-center justify-between">

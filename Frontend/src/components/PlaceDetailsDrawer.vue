@@ -14,13 +14,15 @@ import {
 } from '@/components/ui/tabs'
 import { Button } from '@/components/ui/button'
 import { X } from 'lucide-vue-next'
-import { usePlaces } from '@/hooks/usePlaces'
 import Carousel from './Carousel.vue'
 import AccessibilityDetails from './AccessibilityDetails.vue'
 import Reviews from './Reviews.vue'
-import { watchEffect } from 'vue'
+import { usePlacesStore } from '@/stores/placeStore'
+import { storeToRefs } from 'pinia'
 
-const { selectedPlace, isDrawerOpen, closePlaceDetails } = usePlaces();
+const placesStore = usePlacesStore();
+const { selectedPlace, isDrawerOpen } = storeToRefs(placesStore);
+const { closePlaceDetails } = placesStore;
 
 const categories = {
     "RESTAURANT": "المطاعم",
@@ -31,9 +33,7 @@ const categories = {
 
 }
 
-watchEffect(() => {
-   console.log(selectedPlace.value);
-})
+console.log(selectedPlace.value);
 
 </script>
 

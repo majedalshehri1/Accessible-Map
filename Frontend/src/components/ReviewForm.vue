@@ -5,15 +5,20 @@ import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Star, X } from 'lucide-vue-next'
 import { toast } from 'vue-sonner'
-import reviewServices from '@/services/reviewServices'
-import { usePlaces } from '@/hooks/usePlaces'
+import { usePlacesStore } from '@/stores/placeStore'
+import { useAuthStore } from '@/stores/authStore'
+import { storeToRefs } from 'pinia'
 
-const { selectedPlace } = usePlaces()
+const placesStore = usePlacesStore();
+const { selectedPlace } = storeToRefs(placesStore);
+const { createPlaceReview } = placesStore;
+
+const authStore = useAuthStore();
+const { user } = storeToRefs(authStore);
 
 const emit = defineEmits(['close', 'submit'])
 
 const form = ref({
-    userName: '',
     rating: 0,
     comment: ''
 })
@@ -38,24 +43,24 @@ const submitReview = async () => {
     isLoading.value = true
 
     try {
-        const { data } = reviewServices.createReview({
+        await createPlaceReview({
             placeId: selectedPlace.value.id,
             rating: form.value.rating,
             description: form.value.comment,
-            userId: 1
+            userId: user.value.id
         })
 
         toast.success('ارسل التقييم بنجاح')
 
-        // Reset form
+        // reset form
         form.value = {
-            userName: '',
             rating: 0,
             comment: ''
         }
 
         emit('submit')
     } catch (error) {
+        console.log(error);
         toast.error('فشل في إرسال التقييم. حاول مرة أخرى.')
     } finally {
         isLoading.value = false
