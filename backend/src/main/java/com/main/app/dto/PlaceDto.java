@@ -18,5 +18,5 @@ public class PlaceDto {
     private Category category;
     private List<ReviewResponseDTO> reviews;
     private List<String> accessibilityFeatures = new ArrayList<>();
-    private String imageUrl;
+    private List<String> imageUrls = new ArrayList<>();
 }
