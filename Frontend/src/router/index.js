@@ -62,8 +62,20 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
   const { user } = storeToRefs(authStore);
 
-  // Allow access to home, login, and register for everyone
-  if (to.path === '/' || to.name === 'login' || to.name === 'register') {
+  // If user is logged in and trying to access login or register, redirect to home
+  if (user.value && (to.name === 'login' || to.name === 'register')) {
+    next({ name: 'Home' });
+    return;
+  }
+
+  // Allow access to home for everyone
+  if (to.path === '/') {
+    next();
+    return;
+  }
+
+  // Allow access to login and register for non-authenticated users
+  if (!user.value && (to.name === 'login' || to.name === 'register')) {
     next();
     return;
   }

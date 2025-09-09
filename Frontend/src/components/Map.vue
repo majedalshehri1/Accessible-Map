@@ -1,11 +1,11 @@
 <script setup>
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref, watch } from "vue";
 import L from "leaflet";
 
-import { useGeolocation } from '@vueuse/core';
-import { usePlacesStore } from '@/stores/placeStore';
-import { storeToRefs } from 'pinia';
-import { toast } from 'vue-sonner';
+import { useGeolocation } from "@vueuse/core";
+import { usePlacesStore } from "@/stores/placeStore";
+import { storeToRefs } from "pinia";
+import { toast } from "vue-sonner";
 
 const placesStore = usePlacesStore();
 const { places } = storeToRefs(placesStore);
@@ -57,7 +57,7 @@ onMounted(async () => {
 
   toast.promise(fetchAllPlaces, {
     loading: "تحميل...",
-    error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة"
+    error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة",
   });
 });
 
@@ -74,17 +74,13 @@ watch(
       coords.value.latitude !== Number.POSITIVE_INFINITY &&
       coords.value.longitude !== Number.POSITIVE_INFINITY
     ) {
-      map.value.setView(
-        [coords.value.latitude, coords.value.longitude],
-        12
-      );
+      map.value.setView([coords.value.latitude, coords.value.longitude], 12);
     }
   },
   { once: true }
 );
 </script>
 
-
 <template>
-    <div ref="mapContainer" class="w-full h-full"></div>
+  <div ref="mapContainer" class="w-full h-full"></div>
 </template>

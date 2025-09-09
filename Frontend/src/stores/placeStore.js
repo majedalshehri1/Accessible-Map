@@ -7,33 +7,37 @@ import reviewServices from "@/services/reviewServices";
 const formatPlace = (data) => {
   let rating = 0;
   const reviewsCount = data.reviews.length;
-  const reviews = data.reviews.map(r => {
+  const reviews = data.reviews.map((r) => {
     rating += r.rating;
     return {
       id: r.id,
       userName: r.user?.userName || r.userName,
       rating: r.rating,
-      comment: r.description
+      comment: r.description,
     };
   });
   rating = reviewsCount !== 0 ? rating / reviewsCount : 0;
-  const placeFeatures = data.placeFeatures || data.accessibilityFeatures || data.reviews;
-  
+
+  const images = Array.isArray(data.imageUrls) ? data.imageUrls : [];
+
+  const placeFeatures =
+    data.placeFeatures || data.accessibilityFeatures || data.reviews;
+
   return {
     id: data.id,
     name: data.placeName,
     lng: data.longitude,
     lat: data.latitude,
     placeCategory: data.placeCategory,
-    images: [data.imageUrl],
+    images,
     reviews,
     placeFeatures,
     rating,
-    reviewsCount
+    reviewsCount,
   };
 };
 
-export const usePlacesStore = defineStore('places', () => {
+export const usePlacesStore = defineStore("places", () => {
   const selectedPlace = ref(null);
   const isLoadingPlaces = ref(false);
   const places = ref([]);
@@ -70,7 +74,7 @@ export const usePlacesStore = defineStore('places', () => {
     try {
       await reviewServices.createReview(review);
     } catch (error) {
-      console.error('Fetch error:', error);
+      console.error("Fetch error:", error);
       throw error; // re-throw error to make components responsible of handling UI logic when req failed
     }
   };
@@ -78,7 +82,9 @@ export const usePlacesStore = defineStore('places', () => {
   const searchPlaceByQuery = async (query, controller) => {
     isLoadingPlaces.value = true;
     try {
-      const { data } = await placeServiecs.getPlacesByQuery(query, { signal: controller?.signal });
+      const { data } = await placeServiecs.getPlacesByQuery(query, {
+        signal: controller?.signal,
+      });
       const formatedData = data.map(formatPlace);
       places.value = formatedData;
     } catch (error) {
@@ -106,6 +112,6 @@ export const usePlacesStore = defineStore('places', () => {
     openPlaceDetails,
     closePlaceDetails,
     createPlaceReview,
-    searchPlaceByQuery
+    searchPlaceByQuery,
   };
 });

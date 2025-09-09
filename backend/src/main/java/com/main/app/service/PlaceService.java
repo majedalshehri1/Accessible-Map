@@ -10,11 +10,9 @@ import com.main.app.dto.PlaceDto;
 import com.main.app.dto.ReviewResponseDTO;
 import com.main.app.model.Place;
 import com.main.app.model.PlaceFeature;
+import com.main.app.model.PlaceImage;
 import com.main.app.model.Review;
-import com.main.app.repository.PlaceFeatureRepository;
-import com.main.app.repository.PlaceRepository;
-import com.main.app.repository.ReviewRepository;
-import com.main.app.repository.TokenRepository;
+import com.main.app.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -36,6 +34,12 @@ public class PlaceService {
 
     @Autowired
     private ReviewRepository reviewRepository;
+
+    @Autowired
+    private PlaceImageRepository placeImageRepository;
+
+
+
     @Autowired
     private AdminLogService adminLogService;
     @Autowired
@@ -57,7 +61,11 @@ public class PlaceService {
         dto.setLatitude(place.getLatitude());
         dto.setLongitude(place.getLongitude());
         dto.setCategory(place.getPlaceCategory());
-        dto.setImageUrl(place.getImageUrl());
+
+        // Add list of images from place_images table
+        List<String> imagesUrls = place.getImages()
+                .stream().map(img -> img.getImageUrl()).collect(Collectors.toList());
+        dto.setImageUrls(imagesUrls);
 
         List<String> features = placeFeatureRepository.findByPlace(place).stream()
                 .map(PlaceFeature::getAccessibillityType)
@@ -99,9 +107,26 @@ public class PlaceService {
         place.setLatitude(dto.getLatitude());
         place.setLongitude(dto.getLongitude());
         place.setPlaceCategory(dto.getCategory());
-        place.setImageUrl(dto.getImageUrl());
+
 
         Place saved = placeRepository.save(place);
+
+        final Place finalSaved = saved;
+        if(dto.getImageUrls() != null && !dto.getImageUrls().isEmpty()){
+            if(dto.getImageUrls().size() > 3){
+                throw new IllegalArgumentException("Maximum 3 images per location.");
+            }
+            List<PlaceImage> images = dto.getImageUrls().stream()
+                    .map(url -> {
+                        PlaceImage img = new PlaceImage();
+                        img.setImageUrl(url);
+                        img.setPlace(finalSaved);
+                        return img;
+                    }).collect(Collectors.toList());
+
+            placeImageRepository.saveAll(images);
+            saved.setImages(images);
+        }
 
         if (dto.getAccessibilityFeatures() != null) {
             List<PlaceFeature> features = new ArrayList<>();

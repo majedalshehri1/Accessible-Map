@@ -35,8 +35,9 @@ public class Place {
     @Column(name = "place_category", nullable = false, length = Integer.MAX_VALUE)
     private Category placeCategory;
 
-    @Column(name = "image_url")
-    private String imageUrl;
+    @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<PlaceImage> images;
+
 
     @OneToMany(mappedBy = "place", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Review> reviews;
