@@ -1,6 +1,6 @@
 <script setup>
 // Vue 3 Composition API imports
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import router from "@/router";
 import placeServiecs from "@/services/placeServiecs";
 import { uploadImages } from "@/services/uploadService";
@@ -50,15 +50,20 @@ const isLoading = ref(false);
 // Form validation function
 const validateForm = () => {
   if (!form.value.name.trim()) {
-    alert("يرجى إدخال اسم المكان");
+    toast.error("يرجى إدخال اسم المكان");
     return false;
   }
   if (!form.value.category) {
-    alert("يرجى اختيار فئة المكان");
+    toast.error("يرجى اختيار فئة المكان");
     return false;
   }
   if (!form.value.agree) {
-    alert("يجب الموافقة على الشروط والأحكام أولاً");
+    toast.error("يجب الموافقة على الشروط والأحكام أولاً");
+    return false;
+  }
+
+  if (selectedFiles.value.length > maxImages) {
+    toast.error("يمكنك رفع " + maxImages + " صور كحد أقصى");
     return false;
   }
   return true;
@@ -83,33 +88,57 @@ const handleAddMarker = (newLocation) => {
 };
 
 const maxImages = 3;
+const selectedFiles = ref([]);
+const imagesPreview = ref([]);
+
+// selectedFiles.value make it urls
 
 const handleFileChange = async (event) => {
-  const files = Array.from(event.target.files);
+  const files = Array.from(event.target.files).filter((file) =>
+    file.type.startsWith("image/")
+  );
 
-  if (files.length + form.value.imageUrls.length > maxImages) {
-    alert(`يمكنك رفع ${maxImages} صور كحد أقصى`);
+  if (files.length + selectedFiles.value.length > maxImages) {
+    toast.error(`يمكنك رفع ${maxImages} صور كحد أقصى`);
     return;
   }
 
-  try {
-    isLoading.value = true;
-    const urls = await uploadImages(files);
-    form.value.imageUrls.push(...urls);
-  } catch (err) {
-    console.error("Error uploading images:", err);
-    alert("error for upload images");
-  } finally {
-    isLoading.value = false;
-  }
-};
+  selectedFiles.value = [...files, ...selectedFiles.value];
 
+  console.log(selectedFiles.value);
+
+  const promises = selectedFiles.value.map((file) => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        resolve(e.target.result);
+      };
+      reader.onerror = (error) => reject(error);
+      reader.readAsDataURL(file);
+    });
+  });
+
+  Promise.all(promises)
+    .then((urls) => {
+      imagesPreview.value = urls;
+      console.log(imagesPreview.value);
+      console.log(
+        Array.isArray(imagesPreview.value),
+        imagesPreview.value.length
+      );
+    })
+    .catch((error) => {
+      console.error("Error processing images:", error);
+    });
+};
 const submitForm = async () => {
   if (!validateForm()) return;
 
   isLoading.value = true;
 
   try {
+    // upload imgs to cdn
+    const urls = await uploadImages(selectedFiles.value);
     // Prepare the request payload
     const requestPayload = {
       placeName: form.value.name,
@@ -117,7 +146,7 @@ const submitForm = async () => {
       latitude: form.value.location.lat.toString(),
       category: form.value.category,
       accessibilityFeatures: form.value.services,
-      imageUrls: form.value.imageUrls,
+      imageUrls: urls,
     };
 
     console.log("Request payload:", JSON.stringify(requestPayload, null, 2));
@@ -130,13 +159,16 @@ const submitForm = async () => {
     resetForm();
   } catch (error) {
     console.error("Error submitting form:", error);
-    alert("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
+    toast.error("حدث خطأ أثناء إرسال الطلب. يرجى المحاولة مرة أخرى.");
   } finally {
     isLoading.value = false;
   }
 };
 const removeImage = (index) => {
-  form.value.imageUrls.splice(index, 1);
+  // delete from selectedFiles and imagesPreview as well
+  selectedFiles.value.splice(index, 1);
+  imagesPreview.value.splice(index, 1);
+  console.log(selectedFiles.value, imagesPreview.value);
 };
 
 // Reset form fields to initial state
@@ -328,7 +360,7 @@ const goBack = () => {
                 <!-- Preview selected images -->
                 <div class="flex gap-3 mt-3 flex-wrap">
                   <div
-                    v-for="(url, index) in form.imageUrls"
+                    v-for="(url, index) in imagesPreview"
                     :key="index"
                     class="relative w-24 h-24 rounded-lg overflow-hidden border shadow group"
                   >
