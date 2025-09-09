@@ -127,7 +127,7 @@ public class PlaceService {
                 saved.getId(),
                 actorId,
                 actorName,
-                "تم اضافة مكان: " + saved.getPlaceName()
+                "تم اضافة مكان: " + "'"+saved.getPlaceName()+"'"
         );
 
         return convertToDto(saved);
