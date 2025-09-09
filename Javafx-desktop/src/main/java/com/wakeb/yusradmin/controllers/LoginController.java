@@ -93,22 +93,21 @@ public class LoginController {
 
             // Navigate only on real success (token present; AuthService already validated session)
             if (result.isSuccess() && result.getToken() != null) {
-                var u = auth.getCurrentUser();
-                boolean isAdmin = u != null && u.getRole() != null
-                        && u.getRole().trim().equalsIgnoreCase("ADMIN");
+                var u = (result.getUser() != null) ? result.getUser() : auth.getCurrentUser();
+                boolean isAdmin = (u != null) && AuthService.hasAdminRole(u.getRole());
 
                 if (isAdmin) {
                     navigationManager.navigateToScene(SceneType.MAIN);
                 } else {
-                    showError("حظر الوصول , يجب أن تكون مسؤول");
+                    showError("حظر الوصول، يجب أن تكون مسؤول.");
                     showStyledAlert(Alert.AlertType.ERROR, "حظر الوصول", "يجب أن تكون مسؤول.");
                 }
             } else {
                 String msg = (result.getMessage() == null || result.getMessage().isBlank())
-                        ? "Login failed. Please try again."
-                        : "فشل تسجيل الدخول , غير مسموح يجب أن تكون مسؤول";
+                        ? "فشل تسجيل الدخول."
+                        : result.getMessage();
                 showError(msg);
-                showStyledAlert(Alert.AlertType.ERROR, "Login Failed", msg);
+                showStyledAlert(Alert.AlertType.ERROR, "فشل تسجيل الدخول", msg);
             }
         });
 

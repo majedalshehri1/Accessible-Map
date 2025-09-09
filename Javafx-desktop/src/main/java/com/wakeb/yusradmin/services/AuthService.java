@@ -88,51 +88,44 @@ public class AuthService {
                 if (response == null) {
                     return new LoginResult(false, null, "Server is unreachable.", null);
                 }
-
-                if (response.statusCode() / 100 == 2) {
-                    JsonObject json = gson.fromJson(response.body(), JsonObject.class);
-
-                    String token = json.has("token") && !json.get("token").isJsonNull()
-                            ? json.get("token").getAsString()
-                            : (json.has("accessToken") && !json.get("accessToken").isJsonNull()
-                            ? json.get("accessToken").getAsString() : null);
-
-                    if (token == null) {
-                        return new LoginResult(false, null, "Token missing in response.", null);
-                    }
-
-                    currentToken = token;
-                    tokenExpiry = LocalDateTime.now().plusHours(8);
-
-                    if (!validateSessionSync()) {
-                        clearAuth();
-                        return new LoginResult(false, null, "Unable to validate session.", null);
-                    }
-
-                    if (currentUser == null || currentUser.getRole() == null
-                            || !currentUser.getRole().trim().equalsIgnoreCase("ADMIN")) {
-                        clearAuth();
-                        return new LoginResult(false, null, "Admins only. Access denied.", null);
-                    }
-
-                    storeAuth(currentToken, currentUser, tokenExpiry);
-
-                    String message = json.has("message") && !json.get("message").isJsonNull()
-                            ? json.get("message").getAsString()
-                            : "Login successful";
-
-                    return new LoginResult(true, currentUser, message, currentToken);
+                if (response.statusCode() / 100 != 2) {
+                    String msg = "Login failed: " + response.statusCode();
+                    if (response.body() != null && !response.body().isEmpty()) msg += " - " + response.body();
+                    return new LoginResult(false, null, msg, null);
                 }
 
+                JsonObject json = gson.fromJson(response.body(), JsonObject.class);
 
-                // Non-2xx → failed
-                String msg = "Login failed: " + response.statusCode();
-                if (response.body() != null && !response.body().isEmpty()) msg += " - " + response.body();
-                return new LoginResult(false, null, msg, null);
+                String token =
+                        (json.has("accessToken") && !json.get("accessToken").isJsonNull())
+                                ? json.get("accessToken").getAsString()
+                                : (json.has("token") && !json.get("token").isJsonNull()
+                                ? json.get("token").getAsString()
+                                : null);
+
+                if (token == null) {
+                    return new LoginResult(false, null, "Token missing in response.", null);
+                }
+
+                com.wakeb.yusradmin.models.User u = new com.wakeb.yusradmin.models.User();
+                if (json.has("userId")   && !json.get("userId").isJsonNull())   u.setId(json.get("userId").getAsLong());
+                if (json.has("username") && !json.get("username").isJsonNull()) u.setUserName(json.get("username").getAsString());
+                if (json.has("email")    && !json.get("email").isJsonNull())    u.setUserEmail(json.get("email").getAsString());
+                if (json.has("role")     && !json.get("role").isJsonNull())     u.setRole(json.get("role").getAsString());
+
+                currentToken = token;
+                currentUser  = u;
+                tokenExpiry  = LocalDateTime.now().plusHours(8);
+                storeAuth(currentToken, currentUser, tokenExpiry);
+
+                String message = json.has("message") && !json.get("message").isJsonNull()
+                        ? json.get("message").getAsString()
+                        : "Login successful";
+
+                return new LoginResult(true, currentUser, message, currentToken);
             }
         };
     }
-
     /**
      * Logout:
      * - Clears local session (and could call backend later if needed).
@@ -241,6 +234,15 @@ public class AuthService {
         } catch (IOException | InterruptedException e) {
             return null; // generic I/O problems
         }
+    }
+    // ===== helpers for role checks =====
+    public static boolean hasAdminRole(String role) {
+        if (role == null) return false;
+        String r = role.trim();
+        return r.equalsIgnoreCase("ADMIN") || r.equalsIgnoreCase("ROLE_ADMIN");
+    }
+    public static boolean isAdminUser(com.wakeb.yusradmin.models.User u) {
+        return u != null && hasAdminRole(u.getRole());
     }
 
     // Persistence (Preferences) helpers
