@@ -1,8 +1,8 @@
 package com.main.app.controller;
 
-import com.main.app.dto.UpdateUsernameDTO;
-import com.main.app.model.User;
-import com.main.app.service.UserService;
+import com.main.app.dto.User.UpdateUsernameDTO;
+import com.main.app.model.User.User;
+import com.main.app.service.User.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

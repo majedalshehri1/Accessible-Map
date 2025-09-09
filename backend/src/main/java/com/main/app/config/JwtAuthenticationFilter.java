@@ -1,9 +1,9 @@
 package com.main.app.config;
 
-import com.main.app.model.User;
-import com.main.app.repository.UserRepository;
-import com.main.app.service.CustomUserDetails;
-import com.main.app.service.JwtService;
+import com.main.app.model.User.User;
+import com.main.app.repository.User.UserRepository;
+import com.main.app.service.Security.CustomUserDetails;
+import com.main.app.service.Security.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;

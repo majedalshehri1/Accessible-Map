@@ -2,22 +2,16 @@ package com.main.app.controller;
 
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
-import com.main.app.Exceptions.PlaceNotFoundException;
-import com.main.app.dto.PlaceDto;
-import com.main.app.model.Place;
-import com.main.app.model.PlaceFeature;
-import com.main.app.repository.PlaceFeatureRepository;
-import com.main.app.repository.PlaceRepository;
-import com.main.app.service.PlaceService;
+import com.main.app.dto.Place.PlaceDto;
+import com.main.app.model.Place.Place;
+import com.main.app.service.Place.PlaceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController

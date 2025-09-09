@@ -1,7 +1,8 @@
 package com.main.app.controller;
 
-import com.main.app.dto.*;
-import com.main.app.service.ReviewService;
+import com.main.app.dto.Review.ReviewRequestDTO;
+import com.main.app.dto.Review.ReviewResponseDTO;
+import com.main.app.service.Review.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
