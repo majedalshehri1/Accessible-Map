@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/reviews")
+@PreAuthorize("hasAnyRole('USER','ADMIN')")
 @RequiredArgsConstructor
 public class ReviewController {
     private final ReviewService reviewService;
