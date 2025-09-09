@@ -1,7 +1,11 @@
 package com.main.app.service;
 
 import com.main.app.Enum.AccessibillityType;
+import com.main.app.Enum.Action;
 import com.main.app.Enum.Category;
+import com.main.app.Enum.EntityType;
+import com.main.app.config.AuthUser;
+import com.main.app.config.SecurityUtils;
 import com.main.app.dto.*;
 import com.main.app.model.*;
 import com.main.app.repository.*;
@@ -29,33 +33,9 @@ public class ReviewService {
 
     @Autowired
     JwtService jwtService;
+    @Autowired
+    AdminLogService adminLogService;
 
-//    @Transactional
-//    public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO, String jwt) {
-//       // Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-////        String currentUsername = authentication.getName();
-//        // user id , reuqested instead of jwt
-//        String currentUsername = jwtService.extractUsername(jwt);
-//
-//        System.out.println("Current username : " + currentUsername);
-//
-//        // find by userId, not email
-//        User user = userRepository.findByUserEmail(currentUsername)
-//                .orElseThrow(() -> new RuntimeException("User not found"));
-//
-//        Place place = placeRepository.findById(reviewDTO.getPlaceId())
-//                .orElseThrow(() -> new RuntimeException("Place not found"));
-//
-//        Review review = new Review();
-//        review.setPlace(place);
-//        review.setUser(user);
-//        review.setDescription(reviewDTO.getDescription());
-//        review.setRating(reviewDTO.getRating());
-//        Review savedReview = reviewRepository.save(review);
-//
-//
-//        return convertToDTO(savedReview);
-//    }
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
         User user = userRepository.findById(reviewDTO.getUserId())
@@ -69,7 +49,22 @@ public class ReviewService {
         review.setUser(user);
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
+
         Review saved = reviewRepository.save(review);
+
+        var me = SecurityUtils.currentUser();
+        Long   actorId = me.map(AuthUser::id).orElse(null);
+        String actorName =me.map(AuthUser::name).orElse(null) ;
+
+        adminLogService.writeLog(
+                EntityType.REVIEW,
+                Action.CREATE,
+                saved.getId(),
+                actorId,
+                actorName,
+                "تم اضافة تقييم : " + "'"+saved.getDescription()+"'" +" وتقييمه : " + saved.getRating()
+        );
+
         return convertToDTO(saved);
     }
 
@@ -141,6 +136,19 @@ public class ReviewService {
     }
     public void deleteReview(Long reviewId) {
         reviewRepository.deleteById(reviewId);
+
+        var me = SecurityUtils.currentUser();
+        Long   actorId = me.map(AuthUser::id).orElse(null);
+        String actorName =me.map(AuthUser::name).orElse(null) ;
+
+        adminLogService.writeLog(
+                EntityType.REVIEW,
+                Action.DELETE,
+                reviewId,
+                actorId,
+                actorName,
+                "تم حذف تقييم"
+        );
     }
     public ReviewResponseDTO editReview(Long reviewId, ReviewRequestDTO reviewDTO) {
         Review review =  reviewRepository.findById(reviewId)
@@ -148,9 +156,24 @@ public class ReviewService {
 //        if (!review.getUser().getUserId().equals(review.getUser().getUserId())) {
 //            throw new RuntimeException("Not authorized to edit review");
 //        }
+        var oldDes = review.getDescription();
+        var oldRating = review.getRating();
         review.setDescription(reviewDTO.getDescription());
         review.setRating(reviewDTO.getRating());
         Review updatedReview = reviewRepository.save(review);
+
+        var me = SecurityUtils.currentUser();
+        Long   actorId = me.map(AuthUser::id).orElse(null);
+        String actorName =me.map(AuthUser::name).orElse(null) ;
+
+        adminLogService.writeLog(
+                EntityType.REVIEW,
+                Action.UPDATE,
+                reviewId,
+                actorId,
+                actorName,
+                String.format("%s %s %s %s ", " تم تعديل الوصف من :","'"+oldDes+"'" +"وتقييمه: " + oldRating ," الى :","'"+review.getDescription())+"'"+"وتقييمه:"+ review.getRating()
+        );
         return convertToDTO(updatedReview);
     }
 

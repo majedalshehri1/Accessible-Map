@@ -1,16 +1,20 @@
 package com.main.app.controller;
 
+import com.main.app.Enum.EntityType;
 import com.main.app.dto.*;
 import com.main.app.model.Place;
 import com.main.app.model.Review;
 import com.main.app.model.User;
 import com.main.app.service.*;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
+import java.awt.print.Pageable;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,6 +28,7 @@ public class AdminController {
     private final PlaceService placeService;
     private final AdminService adminService;
     private final UserService userService;
+    private final AdminLogService adminLogService;
 
 
     @GetMapping("/all/reviews")
@@ -149,6 +154,14 @@ public class AdminController {
     public ResponseEntity<List<Object[]>> countPlaceCategory() {
         return ResponseEntity.ok(placeService.countPlacesByCategory());
 
+    }
+
+    @GetMapping("/logs")
+    public Page<AdminLogDto> getLogs(@RequestParam(required = false ) Integer page,
+                                     @RequestParam(required = false ) Integer size,
+                                     @RequestParam(required = false)EntityType entityType,
+                                     @RequestParam(required = false)Long entityId) {
+        return adminLogService.list(page, size, entityType, entityId);
     }
 
 

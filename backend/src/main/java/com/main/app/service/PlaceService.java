@@ -1,7 +1,11 @@
 package com.main.app.service;
 
 import com.main.app.Enum.AccessibillityType;
+import com.main.app.Enum.Action;
 import com.main.app.Enum.Category;
+import com.main.app.Enum.EntityType;
+import com.main.app.config.AuthUser;
+import com.main.app.config.SecurityUtils;
 import com.main.app.dto.PlaceDto;
 import com.main.app.dto.ReviewResponseDTO;
 import com.main.app.model.Place;
@@ -16,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 import com.main.app.Exceptions.PlaceNotFoundException;
 import com.main.app.Exceptions.DuplicatePlaceException;
+import static com.main.app.config.SecurityUtils.currentUser;
+
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,7 +36,10 @@ public class PlaceService {
 
     @Autowired
     private ReviewRepository reviewRepository;
-
+    @Autowired
+    private AdminLogService adminLogService;
+    @Autowired
+    private UserService userService;
 
     public List<PlaceDto> getAllPlaces(){
         return placeRepository.findAll().stream().map(this::convertToDto).toList();
@@ -108,8 +117,22 @@ public class PlaceService {
             saved = placeRepository.save(saved);
         }
 
+        var me = SecurityUtils.currentUser();
+        Long   actorId = me.map(AuthUser::id).orElse(null);
+        String actorName =me.map(AuthUser::name).orElse(null) ;
+
+        adminLogService.writeLog(
+                EntityType.PLACE,
+                Action.CREATE,
+                saved.getId(),
+                actorId,
+                actorName,
+                "تم اضافة مكان: " + saved.getPlaceName()
+        );
+
         return convertToDto(saved);
     }
+
 
     public Place updatePlace(Place place){
         return placeRepository.save(place);
