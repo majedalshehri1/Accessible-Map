@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 
-
-
 @Entity
 @Table(name = "\"user\"")
 @Data
@@ -45,9 +43,10 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "user_role", nullable = false)
+    @Builder.Default
     private Role userRole = Role.USER;
 
     @Column(name = "is_blocked")
+    @Builder.Default
     private Boolean isBlocked = false;
-
 }

@@ -2,6 +2,7 @@ package com.main.app.controller;
 
 import com.main.app.Enum.EntityType;
 import com.main.app.dto.Admin.AdminLogDto;
+import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.Place.PlaceDto;
 import com.main.app.dto.Place.TopPlaceDto;
 import com.main.app.dto.Review.ReviewRequestDTO;
@@ -35,21 +36,6 @@ public class AdminController {
     private final UserService userService;
     private final AdminLogService adminLogService;
 
-
-    @GetMapping("/all/reviews")
-    public ResponseEntity<List<ReviewResponseDTO>> allReviews() {
-        return ResponseEntity.ok(reviewService.getAllReviews());
-    }
-
-    @GetMapping("/all/places")
-    public ResponseEntity<List<PlaceDto>> getAllPlaces(){
-        return ResponseEntity.ok(placeService.getAllPlaces());
-    }
-
-    @GetMapping("/all/users")
-    public ResponseEntity<List<UserDto>> getAllUsers(){
-        return ResponseEntity.ok(userService.findOnlyUsers());
-    }
 
     @GetMapping("/count/places")
     public ResponseEntity<Long> countPlaces() {
@@ -167,6 +153,26 @@ public class AdminController {
                                      @RequestParam(required = false)EntityType entityType,
                                      @RequestParam(required = false)Long entityId) {
         return adminLogService.list(page, size, entityType, entityId);
+    }
+    @GetMapping("/all/reviews")
+    public ResponseEntity<PaginatedResponse<ReviewResponseDTO>> allReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.getAllReviews(page, size));
+    }
+
+    @GetMapping("/all/places")
+    public ResponseEntity<PaginatedResponse<PlaceDto>> getAllPlaces(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(placeService.getAllPlaces(page, size));
+    }
+
+    @GetMapping("/all/users")
+    public ResponseEntity<PaginatedResponse<UserDto>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.findOnlyUsers(page, size));
     }
 
 

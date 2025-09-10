@@ -2,6 +2,7 @@ package com.main.app.controller;
 
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
+import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.Place.PlaceDto;
 import com.main.app.model.Place.Place;
 import com.main.app.service.Place.PlaceService;
@@ -20,11 +21,6 @@ public class PlaceController {
 
     @Autowired
     private PlaceService placeService;
-
-    @GetMapping("/all")
-    public ResponseEntity <List<PlaceDto>> getAllPlaces(){
-        return ResponseEntity.ok(placeService.getAllPlaces());
-    }
 
     @GetMapping("{id}")
     public ResponseEntity<PlaceDto> getPlaceById(@PathVariable Long id){
@@ -67,15 +63,19 @@ public class PlaceController {
         return ResponseEntity.ok(accessibilityType);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<PaginatedResponse<PlaceDto>> getAllPlaces(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(placeService.getAllPlaces(page, size));
+    }
+
     @GetMapping("category")
-    public ResponseEntity<List<PlaceDto>> getPlaceCategory(@RequestParam Category category){
-        List<Place> places = placeService.getPlaceCategory(category);
-        List<PlaceDto> dtos = places.stream().map(placeService::convertToDto)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
-
-
+    public ResponseEntity<PaginatedResponse<PlaceDto>> getPlaceCategory(
+            @RequestParam Category category,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(placeService.getPlaceCategory(category, page, size));
     }
 
 

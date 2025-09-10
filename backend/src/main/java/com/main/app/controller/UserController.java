@@ -1,6 +1,8 @@
 package com.main.app.controller;
 
+import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.User.UpdateUsernameDTO;
+import com.main.app.dto.User.UserDto;
 import com.main.app.model.User.User;
 import com.main.app.service.User.UserService;
 import jakarta.validation.Valid;
@@ -23,5 +25,11 @@ public class UserController {
 
         User updatedUser = userService.updateUsername(currentUserEmail, updateDTO.getNewUsername());
         return ResponseEntity.ok(updatedUser);
+    }
+    @GetMapping("/all")
+    public ResponseEntity<PaginatedResponse<UserDto>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 }

@@ -4,6 +4,8 @@ package com.main.app.repository.Place;
 import com.main.app.Enum.Category;
 import com.main.app.dto.Place.TopPlaceDto;
 import com.main.app.model.Place.Place;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface PlaceRepository extends JpaRepository<Place,Long>{
+public interface PlaceRepository extends JpaRepository<Place,Long> {
 
     List<Place> findByPlaceCategory(Category category);
 
@@ -22,6 +24,9 @@ public interface PlaceRepository extends JpaRepository<Place,Long>{
     @Query("SELECT p.placeCategory, COUNT(p) FROM Place p GROUP BY p.placeCategory")
     List<Object[]> countPlacesByCategory();
 
+    // Pagination methods
+    Page<Place> findAll(Pageable pageable);
+    Page<Place> findByPlaceCategory(Category category, Pageable pageable);
 
     @Query("""
     select
@@ -35,5 +40,5 @@ public interface PlaceRepository extends JpaRepository<Place,Long>{
     group by p.id, p.placeName, p.placeCategory
     order by coalesce(avg(r.rating), 0.0) desc, count(r.id) desc
     """)
-    List<TopPlaceDto> findTopPlaces(org.springframework.data.domain.Pageable Pageable);
+    List<TopPlaceDto> findTopPlaces(Pageable pageable);
 }

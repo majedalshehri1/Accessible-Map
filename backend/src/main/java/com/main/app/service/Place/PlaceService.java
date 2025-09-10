@@ -6,6 +6,7 @@ import com.main.app.Enum.Category;
 import com.main.app.Enum.EntityType;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
+import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.Place.PlaceDto;
 import com.main.app.dto.Review.ReviewResponseDTO;
 import com.main.app.model.Place.Place;
@@ -16,13 +17,15 @@ import com.main.app.repository.Place.PlaceFeatureRepository;
 import com.main.app.repository.Place.PlaceImageRepository;
 import com.main.app.repository.Place.PlaceRepository;
 import com.main.app.repository.Review.ReviewRepository;
+import com.main.app.Exceptions.PlaceNotFoundException;
+import com.main.app.Exceptions.DuplicatePlaceException;
 import com.main.app.service.Admin.AdminLogService;
 import com.main.app.service.User.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.main.app.Exceptions.PlaceNotFoundException;
-import com.main.app.Exceptions.DuplicatePlaceException;
-
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -48,9 +51,6 @@ public class PlaceService {
     @Autowired
     private UserService userService;
 
-    public List<PlaceDto> getAllPlaces(){
-        return placeRepository.findAll().stream().map(this::convertToDto).toList();
-    }
 
     public Place getPlaceOrThrow(Long id) {
         return placeRepository.findById(id)
@@ -177,10 +177,41 @@ public class PlaceService {
         placeRepository.deleteById(id);
     }
 
-    public List<Place> getPlaceCategory(Category category){
-       return placeRepository.findByPlaceCategory(category);
+    public PaginatedResponse<PlaceDto> getAllPlaces(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Place> placePage = placeRepository.findAll(pageable);
+
+        List<PlaceDto> placeDtos = placePage.getContent().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                placeDtos,
+                placePage.getNumber(),
+                placePage.getSize(),
+                placePage.getTotalElements(),
+                placePage.getTotalPages(),
+                placePage.isLast()
+        );
     }
 
+    public PaginatedResponse<PlaceDto> getPlaceCategory(Category category, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Place> placePage = placeRepository.findByPlaceCategory(category, pageable);
+
+        List<PlaceDto> placeDtos = placePage.getContent().stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                placeDtos,
+                placePage.getNumber(),
+                placePage.getSize(),
+                placePage.getTotalElements(),
+                placePage.getTotalPages(),
+                placePage.isLast()
+        );
+    }
     public List<Object[]> countPlacesByCategory(){
         return placeRepository.countPlacesByCategory();
     }

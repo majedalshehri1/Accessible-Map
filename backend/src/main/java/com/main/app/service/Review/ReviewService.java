@@ -5,6 +5,7 @@ import com.main.app.Enum.Action;
 import com.main.app.Enum.EntityType;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
+import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.Place.PlaceWithAccessibilityDTO;
 import com.main.app.dto.Review.ReviewRequestDTO;
 import com.main.app.dto.Review.ReviewResponseDTO;
@@ -20,6 +21,9 @@ import com.main.app.service.Admin.AdminLogService;
 import com.main.app.service.Security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -73,10 +77,7 @@ public class ReviewService {
         return convertToDTO(saved);
     }
 
-    public List<ReviewResponseDTO> getAllReviews() {
-        return reviewRepository.findAll().stream().map(this::convertToDTO).toList();
 
-    }
     @Transactional(readOnly = true)
     public ReviewResponseDTO getReviewById(long reviewId) {
         Review review = reviewRepository.findById(reviewId)
@@ -85,17 +86,59 @@ public class ReviewService {
         return convertToDTO(review);
     }
 
-    public List<ReviewResponseDTO> getReviewsByPlace(Long placeId) {
-        return reviewRepository.findByPlaceId(placeId)
-                .stream()
+
+    public PaginatedResponse<ReviewResponseDTO> getAllReviews(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> reviewPage = reviewRepository.findAll(pageable);
+
+        List<ReviewResponseDTO> reviewDtos = reviewPage.getContent().stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                reviewDtos,
+                reviewPage.getNumber(),
+                reviewPage.getSize(),
+                reviewPage.getTotalElements(),
+                reviewPage.getTotalPages(),
+                reviewPage.isLast()
+        );
     }
-    public List<ReviewResponseDTO> getReviewsByUser(Long userId) {
-        return reviewRepository.findByUser_UserId(userId)
-                .stream()
-                .map(this ::convertToDTO)
+
+    public PaginatedResponse<ReviewResponseDTO> getReviewsByPlace(Long placeId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> reviewPage = reviewRepository.findByPlace_Id(placeId, pageable);
+
+        List<ReviewResponseDTO> reviewDtos = reviewPage.getContent().stream()
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                reviewDtos,
+                reviewPage.getNumber(),
+                reviewPage.getSize(),
+                reviewPage.getTotalElements(),
+                reviewPage.getTotalPages(),
+                reviewPage.isLast()
+        );
+    }
+
+    public PaginatedResponse<ReviewResponseDTO> getReviewsByUser(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> reviewPage = reviewRepository.findByUser_UserId(userId, pageable);
+
+        List<ReviewResponseDTO> reviewDtos = reviewPage.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                reviewDtos,
+                reviewPage.getNumber(),
+                reviewPage.getSize(),
+                reviewPage.getTotalElements(),
+                reviewPage.getTotalPages(),
+                reviewPage.isLast()
+        );
     }
 
     public List<PlaceWithAccessibilityDTO> getPlacesWithAccessibility() {
