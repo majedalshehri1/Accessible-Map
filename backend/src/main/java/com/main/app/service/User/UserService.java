@@ -4,6 +4,7 @@ import com.main.app.dto.User.UserDto;
 import com.main.app.model.User.User;
 import com.main.app.repository.User.UserRepository;
 import com.main.app.service.Security.CustomUserDetails;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,6 +40,14 @@ public class UserService implements UserDetailsService {
 
         user.setUserName(newUsername);
         return userRepository.save(user);
+    }
+
+    @Transactional
+    public User updateUsernameById(Long userId, String newUsername) {
+        User u = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        u.setUserName(newUsername);
+        return userRepository.save(u);
     }
 
     public UserDto convertToDTO(User user) {

@@ -2,6 +2,7 @@ package com.main.app.controller;
 
 import com.main.app.Exceptions.DuplicateEmailException;
 import com.main.app.Exceptions.DuplicateUsernameException;
+import com.main.app.config.SecurityUtils;
 import com.main.app.dto.Security.AuthRequest;
 import com.main.app.model.User.User;
 import com.main.app.dto.Security.AuthResponse;
@@ -88,21 +89,16 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
                 .build();
     }
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Map<String, Object>> me() {
 
-
-        User user = userRepository.findByUserEmail(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
+        var me = SecurityUtils.currentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         return ResponseEntity.ok(Map.of(
-                "id", user.getUserId(),
-                "username", user.getUserName(),
-                "email", user.getUserEmail(),
-                "role", user.getUserRole()
+                "id",       me.id(),
+                "username", me.name(),
+                "email",    me.email(),
+                "role",     me.role()
         ));
     }
 
