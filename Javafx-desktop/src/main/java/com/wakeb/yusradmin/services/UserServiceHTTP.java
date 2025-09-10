@@ -2,7 +2,9 @@
 package com.wakeb.yusradmin.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.User;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -14,7 +16,18 @@ public class UserServiceHTTP implements UserService {
 
     @Override
     public List<User> list() throws Exception {
-        return api.get("/api/admin/all/users", new TypeReference<List<User>>() {});
+        PageResponse<User> page = api.get(
+                "/api/admin/all/users?page=0&size=50",
+                new TypeReference<PageResponse<User>>() {}
+        );
+        return (page != null && page.content != null) ? page.content : Collections.emptyList();
+    }
+
+    public PageResponse<User> page(int page, int size) throws Exception {
+        return api.get(
+                "/api/admin/all/users?page=" + page + "&size=" + size,
+                new TypeReference<PageResponse<User>>() {}
+        );
     }
 
     @Override
@@ -28,18 +41,13 @@ public class UserServiceHTTP implements UserService {
         return api.put("/api/admin/update/user/" + u.getId(), u, new TypeReference<User>() {});
     }
 
-    @Override
-    public void delete(long userId) throws Exception {
+    @Override public void delete(long userId) throws Exception {
         api.delete("/api/admin/delete/user/" + userId);
     }
-
-    @Override
-    public void block(long userId) throws Exception {
+    @Override public void block(long userId) throws Exception  {
         api.put("/api/admin/users/" + userId + "/block", null, null);
     }
-
-    @Override
-    public void unblock(long userId) throws Exception {
+    @Override public void unblock(long userId) throws Exception{
         api.put("/api/admin/users/" + userId + "/unblock", null, null);
     }
 }

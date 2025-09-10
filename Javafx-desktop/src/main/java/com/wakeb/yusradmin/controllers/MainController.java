@@ -31,6 +31,7 @@ public class MainController {
     @FXML private ToggleButton reviewsBtn;
     @FXML private ToggleButton placesBtn;
     @FXML private ToggleButton mapBtn;
+    @FXML private ToggleButton logsBtn;
 
     // Logout button
     @FXML private Button logoutButton;
@@ -87,6 +88,8 @@ public class MainController {
     @FXML private void handleReviews()   { navigationManager.navigateToView(SceneType.REVIEWS); }
     @FXML private void handlePlaces()    { navigationManager.navigateToView(SceneType.PLACES); }
     @FXML private void handleMapView() {navigationManager.navigateToView(SceneType.MAP);}
+    @FXML private void handleLogs() {navigationManager.navigateToView(SceneType.LOGS);}
+
 
     // Logout handler - async clear session + navigate to LOGIN
     /**

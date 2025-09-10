@@ -42,6 +42,14 @@
                 </columns>
             </TableView>
 
+            <HBox spacing="10" style="-fx-padding: 10;">
+                <children>
+                    <Button fx:id="prevBtn" text="السابق" onAction="#prevPage"/>
+                    <Label fx:id="pageInfo" text="صفحة 1/1"/>
+                    <Button fx:id="nextBtn" text="التالي" onAction="#nextPage"/>
+                </children>
+            </HBox>
+
         </VBox>
     </center>
 </BorderPane> 

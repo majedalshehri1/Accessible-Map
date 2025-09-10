@@ -7,5 +7,6 @@ public enum SceneType {
     USERS,
     REVIEWS,
     PLACES,
-    MAP
+    MAP,
+    LOGS
 }
