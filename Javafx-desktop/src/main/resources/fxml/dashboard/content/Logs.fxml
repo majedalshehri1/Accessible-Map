@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.wakeb.yusradmin.controllers.LogsController"
+            stylesheets="@../../../css/places.css"
+            nodeOrientation="RIGHT_TO_LEFT">
+
+    <center>
+        <VBox spacing="14" style="-fx-padding:18;">
+            <Label text="إدارة السجلات" styleClass="h1"/>
+
+            <HBox styleClass="toolbar">
+                <children>
+                    <Button text="تحديث" styleClass="button-primary" onAction="#refresh"/>
+                    <Region HBox.hgrow="ALWAYS"/>
+                </children>
+            </HBox>
+
+            <TableView fx:id="table" VBox.vgrow="ALWAYS" styleClass="data-table">
+                <columns>
+                    <TableColumn fx:id="colTime"     text="الوقت"         prefWidth="160" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colEntity"   text="الكيان"         prefWidth="120" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colAction"   text="الإجراء"        prefWidth="110" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colEntityId" text="معرّف الكيان"   prefWidth="110" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colActor"    text="المستخدم"       prefWidth="180" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colDesc"     text="الوصف"          prefWidth="380" styleClass="table-column-header"/>
+                </columns>
+            </TableView>
+
+            <HBox spacing="8" alignment="CENTER_RIGHT">
+                <ProgressIndicator fx:id="loading" visible="false"/>
+                <Label fx:id="statusLabel" text=""/>
+            </HBox>
+
+            <HBox spacing="10" style="-fx-padding: 10;">
+                <children>
+                    <Button fx:id="prevBtn" text="السابق" onAction="#prevPage"/>
+                    <Label fx:id="pageInfo" text="صفحة 1/1"/>
+                    <Button fx:id="nextBtn" text="التالي" onAction="#nextPage"/>
+                </children>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>
