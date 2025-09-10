@@ -3,6 +3,7 @@ package com.main.app.service.Admin;
 import com.main.app.Enum.Action;
 import com.main.app.Enum.EntityType;
 import com.main.app.dto.Admin.AdminLogDto;
+import com.main.app.dto.PaginatedResponse;
 import com.main.app.model.Admin.AdminLog;
 import com.main.app.repository.Admin.AdminLogRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,6 +12,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -46,10 +50,8 @@ public class AdminLogService {
     }
 
 
-    public Page<AdminLogDto> list(Integer page, Integer size, EntityType entity, Long entityId) {
-        int p = (page == null || page < 0) ? 0 : page;
-        int s = (size == null || size < 1) ? 20 : Math.min(size, 200);
-        Pageable pageable = PageRequest.of(p, s, Sort.by(Sort.Direction.DESC, "createdAt"));
+    public PaginatedResponse<AdminLogDto> list(Integer page, Integer size, EntityType entity, Long entityId) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         Page<AdminLog> logs;
         if (entity != null && entityId != null) {
@@ -59,7 +61,18 @@ public class AdminLogService {
         } else {
             logs = adminLogRepository.findAllByOrderByCreatedAtDesc(pageable);
         }
-        return logs.map(this::convertToDTO);
+
+        List<AdminLogDto> logDtos = logs.getContent().stream()
+                .map(this::convertToDTO).collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                logDtos,
+                logs.getNumber(),
+                logs.getSize(),
+                logs.getTotalElements(),
+                logs.getTotalPages(),
+                logs.isLast()
+        );
     }
 
 

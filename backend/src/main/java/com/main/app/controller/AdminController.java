@@ -148,11 +148,11 @@ public class AdminController {
     }
 
     @GetMapping("/logs")
-    public Page<AdminLogDto> getLogs(@RequestParam(required = false ) Integer page,
+    public ResponseEntity<PaginatedResponse<AdminLogDto>> getLogs(@RequestParam(required = false ) Integer page,
                                      @RequestParam(required = false ) Integer size,
                                      @RequestParam(required = false)EntityType entityType,
                                      @RequestParam(required = false)Long entityId) {
-        return adminLogService.list(page, size, entityType, entityId);
+        return  ResponseEntity.ok(adminLogService.list(page, size, entityType, entityId));
     }
     @GetMapping("/all/reviews")
     public ResponseEntity<PaginatedResponse<ReviewResponseDTO>> allReviews(
