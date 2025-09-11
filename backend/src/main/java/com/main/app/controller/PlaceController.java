@@ -65,8 +65,8 @@ public class PlaceController {
 
     @GetMapping("/all")
     public ResponseEntity<PaginatedResponse<PlaceDto>> getAllPlaces(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
         return ResponseEntity.ok(placeService.getAllPlaces(page, size));
     }
 

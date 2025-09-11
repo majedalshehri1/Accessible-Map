@@ -44,7 +44,7 @@ public class PlaceService {
             @Override
             protected PageResponse<Place> call() throws Exception {
                 HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/admin/all/places?page=" + page + "&size=" + size))
+                        .uri(URI.create(baseUrl + "/all/places?page=" + page + "&size=" + size))
                         .header("Content-Type", "application/json")
                         .GET()
                         .build();
