@@ -1,7 +1,5 @@
-// com.wakeb.yusradmin.controllers.UsersController.java
 package com.wakeb.yusradmin.controllers;
 
-import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
