@@ -2,7 +2,7 @@ package com.wakeb.yusradmin.models;
 
 import java.util.List;
 import lombok.*;
-
+// test
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
