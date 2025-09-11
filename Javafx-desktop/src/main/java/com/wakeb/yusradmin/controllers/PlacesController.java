@@ -323,13 +323,23 @@ public class PlacesController {
 
     // ====== مساعدات ======
     private void handleErrors(Throwable error) {
+        // Always print full stack trace for debugging
+        if (error != null) {
+            System.err.println("=== Exception occurred ===");
+            error.printStackTrace();
+        }
+
+        // Determine user-friendly message
         String msg;
         if (error instanceof SecurityException) msg = "Authentication required. Please login.";
         else if (error instanceof IllegalArgumentException) msg = "Invalid request. Please try again.";
-        else if (error instanceof IOException) msg = "Network Error. Please try again.";
-        else msg = "unknown error. Please try again.";
+        else if (error instanceof IOException) msg = "Network error. Please check your connection.";
+        else msg = "Unknown error occurred: " + (error != null && error.getMessage() != null ? error.getMessage() : "");
+
+        // Show alert
         FXUtil.error("Error", msg);
     }
+
 
     private void showLoading(boolean loading) {
         if (loading) {
