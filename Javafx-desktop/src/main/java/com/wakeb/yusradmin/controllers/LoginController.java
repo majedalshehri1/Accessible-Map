@@ -66,7 +66,7 @@ public class LoginController {
 
         if (email.isEmpty() || password.isEmpty()) {
             showError("ادخل البريد الالكتروني و كلمة المرور");
-            showStyledAlert(Alert.AlertType.ERROR, "فشل تسجيل الدخول", "ادخل الالكتروني و كلمة المرور");
+            showStyledAlert(Alert.AlertType.ERROR, "فشل تسجيل الدخول", "ادخل البريد الالكتروني و كلمة المرور");
             return;
         }
         LoginRequest request = new LoginRequest(email, password);
