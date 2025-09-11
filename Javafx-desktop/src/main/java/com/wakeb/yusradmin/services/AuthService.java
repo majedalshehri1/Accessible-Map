@@ -88,12 +88,16 @@ public class AuthService {
                 if (response == null) {
                     return new LoginResult(false, null, "الخادم غير متاح حاليا", null);
                 }
-                if (response.statusCode() / 100 != 2) {
-                    String msg = "Login failed: " + response.statusCode();
-                    if (response.body() != null && !response.body().isEmpty()) msg += " - " + response.body();
-                    return new LoginResult(false, null, msg, null);
+                int sc = response.statusCode();
+                if (sc == 401) {
+                    return new LoginResult(false, null, "البريد الإلكتروني أو كلمة المرور غير صحيحة.", null);
                 }
-
+                if (sc == 403) {
+                    return new LoginResult(false, null, "تم حظر الحساب.", null);
+                }
+                if (sc / 100 != 2) {
+                    return new LoginResult(false, null, "حدث خطأ غير متوقع. حاول لاحقًا.", null);
+                }
                 JsonObject json = gson.fromJson(response.body(), JsonObject.class);
 
                 String token =
