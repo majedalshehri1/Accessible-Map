@@ -15,6 +15,7 @@
                 <children>
                     <Button text="تحديث" styleClass="button-primary" onAction="#refresh"/>
                     <Region HBox.hgrow="ALWAYS"/>
+                    <ComboBox fx:id="entityFilter" prefWidth="160" promptText="اختر كيان..." />
                 </children>
             </HBox>
 

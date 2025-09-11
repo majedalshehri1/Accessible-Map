@@ -5,6 +5,7 @@ import com.wakeb.yusradmin.dto.AdminLogDto;
 import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.services.AdminLogService;
 import com.wakeb.yusradmin.util.FXUtil;
+import com.wakeb.yusradmin.utils.LogFilter;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -31,6 +32,7 @@ public class LogsController {
 
     @FXML private Button prevBtn, nextBtn;
     @FXML private Label pageInfo;
+    @FXML private ComboBox<LogFilter> entityFilter;
 
     private final ObservableList<AdminLogDto> data = FXCollections.observableArrayList();
     private final AdminLogService service = new AdminLogService();
@@ -59,6 +61,10 @@ public class LogsController {
             return new SimpleStringProperty(txt);
         });
 
+        entityFilter.setItems(FXCollections.observableArrayList(LogFilter.values()));
+        entityFilter.getSelectionModel().select(LogFilter.ALL);
+        entityFilter.valueProperty().addListener((observable, oldValue, newValue) -> loadPage(0));
+
         loadPage(0);
     }
 
@@ -82,7 +88,10 @@ public class LogsController {
         statusLabel.setText("جاري التحميل...");
         updatePagingUI(false);
 
-        Task<PageResponse<AdminLogDto>> t = service.pageAsync(page, pageSize);
+        String selectedType = (entityFilter.getValue() == null) ? null :
+                entityFilter.getValue().getValue();
+
+        Task<PageResponse<AdminLogDto>> t = service.pageAsync(page, pageSize , selectedType);
         t.setOnSucceeded(e -> {
             loading.setVisible(false);
             PageResponse<AdminLogDto> p = t.getValue();
