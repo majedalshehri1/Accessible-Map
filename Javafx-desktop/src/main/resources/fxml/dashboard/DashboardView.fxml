@@ -93,6 +93,10 @@
                                       prefHeight="40.0" styleClass="nav-btn"
                                       text="إدارة الأماكن" toggleGroup="$sideNav"/>
 
+                        <ToggleButton fx:id="surveyBtn" maxWidth="Infinity" onAction="#handleSurvey"
+                                      prefHeight="40.0" styleClass="nav-btn"
+                                      text="إدارة آراء المستخدمين" toggleGroup="$sideNav"/>
+
                         <ToggleButton fx:id="mapBtn" maxWidth="Infinity" onAction="#handleMapView"
                                       prefHeight="40.0" styleClass="nav-btn" toggleGroup="$sideNav">
                             <graphic>

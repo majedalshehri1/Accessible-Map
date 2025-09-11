@@ -8,6 +8,7 @@ module com.wakeb.yusradmin {
 
 
     // JSON libraries
+    requires com.fasterxml.jackson.core;
     requires com.fasterxml.jackson.databind;
     requires com.fasterxml.jackson.annotation;
 

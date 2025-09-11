@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21.0.3"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.wakeb.yusradmin.controllers.SurveyController">
+
+    <top>
+        <HBox spacing="10" padding="10">
+            <Label text="Surveys" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnRefresh" text="Refresh"/>
+            <CheckBox fx:id="chkShowUnreadOnly" text="Show unread only"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="8" padding="10">
+            <TableView fx:id="table" prefHeight="600">
+                <columns>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
+                    <TableColumn fx:id="colUserId" text="User ID" prefWidth="120"/>
+                    <TableColumn fx:id="colRating" text="Rating" prefWidth="90"/>
+                    <TableColumn fx:id="colDescription" text="Description" prefWidth="520"/>
+                    <TableColumn fx:id="colRead" text="Read?" prefWidth="90"/>
+                    <TableColumn fx:id="colActions" text="Actions" prefWidth="220"/>
+                </columns>
+            </TableView>
+            <HBox spacing="10">
+                <Label fx:id="lblStatus" text="" />
+                <Region HBox.hgrow="ALWAYS"/>
+                <ProgressIndicator fx:id="spinner" visible="false" prefWidth="24" prefHeight="24"/>
+            </HBox>
+        </VBox>
+    </center>
+
+</BorderPane>

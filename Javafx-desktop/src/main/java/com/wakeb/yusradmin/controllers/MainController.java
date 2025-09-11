@@ -86,6 +86,7 @@ public class MainController {
     @FXML private void handleUsers()     { navigationManager.navigateToView(SceneType.USERS); }
     @FXML private void handleReviews()   { navigationManager.navigateToView(SceneType.REVIEWS); }
     @FXML private void handlePlaces()    { navigationManager.navigateToView(SceneType.PLACES); }
+    @FXML private void handleSurvey()    { navigationManager.navigateToView(SceneType.SURVEY); }
     @FXML private void handleMapView() {navigationManager.navigateToView(SceneType.MAP);}
 
     // Logout handler - async clear session + navigate to LOGIN
