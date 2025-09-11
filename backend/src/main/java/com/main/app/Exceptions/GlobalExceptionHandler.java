@@ -4,6 +4,7 @@ package com.main.app.Exceptions;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.LockedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -60,9 +61,16 @@ public class GlobalExceptionHandler {
                 .body(Map.of(
                         "status", 403,
                         "error", "Forbidden",
-                        "message", "User is blocked"
+                        "message", "المستخدم محظور"
                 ));
     }
 
+        @ExceptionHandler(BadCredentialsException.class)
+        public ResponseEntity<Map<String, Object>> handleBadCreds() {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "البريد الإلكتروني أو كلمة المرور غير صحيحة."));
+        }
+    }
 
-}
+
+
