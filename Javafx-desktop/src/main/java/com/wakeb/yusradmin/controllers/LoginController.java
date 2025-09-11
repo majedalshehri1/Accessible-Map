@@ -43,13 +43,8 @@ public class LoginController {
         Task<Boolean> validateTask = auth.validateSessionAsync();
         validateTask.setOnSucceeded(e -> {
             boolean valid = Boolean.TRUE.equals(validateTask.getValue());
-            var u = auth.getCurrentUser();
-            boolean isAdmin = valid && u != null && u.getRole() != null
-                    && u.getRole().trim().equalsIgnoreCase("ADMIN");
-
-            if (isAdmin) {
+            if (valid) {
                 navigationManager.navigateToScene(SceneType.MAIN);
-
             }
         });
         validateTask.setOnFailed(e -> {
@@ -70,16 +65,13 @@ public class LoginController {
         final String password = passwordField.getText() == null ? "" : passwordField.getText();
 
         if (email.isEmpty() || password.isEmpty()) {
-            showError("Please enter email and password.");
-            showStyledAlert(Alert.AlertType.ERROR, "Login Error", "Please enter email and password.");
+            showError("ادخل البريد الالكتروني و كلمة المرور");
+            showStyledAlert(Alert.AlertType.ERROR, "فشل تسجيل الدخول", "ادخل الالكتروني و كلمة المرور");
             return;
         }
-
-        // Build request and create Task via AuthService
         LoginRequest request = new LoginRequest(email, password);
         Task<AuthService.LoginResult> loginTask = auth.loginAsync(request);
 
-        // UI feedback while the Task is running
         setLoading(true);
         if (errorLabel != null) errorLabel.setVisible(false);
 
@@ -87,21 +79,9 @@ public class LoginController {
             setLoading(false);
 
             AuthService.LoginResult result = loginTask.getValue();
-            System.out.println("Login isSuccess   : " + result.isSuccess());
-            System.out.println("Login token       : " + result.getToken());
-            System.out.println("Login message     : " + result.getMessage());
 
-            // Navigate only on real success (token present; AuthService already validated session)
-            if (result.isSuccess() && result.getToken() != null) {
-                var u = (result.getUser() != null) ? result.getUser() : auth.getCurrentUser();
-                boolean isAdmin = (u != null) && AuthService.hasAdminRole(u.getRole());
-
-                if (isAdmin) {
-                    navigationManager.navigateToScene(SceneType.MAIN);
-                } else {
-                    showError("حظر الوصول، يجب أن تكون مسؤول.");
-                    showStyledAlert(Alert.AlertType.ERROR, "حظر الوصول", "يجب أن تكون مسؤول.");
-                }
+            if (result.isSuccess()) {
+                navigationManager.navigateToScene(SceneType.MAIN);
             } else {
                 String msg = (result.getMessage() == null || result.getMessage().isBlank())
                         ? "فشل تسجيل الدخول."
