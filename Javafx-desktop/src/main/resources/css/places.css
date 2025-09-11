@@ -229,3 +229,8 @@
 .search-button:hover {
     -fx-background-color: derive(#007bff, -10%);
 }
+
+.meta-label {
+    -fx-text-fill: black;
+    -fx-font-size: 15px;
+}
