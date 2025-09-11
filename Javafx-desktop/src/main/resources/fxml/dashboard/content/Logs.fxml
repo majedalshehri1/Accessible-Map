@@ -9,13 +9,14 @@
 
     <center>
         <VBox spacing="14" style="-fx-padding:18;">
-            <Label text="إدارة السجلات" styleClass="h1"/>
+            <Label text="إدارة السجلات"  styleClass="meta-label"/>
 
-            <HBox styleClass="toolbar">
+            <HBox styleClass="toolbar" spacing="10" alignment="CENTER_RIGHT">
                 <children>
-                    <Button text="تحديث" styleClass="button-primary" onAction="#refresh"/>
+                    <ComboBox fx:id="entityFilter" prefWidth="180"
+                              promptText="الكل" styleClass="combo-box-field"/>
                     <Region HBox.hgrow="ALWAYS"/>
-                    <ComboBox fx:id="entityFilter" prefWidth="160" promptText="اختر كيان..." />
+                    <Button text="تحديث" styleClass="card-button" onAction="#refresh"/>
                 </children>
             </HBox>
 
@@ -30,17 +31,16 @@
                 </columns>
             </TableView>
 
-            <HBox spacing="8" alignment="CENTER_RIGHT">
-                <ProgressIndicator fx:id="loading" visible="false"/>
-                <Label fx:id="statusLabel" text=""/>
-            </HBox>
+            <HBox spacing="10" alignment="CENTER_LEFT" style="-fx-padding: 10;">
+                <Button fx:id="prevBtn" text="السابق" onAction="#prevPage" styleClass="card-button"/>
+                <Label fx:id="pageInfo" text="صفحة 1/1"/>
+                <Button fx:id="nextBtn" text="التالي" onAction="#nextPage" styleClass="card-button"/>
 
-            <HBox spacing="10" style="-fx-padding: 10;">
-                <children>
-                    <Button fx:id="prevBtn" text="السابق" onAction="#prevPage"/>
-                    <Label fx:id="pageInfo" text="صفحة 1/1"/>
-                    <Button fx:id="nextBtn" text="التالي" onAction="#nextPage"/>
-                </children>
+                <ProgressIndicator fx:id="loading" visible="false" prefWidth="18" prefHeight="18"/>
+
+                <Region HBox.hgrow="ALWAYS"/>
+
+                <Label fx:id="statusLabel" text="" styleClass="meta-label"/>
             </HBox>
         </VBox>
     </center>

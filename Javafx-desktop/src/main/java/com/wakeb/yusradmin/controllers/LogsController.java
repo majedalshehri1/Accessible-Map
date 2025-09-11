@@ -39,12 +39,20 @@ public class LogsController {
 
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private int currentPage = 0;
-    private int pageSize = 7;
+    private int pageSize = 13;
     private int totalPages;
 
     @FXML
     private void initialize() {
         table.setItems(data);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        colTime.setMinWidth(140);   colTime.setPrefWidth(140);   colTime.setMaxWidth(180);
+        colEntity.setMinWidth(110); colEntity.setPrefWidth(120); colEntity.setMaxWidth(160);
+        colAction.setMinWidth(100); colAction.setPrefWidth(110); colAction.setMaxWidth(150);
+        colEntityId.setMinWidth(100); colEntityId.setPrefWidth(110); colEntityId.setMaxWidth(150);
+        colActor.setMinWidth(150);  colActor.setPrefWidth(180);  colActor.setMaxWidth(220);
+        colDesc.setMinWidth(300); colDesc.setPrefWidth(400);     colDesc.setMaxWidth(Double.MAX_VALUE);
+
         table.setPlaceholder(new Label("جاري التحميل..."));
 
         colEntityId.setCellValueFactory(c ->
@@ -108,7 +116,7 @@ public class LogsController {
             currentPage = p.currentPage;
             totalPages  = Math.max(p.totalPages, 1);
 
-            statusLabel.setText("عدد السجلات في الصفحة: " + data.size());
+            statusLabel.setText("عدد السجلات  في الصفحة: " + data.size());
             updatePagingUI(true);
         });
         t.setOnFailed(e -> {
