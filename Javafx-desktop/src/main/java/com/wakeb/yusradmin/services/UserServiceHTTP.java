@@ -1,6 +1,7 @@
 package com.wakeb.yusradmin.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.User;
 
@@ -14,40 +15,41 @@ public class UserServiceHTTP implements UserService {
     public UserServiceHTTP(ApiClient api) { this.api = api; }
 
     @Override
-    public PaginatedResponse<User> list(int page, int size) throws Exception {
+    public PageResponse<User> list(int page, int size) throws Exception {
         return api.get(
                 "/api/admin/all/users?page=" + page + "&size=" + size,
-                new TypeReference<PaginatedResponse<User>>() {}
+                new TypeReference<PageResponse<User>>() {}
         );
     }
 
     @Override
-    public PaginatedResponse<User> search(String query, int page, int size) throws Exception {
+    public PageResponse<User> search(String query, int page, int size) throws Exception {
         // Get all search results from backend
-        List<User> allResults = search(query); // This calls the existing search(String) method
+        List<User> allResults = search(query);
 
         // Implement client-side pagination
         int start = page * size;
         int end = Math.min(start + size, allResults.size());
 
-        PaginatedResponse<User> response = new PaginatedResponse<>();
-        response.setContent(allResults.subList(start, end));
-        response.setCurrentPage(page);
-        response.setPageSize(size);
-        response.setTotalElements(allResults.size());
-        response.setTotalPages((int) Math.ceil((double) allResults.size() / size));
+        PageResponse<User> response = new PageResponse<>();
+        response.content = allResults.subList(start, end);
+        response.currentPage = page;
+        response.pageSize = size;
+        response.totalElements = allResults.size();
+        response.totalPages = (int) Math.ceil((double) allResults.size() / size);
+        response.last = (page >= response.totalPages - 1);
 
         return response;
     }
 
+
     @Override
     public List<User> list() throws Exception {
-        // FIX: Use PaginatedResponse instead of PageResponse
-        PaginatedResponse<User> page = api.get(
+        PageResponse<User> page = api.get(
                 "/api/admin/all/users?page=0&size=50",
-                new TypeReference<PaginatedResponse<User>>() {}
+                new TypeReference<PageResponse<User>>() {}
         );
-        return (page != null && page.getContent() != null) ? page.getContent() : Collections.emptyList();
+        return (page != null && page.content != null) ? page.content : Collections.emptyList();
     }
 
     @Override

@@ -131,50 +131,31 @@ public class LoginController {
         if (loginButton != null) loginButton.setDisable(loading);
     }
 
-    /** Show inline error text under the form. */
+    /** Show inline error text under the form (no popup here). */
     private void showError(String message) {
-        // أظهر الرسالة في الـ Label (لو موجود)
         if (errorLabel != null) {
             errorLabel.setText(message);
             errorLabel.setVisible(true);
         }
-
-        // Alert مخصّص بنفس ستايلنا
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("خطأ");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-
-        DialogPane pane = alert.getDialogPane();
-        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT); // للعربي
-        pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
-        pane.getStyleClass().add("custom-alert");
-
-        Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
-        okBtn.setText("حسناً");
-        okBtn.getStyleClass().add("button-primary");
-
-        alert.showAndWait();
     }
 
-    /** Simple alert dialog for critical messages. */
+    /** Simple styled alert dialog for critical messages. */
     private void showStyledAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
 
-        // نجيب الـ DialogPane ونطبّق ستايل
+        // Apply RTL + CSS styling
         DialogPane pane = alert.getDialogPane();
-        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT); // عربي
+        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
         pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
         pane.getStyleClass().add("custom-alert");
 
-        // نغير النصوص للأزرار
+        // Style the OK button
         Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
         okBtn.setText("حسناً");
         okBtn.getStyleClass().add("button-primary");
 
         alert.showAndWait();
-    }
-}
+    }}

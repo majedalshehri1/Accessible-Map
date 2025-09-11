@@ -1,12 +1,35 @@
-/** Show inline error text under the form. */
-private void showError(String message) {
-    // أظهر الرسالة في الـ Label (لو موجود)
-    if (errorLabel != null) {
-        errorLabel.setText(message);
-        errorLabel.setVisible(true);
-    }
+<?xml version="1.0" encoding="UTF-8"?>
 
-    // Optional: Remove the alert from here if you only want the label
-    // If you want both, keep it, but remove the duplicate calls elsewhere
-    showStyledAlert(Alert.AlertType.ERROR, "خطأ", message);
-}
+<VBox xmlns="http://javafx.com/javafx/21"
+      xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.wakeb.yusradmin.controllers.ReviewsController"
+      spacing="14" style="-fx-padding:18;">
+
+    <Label styleClass="h1" text="إدارة التقييمات" />
+
+    <HBox styleClass="toolbar">
+        <TextField fx:id="searchField" promptText="ابحث بالاسم"
+                   styleClass="input-field" HBox.hgrow="ALWAYS" />
+        <Button fx:id="searchBtn" text="بحث" />
+    </HBox>
+
+    <TableView fx:id="table" VBox.vgrow="ALWAYS" styleClass="data-table">
+        <columns>
+            <TableColumn fx:id="colId" prefWidth="70" text="ID"/>
+            <TableColumn fx:id="colUsername" prefWidth="190" text="المستخدم"/>
+            <TableColumn fx:id="colPlace" prefWidth="260" text="المكان"/>
+            <TableColumn fx:id="colReview" prefWidth="110" text="التقييم"/>
+            <TableColumn fx:id="colDescription" text="الوصف" prefWidth="300"/>
+            <TableColumn fx:id="colDate" prefWidth="140" text="التاريخ"/>
+            <TableColumn fx:id="colStatus" prefWidth="120" text="الحالة" visible="false"/>
+            <TableColumn fx:id="colActions" prefWidth="220" text="الإجراءات"/>
+        </columns>
+    </TableView>
+
+    <!-- ✅ Pagination controls -->
+    <HBox spacing="10" alignment="CENTER">
+        <Button fx:id="prevBtn" text="السابق" onAction="#prevPage"/>
+        <Label fx:id="pageInfo" text="صفحة 1 / 1"/>
+        <Button fx:id="nextBtn" text="التالي" onAction="#nextPage"/>
+    </HBox>
+</VBox>

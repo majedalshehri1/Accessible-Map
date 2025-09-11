@@ -1,6 +1,6 @@
 package com.wakeb.yusradmin.controllers;
 
-import com.wakeb.yusradmin.models.PaginatedResponse;
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
 import com.wakeb.yusradmin.util.FXUtil;
@@ -12,7 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
 
 public class UsersController {
 
@@ -55,13 +54,13 @@ public class UsersController {
                 this::onBlockToggle, this::onEdit, this::onDelete
         ));
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);        colActions.setMinWidth(240);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colActions.setMinWidth(240);
         colActions.setPrefWidth(240);
         colActions.setMaxWidth(240);
 
         searchField.setOnAction(e -> refresh());
     }
-
 
     @FXML
     private void prevPage() {
@@ -78,44 +77,23 @@ public class UsersController {
 
         String q = searchField.getText();
         if (q != null && !q.isBlank()) {
-            // Use paginated search
-            Task<PaginatedResponse<User>> task = new Task<>() {
-                @Override
-                protected PaginatedResponse<User> call() throws Exception {
-                    return service.search(q, page, pageSize);
-                }
-            };
-
-            task.setOnSucceeded(e -> {
-                PaginatedResponse<User> p = task.getValue();
-                currentPage = p.getCurrentPage();
-                totalPages = Math.max(p.getTotalPages(), 1);
-                data.setAll(p.getContent());
-                updatePagingUI(true);
-            });
-
-            task.setOnFailed(e -> {
-                FXUtil.error("Search Users Failed", task.getException().getMessage());
-                updatePagingUI(false);
-            });
-
-            updatePagingUI(false);
-            new Thread(task, "users-search-page").start();
+            // when searching, delegate to refresh()
+            refresh();
             return;
         }
 
-        Task<PaginatedResponse<User>> task = new Task<>() {
+        Task<PageResponse<User>> task = new Task<>() {
             @Override
-            protected PaginatedResponse<User> call() throws Exception {
+            protected PageResponse<User> call() throws Exception {
                 return service.list(page, pageSize);
             }
         };
 
         task.setOnSucceeded(e -> {
-            PaginatedResponse<User> p = task.getValue();
-            currentPage = p.getCurrentPage();
-            totalPages = Math.max(p.getTotalPages(), 1);
-            data.setAll(p.getContent());
+            PageResponse<User> p = task.getValue();
+            currentPage = p.currentPage;      // field access (your PageResponse has public fields)
+            totalPages = Math.max(p.totalPages, 1);
+            data.setAll(p.content);
             updatePagingUI(true);
         });
 
@@ -140,37 +118,42 @@ public class UsersController {
         nextBtn.setDisable(currentPage + 1 >= totalPages);
     }
 
-
     public void refresh() {
         if (service == null) return;
 
         String q = searchField.getText();
         if (q != null && !q.isBlank()) {
-            // Use paginated search starting from page 0
-            Task<PaginatedResponse<User>> task = new Task<>() {
+            Task<PageResponse<User>> task = new Task<>() {
                 @Override
-                protected PaginatedResponse<User> call() throws Exception {
-                    return service.search(q, 0, pageSize);
+                protected PageResponse<User> call() throws Exception {
+                    return service.search(q, 0, pageSize); // always reset to page 0
                 }
             };
 
             task.setOnSucceeded(e -> {
-                PaginatedResponse<User> p = task.getValue();
-                data.setAll(p.getContent());  // Use getter method
-                currentPage = 0;
-                totalPages = Math.max(p.getTotalPages(), 1);  // Use getter method
-                pageInfo.setText("نتائج: " + data.size() + " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
-                prevBtn.setDisable(currentPage == 0);
-                nextBtn.setDisable(currentPage + 1 >= totalPages);
+                PageResponse<User> p = task.getValue();
+                if (p != null) {
+                    data.setAll(p.content);
+                    currentPage = p.currentPage;
+                    totalPages = Math.max(p.totalPages, 1);
+                    pageInfo.setText("نتائج: " + p.totalElements +
+                            " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
+                    prevBtn.setDisable(currentPage == 0);
+                    nextBtn.setDisable(currentPage + 1 >= totalPages);
+                } else {
+                    data.clear();
+                    pageInfo.setText("لا توجد نتائج");
+                    prevBtn.setDisable(true);
+                    nextBtn.setDisable(true);
+                }
             });
 
             task.setOnFailed(e -> FXUtil.error("Search Users Failed", task.getException().getMessage()));
             new Thread(task, "users-search-refresh").start();
         } else {
-            loadPage(0); // Load first page without search
+            loadPage(0);
         }
     }
-
 
     private void onBlockToggle(User u) {
         Task<Void> t = new Task<>() {
@@ -180,7 +163,7 @@ public class UsersController {
                 return null;
             }
         };
-        t.setOnSucceeded(e -> loadPage(currentPage)); // نرجّع نفس الصفحة
+        t.setOnSucceeded(e -> loadPage(currentPage));
         t.setOnFailed(e -> FXUtil.error("Block/Unblock Failed", t.getException().getMessage()));
         new Thread(t, "block-toggle").start();
     }
