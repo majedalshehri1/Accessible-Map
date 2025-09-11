@@ -3,6 +3,7 @@ package com.main.app.controller;
 import com.main.app.dto.*;
 import com.main.app.model.Place;
 import com.main.app.model.Review;
+import com.main.app.model.Survey;
 import com.main.app.model.User;
 import com.main.app.service.*;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class AdminController {
     private final PlaceService placeService;
     private final AdminService adminService;
     private final UserService userService;
+    private final SurveyService surveyService;
 
 
     @GetMapping("/all/reviews")
@@ -149,6 +151,17 @@ public class AdminController {
     public ResponseEntity<List<Object[]>> countPlaceCategory() {
         return ResponseEntity.ok(placeService.countPlacesByCategory());
 
+    }
+
+    @GetMapping("/survey/all")
+    public ResponseEntity<List<SurveyResponseDTO>>  getAllSurveys() {
+        return ResponseEntity.ok(surveyService.getAllSurvey());
+    }
+
+    @DeleteMapping("/survey/delete/{id}")
+    public ResponseEntity<String> deleteSurvey(@PathVariable Long id) {
+        surveyService.deleteSurvey(id);
+        return ResponseEntity.ok("Survey deleted successfully");
     }
 
 

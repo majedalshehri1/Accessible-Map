@@ -1,6 +1,11 @@
 package com.main.app.dto;
 
-public class SurveyRequest {
-    private Long id;
-    
+import lombok.Data;
+
+@Data
+public class SurveyRequestDTO {
+    private Long userId;
+    private String description;
+    private Integer rating;
+
 }
