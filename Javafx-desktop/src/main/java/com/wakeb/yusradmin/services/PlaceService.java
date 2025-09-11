@@ -28,6 +28,8 @@ public class PlaceService {
     private final HttpClient httpClient;
     private final Gson gson;
     private final String baseUrl;
+    private final AuthService auth = AuthService.getInstance();
+
 
     public PlaceService() {
         this.httpClient = HttpClient.newHttpClient();
@@ -38,17 +40,24 @@ public class PlaceService {
         this.baseUrl = "http://localhost:8081/api";
     }
 
-    // === Get all places paginated ===
+    private HttpRequest.Builder withAuth(String url) {
+        HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(url))
+                .header("Content-Type", "application/json");
+        String bearer = auth.getBearerToken();
+        if (bearer != null && !bearer.isBlank()) {
+            b.header("Authorization", bearer);
+        }
+        return b;
+    }
+
+    // === Get all places (ADMIN) - مع المسار الصحيح والهيدر ===
     public Task<PageResponse<Place>> getAllPlaces(int page, int size) {
         return new Task<>() {
             @Override
             protected PageResponse<Place> call() throws Exception {
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/all/places?page=" + page + "&size=" + size))
-                        .header("Content-Type", "application/json")
+                HttpRequest request = withAuth(baseUrl + "/admin/all/places?page=" + page + "&size=" + size) // ✅ CHANGED
                         .GET()
                         .build();
-
                 return getPlacePageResponse(request);
             }
         };
