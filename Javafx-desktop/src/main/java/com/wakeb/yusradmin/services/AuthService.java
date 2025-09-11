@@ -86,14 +86,18 @@ public class AuthService {
 
                 HttpResponse<String> response = safeSend(request);
                 if (response == null) {
-                    return new LoginResult(false, null, "Server is unreachable.", null);
+                    return new LoginResult(false, null, "الخادم غير متاح حاليا", null);
                 }
-                if (response.statusCode() / 100 != 2) {
-                    String msg = "Login failed: " + response.statusCode();
-                    if (response.body() != null && !response.body().isEmpty()) msg += " - " + response.body();
-                    return new LoginResult(false, null, msg, null);
+                int sc = response.statusCode();
+                if (sc == 401) {
+                    return new LoginResult(false, null, "البريد الإلكتروني أو كلمة المرور غير صحيحة.", null);
                 }
-
+                if (sc == 403) {
+                    return new LoginResult(false, null, "تم حظر الحساب.", null);
+                }
+                if (sc / 100 != 2) {
+                    return new LoginResult(false, null, "حدث خطأ غير متوقع. حاول لاحقًا.", null);
+                }
                 JsonObject json = gson.fromJson(response.body(), JsonObject.class);
 
                 String token =
@@ -106,26 +110,58 @@ public class AuthService {
                 if (token == null) {
                     return new LoginResult(false, null, "Token missing in response.", null);
                 }
-
-                com.wakeb.yusradmin.models.User u = new com.wakeb.yusradmin.models.User();
-                if (json.has("userId")   && !json.get("userId").isJsonNull())   u.setId(json.get("userId").getAsLong());
-                if (json.has("username") && !json.get("username").isJsonNull()) u.setUserName(json.get("username").getAsString());
-                if (json.has("email")    && !json.get("email").isJsonNull())    u.setUserEmail(json.get("email").getAsString());
-                if (json.has("role")     && !json.get("role").isJsonNull())     u.setRole(json.get("role").getAsString());
+                User fetched = fetchUserFromMe(token);
+                if (fetched == null) {
+                    return new LoginResult(false, null, "Session validation failed.", null);
+                }
+                if (!hasAdminRole(fetched.getRole())) {
+                    return new LoginResult(false, null, "حظر الوصول: فقط للمسؤولين", null);
+                }
 
                 currentToken = token;
-                currentUser  = u;
+                currentUser  = fetched;
                 tokenExpiry  = LocalDateTime.now().plusHours(8);
                 storeAuth(currentToken, currentUser, tokenExpiry);
 
-                String message = json.has("message") && !json.get("message").isJsonNull()
-                        ? json.get("message").getAsString()
-                        : "Login successful";
-
+                String message = "Login successful";
                 return new LoginResult(true, currentUser, message, currentToken);
             }
         };
     }
+    private User fetchUserFromMe(String token) {
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + validatePath))
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+
+        HttpResponse<String> res = safeSend(req);
+        if (res == null || res.statusCode() / 100 != 2) {
+            return null;
+        }
+
+        try {
+            var json = gson.fromJson(res.body(), com.google.gson.JsonObject.class);
+            String username = json.has("username") && !json.get("username").isJsonNull()
+                    ? json.get("username").getAsString() : null;
+            String email = json.has("email") && !json.get("email").isJsonNull()
+                    ? json.get("email").getAsString() : null;
+            String role = null;
+            if (json.has("role") && !json.get("role").isJsonNull())
+                role = json.get("role").getAsString();
+            else if (json.has("hasRole") && !json.get("hasRole").isJsonNull())
+                role = json.get("hasRole").getAsString();
+
+            User u = new User();
+            u.setUserName(username);
+            u.setUserEmail(email);
+            u.setRole(role);
+            return u;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     /**
      * Logout:
      * - Clears local session (and could call backend later if needed).
