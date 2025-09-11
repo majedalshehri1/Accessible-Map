@@ -1,10 +1,7 @@
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
-import com.wakeb.yusradmin.models.PaginatedResponse;
-import com.wakeb.yusradmin.models.Place;
-import com.wakeb.yusradmin.models.PlaceDto;
-import com.wakeb.yusradmin.models.ReviewRequestDTO;
+import com.wakeb.yusradmin.models.*;
 import com.wakeb.yusradmin.services.PlaceService;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
@@ -71,7 +68,10 @@ public class PlacesController {
                 setText(empty || item == null ? null : item.getLabel());
             }
         });
-
+        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = newVal.intValue();
+            loadPlaces();
+        });
         searchButton.setOnAction(e -> loadPlaces());
         filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
 
@@ -89,39 +89,15 @@ public class PlacesController {
 
         try {
             if (q != null && !q.isBlank()) {
-                Task<List<Place>> searchTask = placeService.searchPlaces(q);
-                searchTask.setOnSucceeded(ev -> {
-                    List<Place> result = searchTask.getValue();
-                    places.setAll(result);
-                    renderCards();
-                    pagination.setPageCount(1);
-                    showLoading(false);
-                });
-                searchTask.setOnFailed(ev -> {
-                    handleErrors(searchTask.getException());
-                    showLoading(false);
-                });
-                new Thread(searchTask).start();
+                Task<PageResponse<Place>> searchTask = placeService.searchPlaces(q, currentPage, pageSize);
+                HelperFunc(searchTask);
             } else if (cat != null) {
-                Task<PaginatedResponse<Place>> categoryTask = placeService.getPlacesByCategory(cat, currentPage, pageSize);
-                categoryTask.setOnSucceeded(ev -> {
-                    PaginatedResponse<Place> resp = categoryTask.getValue();
-                    if (resp != null) {
-                        places.setAll(resp.getContent());
-                        renderCards();
-                        pagination.setPageCount(resp.getTotalPages());
-                    }
-                    showLoading(false);
-                });
-                categoryTask.setOnFailed(ev -> {
-                    handleErrors(categoryTask.getException());
-                    showLoading(false);
-                });
-                new Thread(categoryTask).start();
+                Task<PageResponse<Place>> categoryTask = placeService.getPlacesByCategory(cat, currentPage, pageSize);
+                HelperFunc(categoryTask);
             } else {
-                Task<PaginatedResponse<Place>> allTask = placeService.getAllPlaces(currentPage, pageSize);
+                Task<PageResponse<Place>> allTask = placeService.getAllPlaces(currentPage, pageSize);
                 allTask.setOnSucceeded(ev -> {
-                    PaginatedResponse<Place> resp = allTask.getValue();
+                    PageResponse<Place> resp = allTask.getValue();
                     if (resp != null) {
                         places.setAll(resp.getContent());
                         renderCards();
@@ -139,6 +115,29 @@ public class PlacesController {
             handleErrors(e);
             showLoading(false);
         }
+    }
+
+    private void HelperFunc(Task<PageResponse<Place>> categoryTask) {
+        categoryTask.setOnSucceeded(ev -> {
+            PageResponse<Place> result = categoryTask.getValue();
+            if (result != null) {
+                places.setAll(result.content);
+                renderCards();
+                pagination.setPageCount(result.totalPages);
+            }
+            showLoading(false);
+        });
+        categoryTask.setOnFailed(ev -> {
+            handleErrors(categoryTask.getException());
+            showLoading(false);
+        });
+        new Thread(categoryTask).start();
+    }
+
+    @FXML
+    private void handlePageChange() {
+        currentPage = pagination.getCurrentPageIndex();
+        loadPlaces();
     }
 
     private void renderCards() {

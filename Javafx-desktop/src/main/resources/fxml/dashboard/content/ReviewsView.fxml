@@ -37,9 +37,9 @@
                 </placeholder>
             </TableView>
             <HBox spacing="10" alignment="CENTER">
-                <Button fx:id="prevBtn" text="السابق" onAction="#prevPage"/>
+                <Button fx:id="prevBtn" text="السابق"/>
                 <Label fx:id="pageInfo" text="صفحة 1 / 1"/>
-                <Button fx:id="nextBtn" text="التالي" onAction="#nextPage"/>
+                <Button fx:id="nextBtn" text="التالي"/>
             </HBox>
         </VBox>
     </center>
