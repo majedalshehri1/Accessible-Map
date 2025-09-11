@@ -4,6 +4,7 @@ import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Action;
 import com.main.app.Enum.Category;
 import com.main.app.Enum.EntityType;
+import com.main.app.Exceptions.BadRequestException;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
 import com.main.app.dto.PaginatedResponse;
@@ -166,10 +167,10 @@ public class PlaceService {
         return placeRepository.save(place);
     }
 
-    public List<Place> searchPlace( String name){
-        if (name.isEmpty()) {
-            throw new PlaceNotFoundException(name);
-        }
+    public List<Place> searchPlace(String name){
+        if (name == null || name.isBlank())
+            throw new BadRequestException("أدخل نص البحث.");
+
         return placeRepository.findByPlaceNameContainingIgnoreCase(name);
     }
 
@@ -196,6 +197,13 @@ public class PlaceService {
     }
 
     public PaginatedResponse<PlaceDto> getPlaceCategory(Category category, int page, int size) {
+        if (category == null)
+            throw new BadRequestException("التصنيف مطلوب.");
+        if (page < 0)
+            throw new BadRequestException("page لا يمكن أن يكون سالب.");
+        if (size < 1 || size > 100)
+            throw new BadRequestException("size يجب أن يكون بين 1 و 100.");
+
         Pageable pageable = PageRequest.of(page, size);
         Page<Place> placePage = placeRepository.findByPlaceCategory(category, pageable);
 
