@@ -5,6 +5,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
+import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.Place;
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
 import com.wakeb.yusradmin.utils.AccessibilityFeaturesTypeAdapter;
@@ -14,11 +15,15 @@ import javafx.concurrent.Task;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+//import static jdk.internal.jrtfs.JrtFileAttributeView.AttrID.size;
 
 public class PlaceService {
     private final HttpClient httpClient;
@@ -34,143 +39,191 @@ public class PlaceService {
         this.baseUrl = "http://localhost:8081/api";
     }
 
-    public Task<List<Place>> getAllPlaces() {
+    public Task<PaginatedResponse<Place>> getAllPlaces(int page, int size) {
         return new Task<>() {
             @Override
-            protected List<Place> call() throws Exception {
-                try {
-                    updateProgress(0, 100);
-                    updateMessage("Loading all places...");
+            protected PaginatedResponse<Place> call() throws Exception {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl + "/admin/all/places?page=" + page + "&size=" + size))
+                        .header("Content-Type", "application/json")
+                        .GET()
+                        .build();
 
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create(baseUrl + "/place/all"))
-                            .header("Content-Type", "application/json")
-                            .GET()
-                            .build();
-
-                    updateProgress(33, 100);
-
-                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-                    updateProgress(66, 100);
-
-                    int statusCode = response.statusCode();
-
-                    if (statusCode == 200) {
-                        List<Place> places = gson.fromJson(response.body(), new TypeToken<List<Place>>() {
-                        }.getType());
-                        updateProgress(100, 100);
-                        System.out.println(places);
-                        return places != null ? places : new ArrayList<>();
-                    } else {
-                        throw handleAPIErrors(statusCode);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                } catch (IOException | JsonSyntaxException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    return gson.fromJson(response.body(), new TypeToken<PaginatedResponse<Place>>(){}.getType());
+                } else {
+                    throw handleAPIErrors(response.statusCode());
                 }
-
             }
         };
     }
 
+//    public Task<List<Place>> getPlacesByName(String name) {
+//        return new Task<>() {
+//            @Override
+//            protected List<Place> call() throws Exception {
+//                try {
+//                    if (name == null || name.isEmpty()) {
+//                        throw new IllegalArgumentException("Place name cannot be empty");
+//                    }
+//
+//                    updateProgress(0, 100);
+//                    updateMessage("Loading all places...");
+//
+//                    HttpRequest request = HttpRequest.newBuilder()
+//                            .uri(URI.create(baseUrl + "/place/search?search=" + name))
+//                            .header("Content-Type", "application/json")
+//                            .GET()
+//                            .build();
+//
+//                    updateProgress(33, 100);
+//
+//                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+//
+//                    updateProgress(66, 100);
+//
+//                    int statusCode = response.statusCode();
+//
+//                    if (statusCode == 200) {
+//                        List<Place> places = gson.fromJson(response.body(), new TypeToken<List<Place>>() {
+//                        }.getType());
+//                        updateProgress(100, 100);
+//                        System.out.println(places);
+//                        return places != null ? places : new ArrayList<>();
+//                    } else {
+//                        throw handleAPIErrors(statusCode);
+//                    }
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                    e.printStackTrace();
+//                    throw new RuntimeException(e);
+//                } catch (IOException | JsonSyntaxException e) {
+//                    e.printStackTrace();
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        };
+//    }
+
+//    public Task<List<Place>> getPlacesByCategory(CATEGORY category) {
+//        return new Task<>() {
+//            @Override
+//            protected List<Place> call() throws Exception {
+//                try {
+//                    if (category == null) {
+//                        throw new IllegalArgumentException("Place category cannot be empty");
+//                    }
+//
+//                    updateProgress(0, 100);
+//                    updateMessage("Loading all places...");
+//
+//                    HttpRequest request = HttpRequest.newBuilder()
+//                            .uri(URI.create(baseUrl + "/place/category?category=" + category.getValue()))
+//                            .header("Content-Type", "application/json")
+//                            .GET()
+//                            .build();
+//
+//                    updateProgress(33, 100);
+//
+//                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+//
+//                    updateProgress(66, 100);
+//
+//                    int statusCode = response.statusCode();
+//
+//                    if (statusCode == 200) {
+//                        List<Place> places = gson.fromJson(response.body(), new TypeToken<List<Place>>() {
+//                        }.getType());
+//                        updateProgress(100, 100);
+//                        System.out.println(places);
+//                        return places != null ? places : new ArrayList<>();
+//                    } else {
+//                        throw handleAPIErrors(statusCode);
+//                    }
+//                } catch (InterruptedException e) {
+//                    Thread.currentThread().interrupt();
+//                    e.printStackTrace();
+//                    throw new RuntimeException(e);
+//                } catch (IOException | JsonSyntaxException e) {
+//                    e.printStackTrace();
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        };
+//    }
+
+    public Task<List<Place>> searchPlaces(String query) {
+        return new Task<>() {
+            @Override
+            protected List<Place> call() throws Exception {
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl + "/admin/findPlace?search=" +
+                                URLEncoder.encode(query, StandardCharsets.UTF_8)))
+                        .header("Content-Type", "application/json")
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    return gson.fromJson(response.body(), new TypeToken<List<Place>>(){}.getType());
+                } else {
+                    throw handleAPIErrors(response.statusCode());
+                }
+            }
+        };
+    }
+
+    // getAllPlaces already exists in your code; ensure it's correctly typed:
+// public Task<PaginatedResponse<Place>> getAllPlaces(int page, int size) { ... } (you already had one)
+
+    public Task<PaginatedResponse<Place>> getPlacesByCategory(CATEGORY category, int page, int size) {
+        return new Task<>() {
+            @Override
+            protected PaginatedResponse<Place> call() throws Exception {
+                if (category == null) throw new IllegalArgumentException("category required");
+
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl + "/place/category?category=" + category.name() + "&page=" + page + "&size=" + size))
+                        .header("Content-Type", "application/json")
+                        .GET()
+                        .build();
+
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    PaginatedResponse<Place> pr =
+                            gson.fromJson(response.body(), new TypeToken<PaginatedResponse<Place>>() {}.getType());
+                    return pr != null ? pr : new PaginatedResponse<>();
+                } else {
+                    throw handleAPIErrors(response.statusCode());
+                }
+            }
+        };
+    }
+
+    // Keep search non-paginated (server returns a plain list):
     public Task<List<Place>> getPlacesByName(String name) {
         return new Task<>() {
             @Override
             protected List<Place> call() throws Exception {
-                try {
-                    if (name == null || name.isEmpty()) {
-                        throw new IllegalArgumentException("Place name cannot be empty");
-                    }
-
-                    updateProgress(0, 100);
-                    updateMessage("Loading all places...");
-
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create(baseUrl + "/place/search?search=" + name))
-                            .header("Content-Type", "application/json")
-                            .GET()
-                            .build();
-
-                    updateProgress(33, 100);
-
-                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-                    updateProgress(66, 100);
-
-                    int statusCode = response.statusCode();
-
-                    if (statusCode == 200) {
-                        List<Place> places = gson.fromJson(response.body(), new TypeToken<List<Place>>() {
-                        }.getType());
-                        updateProgress(100, 100);
-                        System.out.println(places);
-                        return places != null ? places : new ArrayList<>();
-                    } else {
-                        throw handleAPIErrors(statusCode);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                } catch (IOException | JsonSyntaxException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
+                if (name == null || name.isBlank()) throw new IllegalArgumentException("name is required");
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create(baseUrl + "/place/search?search=" + URLEncoder.encode(name, StandardCharsets.UTF_8)))
+                        .header("Content-Type", "application/json")
+                        .GET()
+                        .build();
+                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+                if (response.statusCode() == 200) {
+                    List<Place> list = gson.fromJson(response.body(), new TypeToken<List<Place>>() {}.getType());
+                    return list != null ? list : new ArrayList<>();
+                } else {
+                    throw handleAPIErrors(response.statusCode());
                 }
             }
         };
     }
 
-    public Task<List<Place>> getPlacesByCategory(CATEGORY category) {
-        return new Task<>() {
-            @Override
-            protected List<Place> call() throws Exception {
-                try {
-                    if (category == null) {
-                        throw new IllegalArgumentException("Place category cannot be empty");
-                    }
 
-                    updateProgress(0, 100);
-                    updateMessage("Loading all places...");
-
-                    HttpRequest request = HttpRequest.newBuilder()
-                            .uri(URI.create(baseUrl + "/place/category?category=" + category.getValue()))
-                            .header("Content-Type", "application/json")
-                            .GET()
-                            .build();
-
-                    updateProgress(33, 100);
-
-                    HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-                    updateProgress(66, 100);
-
-                    int statusCode = response.statusCode();
-
-                    if (statusCode == 200) {
-                        List<Place> places = gson.fromJson(response.body(), new TypeToken<List<Place>>() {
-                        }.getType());
-                        updateProgress(100, 100);
-                        System.out.println(places);
-                        return places != null ? places : new ArrayList<>();
-                    } else {
-                        throw handleAPIErrors(statusCode);
-                    }
-                } catch (InterruptedException e) {
-                    Thread.currentThread().interrupt();
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                } catch (IOException | JsonSyntaxException e) {
-                    e.printStackTrace();
-                    throw new RuntimeException(e);
-                }
-            }
-        };
-    }
 
     public Task<Void> deletePlaceById(long id) {
         return new Task<Void>() {

@@ -1,8 +1,9 @@
-// com.wakeb.yusradmin.services.UserServiceHTTP.java
 package com.wakeb.yusradmin.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.User;
+
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
@@ -13,8 +14,40 @@ public class UserServiceHTTP implements UserService {
     public UserServiceHTTP(ApiClient api) { this.api = api; }
 
     @Override
+    public PaginatedResponse<User> list(int page, int size) throws Exception {
+        return api.get(
+                "/api/admin/all/users?page=" + page + "&size=" + size,
+                new TypeReference<PaginatedResponse<User>>() {}
+        );
+    }
+
+    @Override
+    public PaginatedResponse<User> search(String query, int page, int size) throws Exception {
+        // Get all search results from backend
+        List<User> allResults = search(query); // This calls the existing search(String) method
+
+        // Implement client-side pagination
+        int start = page * size;
+        int end = Math.min(start + size, allResults.size());
+
+        PaginatedResponse<User> response = new PaginatedResponse<>();
+        response.setContent(allResults.subList(start, end));
+        response.setCurrentPage(page);
+        response.setPageSize(size);
+        response.setTotalElements(allResults.size());
+        response.setTotalPages((int) Math.ceil((double) allResults.size() / size));
+
+        return response;
+    }
+
+    @Override
     public List<User> list() throws Exception {
-        return api.get("/api/admin/all/users", new TypeReference<List<User>>() {});
+        // FIX: Use PaginatedResponse instead of PageResponse
+        PaginatedResponse<User> page = api.get(
+                "/api/admin/all/users?page=0&size=50",
+                new TypeReference<PaginatedResponse<User>>() {}
+        );
+        return (page != null && page.getContent() != null) ? page.getContent() : Collections.emptyList();
     }
 
     @Override
@@ -34,7 +67,7 @@ public class UserServiceHTTP implements UserService {
     }
 
     @Override
-    public void block(long userId) throws Exception {
+    public void block(long userId) throws Exception  {
         api.put("/api/admin/users/" + userId + "/block", null, null);
     }
 

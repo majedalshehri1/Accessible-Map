@@ -1,6 +1,7 @@
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
+import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.Place;
 import com.wakeb.yusradmin.models.PlaceDto;
 import com.wakeb.yusradmin.models.ReviewRequestDTO;
@@ -34,9 +35,15 @@ public class PlacesController {
     @FXML private Button searchButton;
     @FXML private ComboBox<CATEGORY> filterComboBox;
 
+
     // شبكة الكروت
     @FXML private FlowPane cardsPane;
     @FXML private ScrollPane cardsScroll;
+
+    @FXML private Pagination pagination;
+
+    private int currentPage = 0;
+    private int pageSize = 12;
 
     // ====== بيانات وخدمات ======
     private PlaceService placeService;
@@ -73,36 +80,65 @@ public class PlacesController {
     }
 
     // ====== تحميل الأماكن من الخدمة ======
+    // PlacesController.java - Fix pagination handling
+    // PlacesController.java - Update loadPlaces method
     private void loadPlaces() {
-        Task<List<Place>> fetchTask;
-        String q = searchField.getText();
-
-        if (q != null && !q.isBlank()) {
-            fetchTask = placeService.getPlacesByName(q);
-        } else if (filterComboBox.getValue() != null &&
-                filterComboBox.getValue() != CATEGORY.ALL) {
-            fetchTask = placeService.getPlacesByCategory(filterComboBox.getValue());
-        } else {
-            fetchTask = placeService.getAllPlaces();
-        }
-
         showLoading(true);
+        String q = searchField.getText();
+        CATEGORY cat = filterComboBox.getValue();
 
-        fetchTask.setOnSucceeded(ev -> {
+        try {
+            if (q != null && !q.isBlank()) {
+                Task<List<Place>> searchTask = placeService.searchPlaces(q);
+                searchTask.setOnSucceeded(ev -> {
+                    List<Place> result = searchTask.getValue();
+                    places.setAll(result);
+                    renderCards();
+                    pagination.setPageCount(1);
+                    showLoading(false);
+                });
+                searchTask.setOnFailed(ev -> {
+                    handleErrors(searchTask.getException());
+                    showLoading(false);
+                });
+                new Thread(searchTask).start();
+            } else if (cat != null) {
+                Task<PaginatedResponse<Place>> categoryTask = placeService.getPlacesByCategory(cat, currentPage, pageSize);
+                categoryTask.setOnSucceeded(ev -> {
+                    PaginatedResponse<Place> resp = categoryTask.getValue();
+                    if (resp != null) {
+                        places.setAll(resp.getContent());
+                        renderCards();
+                        pagination.setPageCount(resp.getTotalPages());
+                    }
+                    showLoading(false);
+                });
+                categoryTask.setOnFailed(ev -> {
+                    handleErrors(categoryTask.getException());
+                    showLoading(false);
+                });
+                new Thread(categoryTask).start();
+            } else {
+                Task<PaginatedResponse<Place>> allTask = placeService.getAllPlaces(currentPage, pageSize);
+                allTask.setOnSucceeded(ev -> {
+                    PaginatedResponse<Place> resp = allTask.getValue();
+                    if (resp != null) {
+                        places.setAll(resp.getContent());
+                        renderCards();
+                        pagination.setPageCount(resp.getTotalPages());
+                    }
+                    showLoading(false);
+                });
+                allTask.setOnFailed(ev -> {
+                    handleErrors(allTask.getException());
+                    showLoading(false);
+                });
+                new Thread(allTask).start();
+            }
+        } catch (Exception e) {
+            handleErrors(e);
             showLoading(false);
-            places.setAll(fetchTask.getValue());
-            renderCards();
-        });
-
-        fetchTask.setOnFailed(ev -> {
-            showLoading(false);
-            Throwable ex = fetchTask.getException();
-            handleErrors(ex);
-        });
-
-        Thread t = new Thread(fetchTask, "load-places");
-        t.setDaemon(true);
-        t.start();
+        }
     }
 
     private void renderCards() {

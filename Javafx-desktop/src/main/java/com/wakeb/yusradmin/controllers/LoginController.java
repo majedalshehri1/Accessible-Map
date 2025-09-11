@@ -107,7 +107,6 @@ public class LoginController {
                         ? "فشل تسجيل الدخول."
                         : result.getMessage();
                 showError(msg);
-                showStyledAlert(Alert.AlertType.ERROR, "فشل تسجيل الدخول", msg);
             }
         });
 

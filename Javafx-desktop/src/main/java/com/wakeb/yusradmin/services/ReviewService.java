@@ -2,7 +2,7 @@ package com.wakeb.yusradmin.services;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.wakeb.yusradmin.models.PlaceDto;
+import com.wakeb.yusradmin.models.PaginatedResponse; // ADD THIS IMPORT
 import com.wakeb.yusradmin.models.ReviewRequestDTO;
 import com.wakeb.yusradmin.models.ReviewResponseDTO;
 import javafx.concurrent.Task;
@@ -40,18 +40,40 @@ public class ReviewService {
                 .build();
         String base = authService.getBaseUrl();
         if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
-        this.adminBase = base + "/admin";  // ✅ Add this
+        this.adminBase = base + "/admin";
     }
 
     // ---------------------------
     // Public async API methods
     // ---------------------------
 
-    /** GET /api/admin/all/reviews */
+    /** GET /api/admin/all/reviews?page={page}&size={size} */
+    public Task<PaginatedResponse<ReviewResponseDTO>> getAllReviewsAsync(int page, int size) {
+        return new Task<>() {
+            @Override
+            protected PaginatedResponse<ReviewResponseDTO> call() throws Exception {
+                HttpRequest.Builder b = HttpRequest.newBuilder(
+                                URI.create(adminBase + "/all/reviews?page=" + page + "&size=" + size))
+                        .timeout(Duration.ofSeconds(20))
+                        .GET();
+                addAuth(b);
+                HttpResponse<String> res = http.send(b.build(), HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+                ensure2xx(res, "getAllReviews");
+
+                // Parse as PaginatedResponse
+                Type responseType = new TypeToken<PaginatedResponse<ReviewResponseDTO>>(){}.getType();
+                return gson.fromJson(res.body(), responseType);
+            }
+        };
+    }
+
+    // Keep the old method for backward compatibility if needed
     public Task<List<ReviewResponseDTO>> getAllReviewsAsync() {
         return new Task<>() {
-            @Override protected List<ReviewResponseDTO> call() throws Exception {
-                HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(adminBase + "/all/reviews"))
+            @Override
+            protected List<ReviewResponseDTO> call() throws Exception {
+                HttpRequest.Builder b = HttpRequest.newBuilder(
+                                URI.create(adminBase + "/all/reviews"))
                         .timeout(Duration.ofSeconds(20))
                         .GET();
                 addAuth(b);
@@ -66,7 +88,8 @@ public class ReviewService {
     /** DELETE /api/admin/delete/review/{id} */
     public Task<Void> deleteReviewAsync(long reviewId) {
         return new Task<>() {
-            @Override protected Void call() throws Exception {
+            @Override
+            protected Void call() throws Exception {
                 HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(adminBase + "/delete/review/" + reviewId))
                         .timeout(Duration.ofSeconds(20))
                         .DELETE();
@@ -81,7 +104,8 @@ public class ReviewService {
     /** PUT /api/admin/update/review/{id}  (body: ReviewRequestDTO) */
     public Task<ReviewResponseDTO> updateReviewAsync(long reviewId, ReviewRequestDTO dto) {
         return new Task<>() {
-            @Override protected ReviewResponseDTO call() throws Exception {
+            @Override
+            protected ReviewResponseDTO call() throws Exception {
                 String body = gson.toJson(dto);
                 HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(adminBase + "/update/review/" + reviewId))
                         .timeout(Duration.ofSeconds(20))
@@ -112,7 +136,4 @@ public class ReviewService {
             throw new RuntimeException(op + " failed: " + sc + " -> " + res.body());
         }
     }
-
-
-
 }

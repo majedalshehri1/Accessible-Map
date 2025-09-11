@@ -1,5 +1,6 @@
 package com.wakeb.yusradmin.controllers;
 
+import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.ReviewRow;
 import com.wakeb.yusradmin.models.ReviewRequestDTO;
 import com.wakeb.yusradmin.models.ReviewResponseDTO;
@@ -32,10 +33,17 @@ public class ReviewsController implements Initializable {
     @FXML private TableColumn<ReviewRow, String>  colDate;
     @FXML private TableColumn<ReviewRow, String>  colStatus;
     @FXML private TableColumn<ReviewRow, ReviewRow> colActions;
+    @FXML private Pagination pagination;
+    @FXML private Label pageInfo;
+    @FXML private Button prevBtn, nextBtn;
 
     @FXML private TextField searchField;
     @FXML private Button searchBtn;
     private ReviewService reviewService;
+
+    private int currentPage = 0;
+    private int pageSize = 10;
+    private int totalPages = 1;
 
     private final ObservableList<ReviewRow> data = FXCollections.observableArrayList();
 
@@ -44,6 +52,39 @@ public class ReviewsController implements Initializable {
     public void setService(ReviewService service) {
         this.reviewService = service;
         loadAllReviewsAsync(); // Load reviews when service is set
+    }
+
+    private void initializePagination() {
+        prevBtn.setOnAction(e -> loadPage(currentPage - 1));
+        nextBtn.setOnAction(e -> loadPage(currentPage + 1));
+        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
+            loadPage(newVal.intValue());
+        });
+    }
+    private void loadPage(int page) {
+        Task<PaginatedResponse<ReviewResponseDTO>> task = reviewService.getAllReviewsAsync(page, pageSize);
+        task.setOnSucceeded(e -> {
+            PaginatedResponse<ReviewResponseDTO> response = task.getValue();
+            if (response != null) {
+                data.setAll(response.getContent().stream().map(this::toRow).toList());
+                totalPages = response.getTotalPages();
+                currentPage = page;
+                updatePaginationUI();
+            }
+        });
+        task.setOnFailed(e -> {
+            showError("Load failed", task.getException());
+            updatePaginationUI(); // Reset UI on failure
+        });
+        new Thread(task).start();
+    }
+
+    private void updatePaginationUI() {
+        pageInfo.setText("صفحة " + (currentPage + 1) + " / " + totalPages);
+        prevBtn.setDisable(currentPage == 0);
+        nextBtn.setDisable(currentPage >= totalPages - 1);
+        pagination.setPageCount(totalPages);
+        pagination.setCurrentPageIndex(currentPage);
     }
     @Override
     public void initialize(URL location, ResourceBundle resources) {
@@ -74,6 +115,7 @@ public class ReviewsController implements Initializable {
                 setGraphic(box);
             }
         });
+        initializePagination();
 
         table.setItems(data);
 
@@ -87,16 +129,23 @@ public class ReviewsController implements Initializable {
 
     // ---------- API wiring ----------
 
+
     private void loadAllReviewsAsync() {
-        Task<List<ReviewResponseDTO>> task = reviewService.getAllReviewsAsync(); // :contentReference[oaicite:10]{index=10}
+        Task<PaginatedResponse<ReviewResponseDTO>> task = reviewService.getAllReviewsAsync(currentPage, pageSize);
         task.setOnSucceeded(e -> {
-            List<ReviewResponseDTO> list = task.getValue();
-            data.setAll(list.stream().map(this::toRow).toList());
+            PaginatedResponse<ReviewResponseDTO> response = task.getValue();
+            if (response == null) {
+                showError("فشل", new NullPointerException("Response is null"));
+                return;
+            }
+            data.setAll(response.getContent().stream().map(this::toRow).toList());
             table.refresh();
+            // TODO: if you want pagination controls for reviews, add a Pagination like in UsersController
         });
         task.setOnFailed(e -> showError("فشل في تحميل التقييمات", task.getException()));
         new Thread(task, "load-reviews").start();
     }
+
 
     private void onDeleteReview(ReviewRow row) {
         // DELETE /api/admin/delete/review/{id}  :contentReference[oaicite:11]{index=11}

@@ -1,0 +1,12 @@
+/** Show inline error text under the form. */
+private void showError(String message) {
+    // أظهر الرسالة في الـ Label (لو موجود)
+    if (errorLabel != null) {
+        errorLabel.setText(message);
+        errorLabel.setVisible(true);
+    }
+
+    // Optional: Remove the alert from here if you only want the label
+    // If you want both, keep it, but remove the duplicate calls elsewhere
+    showStyledAlert(Alert.AlertType.ERROR, "خطأ", message);
+}

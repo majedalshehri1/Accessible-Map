@@ -1,9 +1,7 @@
 module com.wakeb.yusradmin {
-    // JavaFX
     requires javafx.controls;
     requires javafx.fxml;
     requires javafx.graphics;
-    requires java.prefs;
 
 
     // JSON libraries
@@ -20,6 +18,9 @@ module com.wakeb.yusradmin {
     // Ikonli Font Icons (if using them)
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.ikonli.fontawesome5;
+    requires java.desktop;
+    requires java.prefs;
+    requires static lombok;
 
     // Allow FXML to access controllers
     opens com.wakeb.yusradmin.controllers to javafx.fxml;
