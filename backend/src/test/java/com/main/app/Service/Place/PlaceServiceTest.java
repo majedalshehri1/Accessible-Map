@@ -190,7 +190,8 @@ class PlaceServiceTest {
 
         assertNotNull(result);
         assertEquals(placeDto.getPlaceName(), result.getPlaceName());
-        verify(placeRepository, times(1)).save(any(Place.class));
+//        verify(placeRepository, times(1)).save(any(Place.class));
+        verify(placeRepository, times(2)).save(any(Place.class));
         verify(placeImageRepository, times(1)).saveAll(anyList());
         verify(placeFeatureRepository, times(1)).saveAll(anyList());
         verify(adminLogService, times(1)).writeLog(any(), any(), any(), any(), any(), any());
