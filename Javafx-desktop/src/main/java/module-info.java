@@ -40,4 +40,5 @@ module com.wakeb.yusradmin {
     exports com.wakeb.yusradmin.controllers;
     exports com.wakeb.yusradmin.models;
     exports com.wakeb.yusradmin.dto;
+    exports com.wakeb.yusradmin.utils;
 }
