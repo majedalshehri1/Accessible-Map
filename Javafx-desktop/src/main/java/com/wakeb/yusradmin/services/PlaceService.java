@@ -1,64 +1,38 @@
 package com.wakeb.yusradmin.services;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
 import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.Place;
-import com.wakeb.yusradmin.utils.AccessibilityFeatures;
-import com.wakeb.yusradmin.utils.AccessibilityFeaturesTypeAdapter;
 import com.wakeb.yusradmin.utils.CATEGORY;
-import com.wakeb.yusradmin.utils.CategoryTypeAdapter;
 import javafx.concurrent.Task;
 
-import java.io.IOException;
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 
 public class PlaceService {
-
-    private final HttpClient httpClient;
-    private final Gson gson;
-    private final String baseUrl;
-    private final AuthService auth = AuthService.getInstance();
-
+    private final ApiClient api;
 
     public PlaceService() {
-        this.httpClient = HttpClient.newHttpClient();
-        this.gson = new GsonBuilder()
-                .registerTypeAdapter(CATEGORY.class, new CategoryTypeAdapter())
-                .registerTypeAdapter(AccessibilityFeatures[].class, new AccessibilityFeaturesTypeAdapter())
-                .create();
-        this.baseUrl = "http://localhost:8081/api";
+        this.api = new ApiClient(AuthService.getInstance().getBaseUrl());
     }
 
-    private HttpRequest.Builder withAuth(String url) {
-        HttpRequest.Builder b = HttpRequest.newBuilder(URI.create(url))
-                .header("Content-Type", "application/json");
-        String bearer = auth.getBearerToken();
-        if (bearer != null && !bearer.isBlank()) {
-            b.header("Authorization", bearer);
-        }
-        return b;
-    }
-
-    // === Get all places (ADMIN) - مع المسار الصحيح والهيدر ===
+    // === Get all places (ADMIN) ===
     public Task<PageResponse<Place>> getAllPlaces(int page, int size) {
         return new Task<>() {
             @Override
             protected PageResponse<Place> call() throws Exception {
-                HttpRequest request = withAuth(baseUrl + "/admin/all/places?page=" + page + "&size=" + size) // ✅ CHANGED
-                        .GET()
-                        .build();
-                return getPlacePageResponse(request);
+                try {
+                    return api.get(
+                            "/admin/all/places?page=" + page + "&size=" + size,
+                            new TypeReference<PageResponse<Place>>() {}
+                    );
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
+                }
             }
         };
     }
@@ -72,26 +46,16 @@ public class PlaceService {
                     throw new IllegalArgumentException("Place name cannot be empty");
                 }
 
-                updateProgress(0, 100);
-                updateMessage("Loading places...");
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/place/search?search=" + URLEncoder.encode(name, StandardCharsets.UTF_8)))
-                        .header("Content-Type", "application/json")
-                        .GET()
-                        .build();
-
-                updateProgress(33, 100);
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                updateProgress(66, 100);
-
-                if (response.statusCode() == 200) {
-                    List<Place> places = gson.fromJson(response.body(), new TypeToken<List<Place>>() {}.getType());
-                    updateProgress(100, 100);
-                    return places != null ? places : new ArrayList<>();
-                } else {
-                    throw handleAPIErrors(response.statusCode(), response.body());
+                try {
+                    String encodedName = URLEncoder.encode(name, StandardCharsets.UTF_8);
+                    return api.get(
+                            "/place/search?search=" + encodedName,
+                            new TypeReference<List<Place>>() {}
+                    );
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
                 }
             }
         };
@@ -106,26 +70,15 @@ public class PlaceService {
                     throw new IllegalArgumentException("Place category cannot be null");
                 }
 
-                updateProgress(0, 100);
-                updateMessage("Loading places...");
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/place/category?category=" + category.getValue() + "&page=" + page + "&size=" + size))
-                        .header("Content-Type", "application/json")
-                        .GET()
-                        .build();
-
-                updateProgress(33, 100);
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                updateProgress(66, 100);
-
-                if (response.statusCode() == 200) {
-                    PageResponse<Place> places = gson.fromJson(response.body(), new TypeToken<PageResponse<Place>>() {}.getType());
-                    updateProgress(100, 100);
-                    return places != null ? places : new PageResponse<>();
-                } else {
-                    throw handleAPIErrors(response.statusCode(), response.body());
+                try {
+                    return api.get(
+                            "/place/category?category=" + category.getValue() + "&page=" + page + "&size=" + size,
+                            new TypeReference<PageResponse<Place>>() {}
+                    );
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
                 }
             }
         };
@@ -136,28 +89,19 @@ public class PlaceService {
         return new Task<>() {
             @Override
             protected PageResponse<Place> call() throws Exception {
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/admin/all/places?page=" + page +
-                                "&size=" + size + "&search=" + URLEncoder.encode(query, StandardCharsets.UTF_8)))
-                        .header("Content-Type", "application/json")
-                        .GET()
-                        .build();
-
-                return getPlacePageResponse(request);
+                try {
+                    String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
+                    return api.get(
+                            "/admin/all/places?page=" + page + "&size=" + size + "&search=" + encodedQuery,
+                            new TypeReference<PageResponse<Place>>() {}
+                    );
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
+                }
             }
         };
-    }
-
-    // === Helper for paginated responses ===
-    private PageResponse<Place> getPlacePageResponse(HttpRequest request) throws IOException, InterruptedException {
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-        if (response.statusCode() == 200) {
-            PageResponse<Place> pageResp = gson.fromJson(response.body(), new TypeToken<PageResponse<Place>>() {}.getType());
-            return pageResp != null ? pageResp : new PageResponse<>();
-        } else {
-            throw handleAPIErrors(response.statusCode(), response.body());
-        }
     }
 
     // === Delete a place by ID ===
@@ -167,27 +111,14 @@ public class PlaceService {
             protected Void call() throws Exception {
                 if (id < 0) throw new IllegalArgumentException("Place id cannot be negative");
 
-                updateProgress(0, 100);
-                updateMessage("Deleting place...");
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/admin/delete/place/" + id))
-                        .header("Content-Type", "application/json")
-                        .DELETE()
-                        .build();
-
-                updateProgress(33, 100);
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                updateProgress(66, 100);
-
-                if (response.statusCode() == 200) {
-                    updateMessage("Place deleted successfully");
-                } else {
-                    throw handleAPIErrors(response.statusCode(), response.body());
+                try {
+                    api.delete("/admin/delete/place/" + id);
+                    return null;
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
                 }
-                updateProgress(100, 100);
-                return null;
             }
         };
     }
@@ -200,42 +131,34 @@ public class PlaceService {
                 long placeId = placeUpdateDto.getId();
                 if (placeId < 0) throw new IllegalArgumentException("Place id cannot be negative");
 
-                String jsonRequest = gson.toJson(placeUpdateDto);
-
-                updateProgress(0, 100);
-                updateMessage("Updating place...");
-
-                HttpRequest request = HttpRequest.newBuilder()
-                        .uri(URI.create(baseUrl + "/admin/update/place/" + placeId))
-                        .header("Content-Type", "application/json")
-                        .PUT(HttpRequest.BodyPublishers.ofString(jsonRequest))
-                        .build();
-
-                updateProgress(33, 100);
-
-                HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-                updateProgress(66, 100);
-
-                if (response.statusCode() == 200) {
-                    updateProgress(100, 100);
-                    updateMessage("Place updated successfully");
-                    return gson.fromJson(response.body(), Place.class);
-                } else {
-                    throw handleAPIErrors(response.statusCode(), response.body());
+                try {
+                    return api.put(
+                            "/admin/update/place/" + placeId,
+                            placeUpdateDto,
+                            new TypeReference<Place>() {}
+                    );
+                } catch (RuntimeException e) {
+                    throw e;
+                } catch (Exception e) {
+                    throw new RuntimeException("Unexpected error: " + e.getMessage(), e);
                 }
             }
         };
     }
 
-    // === Centralized error handling ===
-    private RuntimeException handleAPIErrors(int statusCode, String responseBody) {
+    // === Error handling  ===
+    private RuntimeException handleAPIErrors(int statusCode) {
         switch (statusCode) {
-            case 400: return new IllegalArgumentException("Bad Request: " + responseBody);
-            case 401: return new SecurityException("Authentication required: " + responseBody);
-            case 403: return new SecurityException("Forbidden: " + responseBody);
-            case 404: return new IllegalArgumentException("Endpoint not found: " + responseBody);
-            case 500: return new RuntimeException("Server error: " + responseBody);
-            default: return new RuntimeException("Unexpected error (" + statusCode + "): " + responseBody);
+            case 400:
+                return new IllegalArgumentException("Bad Request");
+            case 401:
+                return new SecurityException("Authentication required");
+            case 404:
+                return new IllegalArgumentException("Endpoint not found");
+            case 500:
+                return new RuntimeException("Server error");
+            default:
+                return new RuntimeException("Unexpected error: " + statusCode);
         }
     }
 }
