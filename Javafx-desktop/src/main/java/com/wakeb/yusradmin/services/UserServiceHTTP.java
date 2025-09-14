@@ -2,7 +2,6 @@ package com.wakeb.yusradmin.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.wakeb.yusradmin.models.PageResponse;
-import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.User;
 
 import java.net.URLEncoder;

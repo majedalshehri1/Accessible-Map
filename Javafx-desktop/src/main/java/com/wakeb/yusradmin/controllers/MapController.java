@@ -7,7 +7,6 @@ import com.sothawo.mapjfx.event.MarkerEvent;
 import com.wakeb.yusradmin.dto.PlaceMapDTO;
 import com.wakeb.yusradmin.mappers.PlaceMappers;
 import com.wakeb.yusradmin.models.PageResponse;
-import com.wakeb.yusradmin.models.PaginatedResponse;
 import com.wakeb.yusradmin.models.Place;
 import com.wakeb.yusradmin.services.PlaceService;
 

@@ -1,7 +1,7 @@
 package com.wakeb.yusradmin.services;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.wakeb.yusradmin.models.PaginatedResponse;
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.ReviewRequestDTO;
 import com.wakeb.yusradmin.models.ReviewResponseDTO;
 import javafx.concurrent.Task;
@@ -16,13 +16,13 @@ public class ReviewService {
         this.api = new ApiClient(AuthService.getInstance().getBaseUrl());
     }
     /** GET /api/admin/all/reviews?page={page}&size={size} */
-    public Task<PaginatedResponse<ReviewResponseDTO>> getAllReviewsAsync(int page, int size) {
+    public Task<PageResponse<ReviewResponseDTO>> getAllReviewsAsync(int page, int size) {
         return new Task<>() {
             @Override
-            protected PaginatedResponse<ReviewResponseDTO> call() throws Exception {
+            protected PageResponse<ReviewResponseDTO> call() throws Exception {
                 return api.get(
                         "/admin/all/reviews?page=" + page + "&size=" + size,
-                        new TypeReference<PaginatedResponse<ReviewResponseDTO>>() {}
+                        new TypeReference<PageResponse<ReviewResponseDTO>>() {}
                 );
             }
         };

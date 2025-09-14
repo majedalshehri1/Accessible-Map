@@ -1,6 +1,6 @@
 package com.wakeb.yusradmin.controllers;
 
-import com.wakeb.yusradmin.models.PaginatedResponse;
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.ReviewRow;
 import com.wakeb.yusradmin.models.ReviewRequestDTO;
 import com.wakeb.yusradmin.models.ReviewResponseDTO;
@@ -108,9 +108,9 @@ public class ReviewsController implements Initializable {
     private void loadPage(int page) {
         if (reviewService == null) return;
 
-        Task<PaginatedResponse<ReviewResponseDTO>> task = reviewService.getAllReviewsAsync(page, pageSize);
+        Task<PageResponse<ReviewResponseDTO>> task = reviewService.getAllReviewsAsync(page, pageSize);
         task.setOnSucceeded(e -> {
-            PaginatedResponse<ReviewResponseDTO> response = task.getValue();
+            PageResponse<ReviewResponseDTO> response = task.getValue();
             if (response != null) {
                 data.setAll(response.getContent().stream().map(this::toRow).toList());
                 totalPages = response.getTotalPages();
