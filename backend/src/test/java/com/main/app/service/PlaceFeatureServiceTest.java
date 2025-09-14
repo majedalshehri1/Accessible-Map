@@ -1,4 +1,4 @@
-package com.main.app.Service.Place;
+package com.main.app.service;
 
 import com.main.app.model.Place.PlaceFeature;
 import com.main.app.repository.Place.PlaceFeatureRepository;

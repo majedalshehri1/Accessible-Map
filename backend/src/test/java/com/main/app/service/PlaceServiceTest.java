@@ -1,4 +1,4 @@
-package com.main.app.Service.Place;
+package com.main.app.service;
 
 import com.main.app.Enum.*;
 import com.main.app.Exceptions.BadRequestException;
@@ -8,7 +8,6 @@ import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
 import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.Place.PlaceDto;
-import com.main.app.dto.Review.ReviewResponseDTO;
 import com.main.app.model.Place.Place;
 import com.main.app.model.Place.PlaceFeature;
 import com.main.app.model.Place.PlaceImage;
@@ -36,7 +35,6 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.main.app.Enum.Role.USER;
 import static org.junit.jupiter.api.Assertions.*;

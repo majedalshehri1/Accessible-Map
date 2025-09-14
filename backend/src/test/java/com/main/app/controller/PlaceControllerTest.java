@@ -1,10 +1,9 @@
-package com.main.app.Controller.Place;
+package com.main.app.controller;
 
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
-import com.main.app.controller.PlaceController;
 import com.main.app.dto.PaginatedResponse;
 import com.main.app.dto.Place.PlaceDto;
 import com.main.app.model.Place.Place;
@@ -17,13 +16,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 import static com.main.app.Enum.Role.USER;
 import static org.junit.jupiter.api.Assertions.*;

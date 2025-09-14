@@ -41,9 +41,9 @@ public class ReviewService {
     private final PlaceFeatureRepository placeFeatureRepository;
 
     @Autowired
-    JwtService jwtService;
+    private final JwtService jwtService;
     @Autowired
-    AdminLogService adminLogService;
+    private final AdminLogService adminLogService;
 
     @Transactional
     public ReviewResponseDTO createReview(ReviewRequestDTO reviewDTO) {
