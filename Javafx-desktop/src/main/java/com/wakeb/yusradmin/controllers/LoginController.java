@@ -111,7 +111,7 @@ public class LoginController {
         if (loginButton != null) loginButton.setDisable(loading);
     }
 
-    /** Show inline error text under the form. */
+    /** Show inline error text under the form (no popup here). */
     private void showError(String message) {
         if (errorLabel != null) {
             errorLabel.setText(message);
@@ -119,24 +119,23 @@ public class LoginController {
         }
     }
 
-    /** Simple alert dialog for critical messages. */
+    /** Simple styled alert dialog for critical messages. */
     private void showStyledAlert(Alert.AlertType type, String title, String content) {
         Alert alert = new Alert(type);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(content);
 
-        // نجيب الـ DialogPane ونطبّق ستايل
+        // Apply RTL + CSS styling
         DialogPane pane = alert.getDialogPane();
-        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT); // عربي
+        pane.setNodeOrientation(javafx.geometry.NodeOrientation.RIGHT_TO_LEFT);
         pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
         pane.getStyleClass().add("custom-alert");
 
-        // نغير النصوص للأزرار
+        // Style the OK button
         Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
         okBtn.setText("حسناً");
         okBtn.getStyleClass().add("button-primary");
 
         alert.showAndWait();
-    }
-}
+    }}

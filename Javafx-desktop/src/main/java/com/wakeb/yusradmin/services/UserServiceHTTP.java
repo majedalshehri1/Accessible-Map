@@ -15,19 +15,37 @@ public class UserServiceHTTP implements UserService {
     public UserServiceHTTP(ApiClient api) { this.api = api; }
 
     @Override
-    public List<User> list() throws Exception {
-        PageResponse<User> page = api.get(
-                "/api/admin/all/users?page=0&size=50",
-                new TypeReference<PageResponse<User>>() {}
-        );
-        return (page != null && page.content != null) ? page.content : Collections.emptyList();
-    }
-
-    public PageResponse<User> page(int page, int size) throws Exception {
+    public PageResponse<User> list(int page, int size) throws Exception {
         return api.get(
                 "/api/admin/all/users?page=" + page + "&size=" + size,
                 new TypeReference<PageResponse<User>>() {}
         );
+    }
+
+    @Override
+    public PageResponse<User> search(String query, int page, int size) throws Exception {
+        // Get all search results from backend
+        List<User> allResults = search(query);
+
+        // Implement client-side pagination
+        int start = page * size;
+        int end = Math.min(start + size, allResults.size());
+
+        PageResponse<User> response = new PageResponse<>();
+        response.content = allResults.subList(start, end);
+        response.currentPage = page;
+        response.pageSize = size;
+        response.totalElements = allResults.size();
+        response.totalPages = (int) Math.ceil((double) allResults.size() / size);
+        response.last = (page >= response.totalPages - 1);
+
+        return response;
+    }
+
+
+    @Override
+    public List<User> list() throws Exception {
+        return api.get("/api/admin/all/users", new TypeReference<List<User>>() {});
     }
 
     @Override
@@ -41,13 +59,18 @@ public class UserServiceHTTP implements UserService {
         return api.put("/api/admin/update/user/" + u.getId(), u, new TypeReference<User>() {});
     }
 
-    @Override public void delete(long userId) throws Exception {
+    @Override
+    public void delete(long userId) throws Exception {
         api.delete("/api/admin/delete/user/" + userId);
     }
-    @Override public void block(long userId) throws Exception  {
+
+    @Override
+    public void block(long userId) throws Exception  {
         api.put("/api/admin/users/" + userId + "/block", null, null);
     }
-    @Override public void unblock(long userId) throws Exception{
+
+    @Override
+    public void unblock(long userId) throws Exception {
         api.put("/api/admin/users/" + userId + "/unblock", null, null);
     }
 }

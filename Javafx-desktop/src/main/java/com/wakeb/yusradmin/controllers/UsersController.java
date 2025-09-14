@@ -1,10 +1,8 @@
-// com.wakeb.yusradmin.controllers.UsersController.java
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
-import com.wakeb.yusradmin.services.UserServiceHTTP;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.util.UserActionCell;
 import javafx.beans.property.SimpleLongProperty;
@@ -14,8 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.util.List;
 
 public class UsersController {
 
@@ -33,7 +29,7 @@ public class UsersController {
 
     private int currentPage = 0;
     private int pageSize = 11;
-    private int totalPages = 2;
+    private int totalPages;
 
     private final ObservableList<User> data = FXCollections.observableArrayList();
     private UserService service;
@@ -58,14 +54,13 @@ public class UsersController {
                 this::onBlockToggle, this::onEdit, this::onDelete
         ));
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colActions.setMinWidth(240);
         colActions.setPrefWidth(240);
         colActions.setMaxWidth(240);
 
         searchField.setOnAction(e -> refresh());
     }
-
 
     @FXML
     private void prevPage() {
@@ -82,39 +77,30 @@ public class UsersController {
 
         String q = searchField.getText();
         if (q != null && !q.isBlank()) {
+            // when searching, delegate to refresh()
             refresh();
             return;
         }
 
-        Task<Void> task = new Task<>() {
-            PageResponse<User> p;
-
-            @Override protected Void call() throws Exception {
-                if (service instanceof UserServiceHTTP sHttp) {
-                    p = sHttp.page(page, pageSize);
-                } else {
-                    List<User> all = service.list();
-                    p = new PageResponse<>();
-                    p.content = all;
-                    p.currentPage = 0; p.pageSize = all.size();
-                    p.totalElements = all.size();
-                    p.totalPages = 1;
-                }
-                return null;
-            }
-
-            @Override protected void succeeded() {
-                currentPage = p.currentPage;
-                totalPages  = Math.max(p.totalPages, 1);
-                data.setAll(p.content);
-                updatePagingUI(true);
-            }
-
-            @Override protected void failed() {
-                FXUtil.error("Load Users Failed", getException().getMessage());
-                updatePagingUI(false);
+        Task<PageResponse<User>> task = new Task<>() {
+            @Override
+            protected PageResponse<User> call() throws Exception {
+                return service.list(page, pageSize);
             }
         };
+
+        task.setOnSucceeded(e -> {
+            PageResponse<User> p = task.getValue();
+            currentPage = p.currentPage;      // field access (your PageResponse has public fields)
+            totalPages = Math.max(p.totalPages, 1);
+            data.setAll(p.content);
+            updatePagingUI(true);
+        });
+
+        task.setOnFailed(e -> {
+            FXUtil.error("Load Users Failed", task.getException().getMessage());
+            updatePagingUI(false);
+        });
 
         updatePagingUI(false);
         new Thread(task, "users-page").start();
@@ -132,28 +118,42 @@ public class UsersController {
         nextBtn.setDisable(currentPage + 1 >= totalPages);
     }
 
-
     public void refresh() {
         if (service == null) return;
 
         String q = searchField.getText();
         if (q != null && !q.isBlank()) {
-            Task<List<User>> task = new Task<>() {
-                @Override protected List<User> call() throws Exception { return service.search(q); }
+            Task<PageResponse<User>> task = new Task<>() {
+                @Override
+                protected PageResponse<User> call() throws Exception {
+                    return service.search(q, 0, pageSize); // always reset to page 0
+                }
             };
+
             task.setOnSucceeded(e -> {
-                data.setAll(task.getValue());
-                pageInfo.setText("نتائج: " + data.size());
-                prevBtn.setDisable(true);
-                nextBtn.setDisable(true);
+                PageResponse<User> p = task.getValue();
+                if (p != null) {
+                    data.setAll(p.content);
+                    currentPage = p.currentPage;
+                    totalPages = Math.max(p.totalPages, 1);
+                    pageInfo.setText("نتائج: " + p.totalElements +
+                            " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
+                    prevBtn.setDisable(currentPage == 0);
+                    nextBtn.setDisable(currentPage + 1 >= totalPages);
+                } else {
+                    data.clear();
+                    pageInfo.setText("لا توجد نتائج");
+                    prevBtn.setDisable(true);
+                    nextBtn.setDisable(true);
+                }
             });
-            task.setOnFailed(e -> FXUtil.error("Load Users Failed", task.getException().getMessage()));
-            new Thread(task, "users-search").start();
+
+            task.setOnFailed(e -> FXUtil.error("Search Users Failed", task.getException().getMessage()));
+            new Thread(task, "users-search-refresh").start();
         } else {
             loadPage(0);
         }
     }
-
 
     private void onBlockToggle(User u) {
         Task<Void> t = new Task<>() {
@@ -163,7 +163,7 @@ public class UsersController {
                 return null;
             }
         };
-        t.setOnSucceeded(e -> loadPage(currentPage)); // نرجّع نفس الصفحة
+        t.setOnSucceeded(e -> refresh());
         t.setOnFailed(e -> FXUtil.error("Block/Unblock Failed", t.getException().getMessage()));
         new Thread(t, "block-toggle").start();
     }
@@ -171,8 +171,8 @@ public class UsersController {
     private void onEdit(User u) {
         TextInputDialog dlg = new TextInputDialog(u.getUserName());
         dlg.setTitle("تعديل المستخدم");
-        dlg.setHeaderText(null);
-        dlg.setGraphic(null);
+        dlg.setHeaderText(null);                 // بدون هيدر
+        dlg.setGraphic(null);                    // بدون أيقونة افتراضية
         dlg.setContentText("الاسم الجديد");
 
         DialogPane pane = dlg.getDialogPane();

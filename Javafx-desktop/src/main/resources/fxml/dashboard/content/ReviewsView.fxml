@@ -9,7 +9,12 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane nodeOrientation="RIGHT_TO_LEFT" stylesheets="@../../../css/places.css" xmlns="http://javafx.com/javafx/24.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.wakeb.yusradmin.controllers.ReviewsController">
+<?import javafx.scene.control.Pagination?>
+<BorderPane nodeOrientation="RIGHT_TO_LEFT"
+            stylesheets="@../../../css/places.css"
+            xmlns="http://javafx.com/javafx/24.0.1"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.wakeb.yusradmin.controllers.ReviewsController">
 
     <center>
         <VBox spacing="14" style="-fx-padding:18;">
@@ -22,20 +27,29 @@
 
             <TableView fx:id="table" VBox.vgrow="ALWAYS" styleClass="data-table">
                 <columns>
-                    <TableColumn fx:id="colId" prefWidth="70" text="ID" styleClass="table-column-header"/>
-                    <TableColumn fx:id="colUsername" prefWidth="190" text="المستخدم" styleClass="table-column-header" />
-                    <TableColumn fx:id="colPlace" prefWidth="260" text="المكان" styleClass="table-column-header" />
-                    <TableColumn fx:id="colReview" prefWidth="110" text="التقييم" styleClass="table-column-header" />
-                    <TableColumn fx:id="colDescription" text="الوصف" prefWidth="300" styleClass="table-column-header"/>
-                    <TableColumn fx:id="colDate" prefWidth="140" text="التاريخ" styleClass="table-column-header" />
-                    <TableColumn fx:id="colStatus" prefWidth="120" text="الحالة" visible="false" styleClass="table-column-header" />
-                    <!-- عمود الإجراءات -->
-                    <TableColumn fx:id="colActions" prefWidth="220" text="الإجراءات" styleClass="table-column-header" />
+                    <TableColumn fx:id="colId" prefWidth="70" text="ID"/>
+                    <TableColumn fx:id="colUsername" prefWidth="190" text="المستخدم"/>
+                    <TableColumn fx:id="colPlace" prefWidth="260" text="المكان"/>
+                    <TableColumn fx:id="colReview" prefWidth="110" text="التقييم"/>
+                    <TableColumn fx:id="colDescription" prefWidth="300" text="الوصف"/>
+                    <TableColumn fx:id="colDate" prefWidth="140" text="التاريخ"/>
+                    <TableColumn fx:id="colStatus" prefWidth="120" text="الحالة"/>
+                    <TableColumn fx:id="colActions" prefWidth="220" text="الإجراءات"/>
                 </columns>
                 <placeholder>
                     <Label text="جاري التحميل..." />
                 </placeholder>
             </TableView>
+
+            <!-- Pagination Control -->
+            <Pagination fx:id="pagination" VBox.vgrow="NEVER" maxPageIndicatorCount="5"/>
+
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="prevBtn" text="السابق"/>
+                <Label fx:id="pageInfo" text="صفحة 1 / 1"/>
+                <Button fx:id="nextBtn" text="التالي"/>
+            </HBox>
+
         </VBox>
     </center>
 </BorderPane>

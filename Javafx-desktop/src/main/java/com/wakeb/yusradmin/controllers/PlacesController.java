@@ -1,9 +1,7 @@
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
-import com.wakeb.yusradmin.models.Place;
-import com.wakeb.yusradmin.models.PlaceDto;
-import com.wakeb.yusradmin.models.ReviewRequestDTO;
+import com.wakeb.yusradmin.models.*;
 import com.wakeb.yusradmin.services.PlaceService;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
@@ -34,9 +32,15 @@ public class PlacesController {
     @FXML private Button searchButton;
     @FXML private ComboBox<CATEGORY> filterComboBox;
 
+
     // شبكة الكروت
     @FXML private FlowPane cardsPane;
     @FXML private ScrollPane cardsScroll;
+
+    @FXML private Pagination pagination;
+
+    private int currentPage = 0;
+    private int pageSize = 12;
 
     // ====== بيانات وخدمات ======
     private PlaceService placeService;
@@ -64,7 +68,10 @@ public class PlacesController {
                 setText(empty || item == null ? null : item.getLabel());
             }
         });
-
+        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = newVal.intValue();
+            loadPlaces();
+        });
         searchButton.setOnAction(e -> loadPlaces());
         filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
 
@@ -73,36 +80,64 @@ public class PlacesController {
     }
 
     // ====== تحميل الأماكن من الخدمة ======
+    // PlacesController.java - Fix pagination handling
+    // PlacesController.java - Update loadPlaces method
     private void loadPlaces() {
-        Task<List<Place>> fetchTask;
-        String q = searchField.getText();
-
-        if (q != null && !q.isBlank()) {
-            fetchTask = placeService.getPlacesByName(q);
-        } else if (filterComboBox.getValue() != null &&
-                filterComboBox.getValue() != CATEGORY.ALL) {
-            fetchTask = placeService.getPlacesByCategory(filterComboBox.getValue());
-        } else {
-            fetchTask = placeService.getAllPlaces();
-        }
-
         showLoading(true);
+        String q = searchField.getText();
+        CATEGORY cat = filterComboBox.getValue();
 
-        fetchTask.setOnSucceeded(ev -> {
+        try {
+            if (q != null && !q.isBlank()) {
+                Task<PageResponse<Place>> searchTask = placeService.searchPlaces(q, currentPage, pageSize);
+                HelperFunc(searchTask);
+            } else if (cat != null) {
+                Task<PageResponse<Place>> categoryTask = placeService.getPlacesByCategory(cat, currentPage, pageSize);
+                HelperFunc(categoryTask);
+            } else {
+                Task<PageResponse<Place>> allTask = placeService.getAllPlaces(currentPage, pageSize);
+                allTask.setOnSucceeded(ev -> {
+                    PageResponse<Place> resp = allTask.getValue();
+                    if (resp != null) {
+                        places.setAll(resp.getContent());
+                        renderCards();
+                        pagination.setPageCount(resp.getTotalPages());
+                    }
+                    showLoading(false);
+                });
+                allTask.setOnFailed(ev -> {
+                    handleErrors(allTask.getException());
+                    showLoading(false);
+                });
+                new Thread(allTask).start();
+            }
+        } catch (Exception e) {
+            handleErrors(e);
             showLoading(false);
-            places.setAll(fetchTask.getValue());
-            renderCards();
-        });
+        }
+    }
 
-        fetchTask.setOnFailed(ev -> {
+    private void HelperFunc(Task<PageResponse<Place>> categoryTask) {
+        categoryTask.setOnSucceeded(ev -> {
+            PageResponse<Place> result = categoryTask.getValue();
+            if (result != null) {
+                places.setAll(result.content);
+                renderCards();
+                pagination.setPageCount(result.totalPages);
+            }
             showLoading(false);
-            Throwable ex = fetchTask.getException();
-            handleErrors(ex);
         });
+        categoryTask.setOnFailed(ev -> {
+            handleErrors(categoryTask.getException());
+            showLoading(false);
+        });
+        new Thread(categoryTask).start();
+    }
 
-        Thread t = new Thread(fetchTask, "load-places");
-        t.setDaemon(true);
-        t.start();
+    @FXML
+    private void handlePageChange() {
+        currentPage = pagination.getCurrentPageIndex();
+        loadPlaces();
     }
 
     private void renderCards() {
@@ -288,13 +323,23 @@ public class PlacesController {
 
     // ====== مساعدات ======
     private void handleErrors(Throwable error) {
+        // Always print full stack trace for debugging
+        if (error != null) {
+            System.err.println("=== Exception occurred ===");
+            error.printStackTrace();
+        }
+
+        // Determine user-friendly message
         String msg;
         if (error instanceof SecurityException) msg = "Authentication required. Please login.";
         else if (error instanceof IllegalArgumentException) msg = "Invalid request. Please try again.";
-        else if (error instanceof IOException) msg = "Network Error. Please try again.";
-        else msg = "unknown error. Please try again.";
+        else if (error instanceof IOException) msg = "Network error. Please check your connection.";
+        else msg = "Unknown error occurred: " + (error != null && error.getMessage() != null ? error.getMessage() : "");
+
+        // Show alert
         FXUtil.error("Error", msg);
     }
+
 
     private void showLoading(boolean loading) {
         if (loading) {
