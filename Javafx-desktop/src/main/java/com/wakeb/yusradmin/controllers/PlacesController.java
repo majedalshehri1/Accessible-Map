@@ -148,15 +148,15 @@ public class PlacesController {
     }
 
     private Node buildPlaceCard(Place p) {
-        // الصورة
         ImageView img = new ImageView();
         img.setFitWidth(CARD_WIDTH);
         img.setFitHeight(IMAGE_HEIGHT);
         img.setPreserveRatio(false);
         img.setSmooth(true);
 
-        if (p.getImageUrl() != null && !p.getImageUrl().isBlank()) {
-            Image image = new Image(p.getImageUrl(), CARD_WIDTH, IMAGE_HEIGHT, false, true, true);
+        String firstImageUrl = p.getFirstImageUrl();
+        if (firstImageUrl != null && !firstImageUrl.isBlank()) {
+            Image image = new Image(firstImageUrl, CARD_WIDTH, IMAGE_HEIGHT, false, true, true);
             img.setImage(image);
         } else {
             img.setStyle("-fx-background-color: #eceff1;");
