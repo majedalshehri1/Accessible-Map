@@ -1,6 +1,6 @@
 package com.main.app.config;
 
-import com.main.app.service.JwtService;
+import com.main.app.service.Security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import com.main.app.repository.User.UserRepository;
 
 import java.util.List;
 
@@ -30,6 +31,8 @@ public class SecurityConfig {
 
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
+
 
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -59,7 +62,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
                         .requestMatchers("/api/place/**").permitAll()
-                        .requestMatchers("/api/reviews/place/**").permitAll()
+                        .requestMatchers("/api/reviews/**").hasAnyRole("USER", "ADMIN")
 
                         .requestMatchers("/api/auth/me").authenticated()
 
@@ -67,7 +70,7 @@ public class SecurityConfig {
                 );
 
         http.addFilterBefore(
-                new JwtAuthenticationFilter(jwtService, userDetailsService),
+                new JwtAuthenticationFilter(jwtService, userDetailsService, userRepository),
                 UsernamePasswordAuthenticationFilter.class
         );
 

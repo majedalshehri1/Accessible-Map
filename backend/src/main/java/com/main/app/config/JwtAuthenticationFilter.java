@@ -1,8 +1,9 @@
 package com.main.app.config;
 
-import com.main.app.model.User;
-import com.main.app.service.CustomUserDetails;
-import com.main.app.service.JwtService;
+import com.main.app.model.User.User;
+import com.main.app.repository.User.UserRepository;
+import com.main.app.service.Security.CustomUserDetails;
+import com.main.app.service.Security.JwtService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -11,21 +12,26 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UserDetailsService userDetailsService,
+                                   UserRepository userRepository) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -35,7 +41,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
 
         String token = extractTokenFromCookieOrHeader(request);
-
         if (token == null) {
             chain.doFilter(request, response);
             return;
@@ -55,16 +60,33 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-
-            if(userDetails instanceof CustomUserDetails u && u.isBlocked()){
+            var userDetails = userDetailsService.loadUserByUsername(userEmail);
+            if (userDetails instanceof CustomUserDetails cud && cud.isBlocked()) {
                 forbiddenAndClearCookie(response);
                 return;
             }
 
-            var authToken = new UsernamePasswordAuthenticationToken(
-                    userDetails, null, userDetails.getAuthorities()
+            var userOpt = userRepository.findByUserEmail(userEmail);
+            if (userOpt.isEmpty()) {
+                unauthorizedAndClearCookie(response);
+                return;
+            }
+            User u = userOpt.get();
+            if (Boolean.TRUE.equals(u.getIsBlocked())) {
+                forbiddenAndClearCookie(response);
+                return;
+            }
+
+            var principal = new AuthUser(
+                    u.getUserId(),
+                    u.getUserName(),
+                    u.getUserEmail(),
+                    u.getUserRole()
             );
+
+            var authorities = List.of(new SimpleGrantedAuthority("ROLE_" + u.getUserRole()));
+
+            var authToken = new UsernamePasswordAuthenticationToken(principal, null, authorities);
             authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authToken);
         }
@@ -89,40 +111,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static void unauthorizedAndClearCookie(HttpServletResponse res) throws IOException {
         ResponseCookie clear = ResponseCookie.from("jwt","")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
+                .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(0).build();
         res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
         res.addHeader("Cache-Control", "no-store");
-
-        // RFC7807 Problem JSON
         res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         res.setContentType("application/problem+json");
         res.getWriter().write("""
           {"type":"about:blank","title":"Unauthorized","status":401,"detail":"Invalid or expired token"}
         """);
     }
+
     private static void forbiddenAndClearCookie(HttpServletResponse res) throws IOException {
         ResponseCookie clear = ResponseCookie.from("jwt","")
-                .httpOnly(true)
-                .secure(false)
-                .sameSite("Lax")
-                .path("/")
-                .maxAge(0)
-                .build();
+                .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(0).build();
         res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
         res.addHeader("Cache-Control", "no-store");
-
         res.setStatus(HttpServletResponse.SC_FORBIDDEN);
         res.setContentType("application/problem+json");
         res.getWriter().write("""
-      {"type":"about:blank","title":"Forbidden","status":403,"detail":"User is blocked"}
-    """);
+          {"type":"about:blank","title":"Forbidden","status":403,"detail":"User is blocked"}
+        """);
     }
-
-
-
 }

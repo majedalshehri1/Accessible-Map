@@ -1,12 +1,22 @@
 package com.main.app.controller;
 
-import com.main.app.dto.*;
-import com.main.app.model.Place;
-import com.main.app.model.Review;
-import com.main.app.model.User;
-import com.main.app.service.*;
+import com.main.app.Enum.EntityType;
+import com.main.app.dto.Admin.AdminLogDto;
+import com.main.app.dto.PaginatedResponse;
+import com.main.app.dto.Place.PlaceDto;
+import com.main.app.dto.Place.TopPlaceDto;
+import com.main.app.dto.Review.ReviewRequestDTO;
+import com.main.app.dto.Review.ReviewResponseDTO;
+import com.main.app.dto.User.UserDto;
+import com.main.app.model.Place.Place;
+import com.main.app.model.User.User;
+import com.main.app.service.Admin.AdminLogService;
+import com.main.app.service.Admin.AdminService;
+import com.main.app.service.Place.PlaceService;
+import com.main.app.service.Review.ReviewService;
+import com.main.app.service.User.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,22 +34,8 @@ public class AdminController {
     private final PlaceService placeService;
     private final AdminService adminService;
     private final UserService userService;
+    private final AdminLogService adminLogService;
 
-
-    @GetMapping("/all/reviews")
-    public ResponseEntity<List<ReviewResponseDTO>> allReviews() {
-        return ResponseEntity.ok(reviewService.getAllReviews());
-    }
-
-    @GetMapping("/all/places")
-    public ResponseEntity<List<PlaceDto>> getAllPlaces(){
-        return ResponseEntity.ok(placeService.getAllPlaces());
-    }
-
-    @GetMapping("/all/users")
-    public ResponseEntity<List<UserDto>> getAllUsers(){
-        return ResponseEntity.ok(userService.findOnlyUsers());
-    }
 
     @GetMapping("/count/places")
     public ResponseEntity<Long> countPlaces() {
@@ -149,6 +145,34 @@ public class AdminController {
     public ResponseEntity<List<Object[]>> countPlaceCategory() {
         return ResponseEntity.ok(placeService.countPlacesByCategory());
 
+    }
+
+    @GetMapping("/logs")
+    public ResponseEntity<PaginatedResponse<AdminLogDto>> getLogs(@RequestParam(required = false ) Integer page,
+                                     @RequestParam(required = false ) Integer size,
+                                     @RequestParam(required = false)EntityType entityType,
+                                     @RequestParam(required = false)Long entityId) {
+        return  ResponseEntity.ok(adminLogService.list(page, size, entityType, entityId));
+    }
+    @GetMapping("/all/reviews")
+    public ResponseEntity<PaginatedResponse<ReviewResponseDTO>> allReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.getAllReviews(page, size));
+    }
+
+    @GetMapping("/all/places")
+    public ResponseEntity<PaginatedResponse<PlaceDto>> getAllPlaces(
+            @RequestParam( required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(placeService.getAllPlaces(page, size));
+    }
+
+    @GetMapping("/all/users")
+    public ResponseEntity<PaginatedResponse<UserDto>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.findOnlyUsers(page, size));
     }
 
 

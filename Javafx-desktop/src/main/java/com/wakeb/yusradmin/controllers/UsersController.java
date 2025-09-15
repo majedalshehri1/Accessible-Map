@@ -1,11 +1,10 @@
-// com.wakeb.yusradmin.controllers.UsersController.java
 package com.wakeb.yusradmin.controllers;
 
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.util.UserActionCell;
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -13,8 +12,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-
-import java.util.List;
 
 public class UsersController {
 
@@ -27,21 +24,19 @@ public class UsersController {
     @FXML private TableColumn<User, String> colStatus;
     @FXML private TableColumn<User, Void>   colActions;
 
+    @FXML private Button prevBtn, nextBtn;
+    @FXML private Label pageInfo;
+
+    private int currentPage = 0;
+    private int pageSize = 11;
+    private int totalPages;
+
     private final ObservableList<User> data = FXCollections.observableArrayList();
     private UserService service;
 
-    private static final double[] COLUMN_WIDTH_PERCENTAGES = {
-            0.12, // ID
-            0.15, // Name
-            0.12, // Email
-            0.22, // Role
-            0.12, // Status
-            0.23  // Actions
-    };
-
     public void setService(UserService s) {
         this.service = s;
-        refresh();
+        loadPage(0);
     }
 
     @FXML
@@ -59,34 +54,105 @@ public class UsersController {
                 this::onBlockToggle, this::onEdit, this::onDelete
         ));
 
-        bindColumnsWidth();
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
+        colActions.setMinWidth(240);
+        colActions.setPrefWidth(240);
+        colActions.setMaxWidth(240);
 
         searchField.setOnAction(e -> refresh());
     }
 
-    private void bindColumnsWidth() {
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+    @FXML
+    private void prevPage() {
+        if (currentPage > 0) loadPage(currentPage - 1);
+    }
 
-        colActions.setMinWidth(240);
-        colActions.setPrefWidth(240);
-        colActions.setMaxWidth(240);
+    @FXML
+    private void nextPage() {
+        if (currentPage + 1 < totalPages) loadPage(currentPage + 1);
+    }
+
+    private void loadPage(int page) {
+        if (service == null) return;
+
+        String q = searchField.getText();
+        if (q != null && !q.isBlank()) {
+            // when searching, delegate to refresh()
+            refresh();
+            return;
+        }
+
+        Task<PageResponse<User>> task = new Task<>() {
+            @Override
+            protected PageResponse<User> call() throws Exception {
+                return service.list(page, pageSize);
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            PageResponse<User> p = task.getValue();
+            currentPage = p.currentPage;      // field access (your PageResponse has public fields)
+            totalPages = Math.max(p.totalPages, 1);
+            data.setAll(p.content);
+            updatePagingUI(true);
+        });
+
+        task.setOnFailed(e -> {
+            FXUtil.error("Load Users Failed", task.getException().getMessage());
+            updatePagingUI(false);
+        });
+
+        updatePagingUI(false);
+        new Thread(task, "users-page").start();
+    }
+
+    private void updatePagingUI(boolean loaded) {
+        if (!loaded) {
+            pageInfo.setText("...");
+            prevBtn.setDisable(true);
+            nextBtn.setDisable(true);
+            return;
+        }
+        pageInfo.setText("صفحة " + (currentPage + 1) + " / " + totalPages);
+        prevBtn.setDisable(currentPage == 0);
+        nextBtn.setDisable(currentPage + 1 >= totalPages);
     }
 
     public void refresh() {
         if (service == null) return;
 
         String q = searchField.getText();
-        Task<List<User>> task = new Task<>() {
-            @Override protected List<User> call() throws Exception {
-                if (q != null && !q.isBlank()) return service.search(q);
-                else return service.list();
-            }
-        };
+        if (q != null && !q.isBlank()) {
+            Task<PageResponse<User>> task = new Task<>() {
+                @Override
+                protected PageResponse<User> call() throws Exception {
+                    return service.search(q, 0, pageSize); // always reset to page 0
+                }
+            };
 
-        task.setOnSucceeded(e -> data.setAll(task.getValue()));
-        task.setOnFailed(e -> FXUtil.error("Load Users Failed", task.getException().getMessage()));
+            task.setOnSucceeded(e -> {
+                PageResponse<User> p = task.getValue();
+                if (p != null) {
+                    data.setAll(p.content);
+                    currentPage = p.currentPage;
+                    totalPages = Math.max(p.totalPages, 1);
+                    pageInfo.setText("نتائج: " + p.totalElements +
+                            " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
+                    prevBtn.setDisable(currentPage == 0);
+                    nextBtn.setDisable(currentPage + 1 >= totalPages);
+                } else {
+                    data.clear();
+                    pageInfo.setText("لا توجد نتائج");
+                    prevBtn.setDisable(true);
+                    nextBtn.setDisable(true);
+                }
+            });
 
-        new Thread(task, "load-users").start();
+            task.setOnFailed(e -> FXUtil.error("Search Users Failed", task.getException().getMessage()));
+            new Thread(task, "users-search-refresh").start();
+        } else {
+            loadPage(0);
+        }
     }
 
     private void onBlockToggle(User u) {
@@ -114,9 +180,7 @@ public class UsersController {
         pane.getStylesheets().add(getClass().getResource("/css/main.css").toExternalForm());
         pane.getStyleClass().add("modern-dialog");
 
-        if (table.getScene() != null) {
-            dlg.initOwner(table.getScene().getWindow());
-        }
+        if (table.getScene() != null) dlg.initOwner(table.getScene().getWindow());
 
         Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
         okBtn.setText("حفظ");
@@ -136,7 +200,7 @@ public class UsersController {
                     return null;
                 }
             };
-            t.setOnSucceeded(e -> refresh());
+            t.setOnSucceeded(e -> loadPage(currentPage));
             t.setOnFailed(e -> FXUtil.error("Update Failed", t.getException().getMessage()));
             new Thread(t, "update-user").start();
         });
@@ -150,7 +214,10 @@ public class UsersController {
                 return null;
             }
         };
-        t.setOnSucceeded(e -> refresh());
+        t.setOnSucceeded(e -> {
+            if (data.size() == 1 && currentPage > 0) loadPage(currentPage - 1);
+            else loadPage(currentPage);
+        });
         t.setOnFailed(e -> FXUtil.error("Delete Failed", t.getException().getMessage()));
         new Thread(t, "delete-user").start();
     }

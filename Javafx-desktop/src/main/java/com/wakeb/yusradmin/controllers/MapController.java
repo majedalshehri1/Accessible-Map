@@ -6,10 +6,12 @@ import com.sothawo.mapjfx.event.MarkerEvent;
 
 import com.wakeb.yusradmin.dto.PlaceMapDTO;
 import com.wakeb.yusradmin.mappers.PlaceMappers;
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.Place;
 import com.wakeb.yusradmin.services.PlaceService;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
@@ -66,13 +68,20 @@ public class MapController {
 
     @FXML
     public void refreshFromDatabase() {
-        var task = placeService.getAllPlaces();
+        Task<PageResponse<Place>> task = placeService.getAllPlaces(0, 1000);
 
         task.setOnSucceeded(ev -> {
-            List<Place> places = task.getValue();
+            PageResponse<Place> response = task.getValue();
+            if (response == null) {
+                Platform.runLater(() -> {
+                    clearPins();
+                    Alert alert = new Alert(Alert.AlertType.ERROR, "Empty response from server");
+                    alert.show();
+                });
+                return;
+            }
 
-            // convert to DTOs
-            List<PlaceMapDTO> dtoList = places.stream()
+            List<PlaceMapDTO> dtoList = response.getContent().stream()
                     .map(PlaceMappers::toMapDTO)
                     .flatMap(Optional::stream)
                     .collect(Collectors.toList());
@@ -96,6 +105,8 @@ public class MapController {
     }
 
 
+
+
     private void renderPlaces(List<PlaceMapDTO> places) {
         clearPins();
         for (PlaceMapDTO p : places) {
@@ -104,6 +115,7 @@ public class MapController {
         }
         fitToMarkers();
     }
+
 
     private void addPin(Coordinate c, String name, String category) {
         Marker marker = Marker.createProvided(Marker.Provided.BLUE)

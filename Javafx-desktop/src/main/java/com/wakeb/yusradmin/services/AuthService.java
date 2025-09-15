@@ -86,51 +86,80 @@ public class AuthService {
 
                 HttpResponse<String> response = safeSend(request);
                 if (response == null) {
-                    return new LoginResult(false, null, "Server is unreachable.", null);
+                    return new LoginResult(false, null, "الخادم غير متاح حاليا", null);
+                }
+                int sc = response.statusCode();
+                if (sc == 401) {
+                    return new LoginResult(false, null, "البريد الإلكتروني أو كلمة المرور غير صحيحة.", null);
+                }
+                if (sc == 403) {
+                    return new LoginResult(false, null, "تم حظر الحساب.", null);
+                }
+                if (sc / 100 != 2) {
+                    return new LoginResult(false, null, "حدث خطأ غير متوقع. حاول لاحقًا.", null);
+                }
+                JsonObject json = gson.fromJson(response.body(), JsonObject.class);
+
+                String token =
+                        (json.has("accessToken") && !json.get("accessToken").isJsonNull())
+                                ? json.get("accessToken").getAsString()
+                                : (json.has("token") && !json.get("token").isJsonNull()
+                                ? json.get("token").getAsString()
+                                : null);
+
+                if (token == null) {
+                    return new LoginResult(false, null, "Token missing in response.", null);
+                }
+                User fetched = fetchUserFromMe(token);
+                if (fetched == null) {
+                    return new LoginResult(false, null, "Session validation failed.", null);
+                }
+                if (!hasAdminRole(fetched.getRole())) {
+                    return new LoginResult(false, null, "حظر الوصول: فقط للمسؤولين", null);
                 }
 
-                if (response.statusCode() / 100 == 2) {
-                    JsonObject json = gson.fromJson(response.body(), JsonObject.class);
+                currentToken = token;
+                currentUser  = fetched;
+                tokenExpiry  = LocalDateTime.now().plusHours(8);
+                storeAuth(currentToken, currentUser, tokenExpiry);
 
-                    String token = json.has("token") && !json.get("token").isJsonNull()
-                            ? json.get("token").getAsString()
-                            : (json.has("accessToken") && !json.get("accessToken").isJsonNull()
-                            ? json.get("accessToken").getAsString() : null);
-
-                    if (token == null) {
-                        return new LoginResult(false, null, "Token missing in response.", null);
-                    }
-
-                    currentToken = token;
-                    tokenExpiry = LocalDateTime.now().plusHours(8);
-
-                    if (!validateSessionSync()) {
-                        clearAuth();
-                        return new LoginResult(false, null, "Unable to validate session.", null);
-                    }
-
-                    if (currentUser == null || currentUser.getRole() == null
-                            || !currentUser.getRole().trim().equalsIgnoreCase("ADMIN")) {
-                        clearAuth();
-                        return new LoginResult(false, null, "Admins only. Access denied.", null);
-                    }
-
-                    storeAuth(currentToken, currentUser, tokenExpiry);
-
-                    String message = json.has("message") && !json.get("message").isJsonNull()
-                            ? json.get("message").getAsString()
-                            : "Login successful";
-
-                    return new LoginResult(true, currentUser, message, currentToken);
-                }
-
-
-                // Non-2xx → failed
-                String msg = "Login failed: " + response.statusCode();
-                if (response.body() != null && !response.body().isEmpty()) msg += " - " + response.body();
-                return new LoginResult(false, null, msg, null);
+                String message = "Login successful";
+                return new LoginResult(true, currentUser, message, currentToken);
             }
         };
+    }
+    private User fetchUserFromMe(String token) {
+        HttpRequest req = HttpRequest.newBuilder()
+                .uri(URI.create(baseUrl + validatePath))
+                .header("Authorization", "Bearer " + token)
+                .GET()
+                .build();
+
+        HttpResponse<String> res = safeSend(req);
+        if (res == null || res.statusCode() / 100 != 2) {
+            return null;
+        }
+
+        try {
+            var json = gson.fromJson(res.body(), com.google.gson.JsonObject.class);
+            String username = json.has("username") && !json.get("username").isJsonNull()
+                    ? json.get("username").getAsString() : null;
+            String email = json.has("email") && !json.get("email").isJsonNull()
+                    ? json.get("email").getAsString() : null;
+            String role = null;
+            if (json.has("role") && !json.get("role").isJsonNull())
+                role = json.get("role").getAsString();
+            else if (json.has("hasRole") && !json.get("hasRole").isJsonNull())
+                role = json.get("hasRole").getAsString();
+
+            User u = new User();
+            u.setUserName(username);
+            u.setUserEmail(email);
+            u.setRole(role);
+            return u;
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     /**
@@ -241,6 +270,15 @@ public class AuthService {
         } catch (IOException | InterruptedException e) {
             return null; // generic I/O problems
         }
+    }
+    // ===== helpers for role checks =====
+    public static boolean hasAdminRole(String role) {
+        if (role == null) return false;
+        String r = role.trim();
+        return r.equalsIgnoreCase("ADMIN") || r.equalsIgnoreCase("ROLE_ADMIN");
+    }
+    public static boolean isAdminUser(com.wakeb.yusradmin.models.User u) {
+        return u != null && hasAdminRole(u.getRole());
     }
 
     // Persistence (Preferences) helpers

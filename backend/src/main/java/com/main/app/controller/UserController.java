@@ -1,14 +1,21 @@
 package com.main.app.controller;
 
-import com.main.app.dto.UpdateUsernameDTO;
-import com.main.app.model.User;
-import com.main.app.service.UserService;
+import com.main.app.dto.PaginatedResponse;
+import com.main.app.config.SecurityUtils;
+import com.main.app.dto.User.UpdateUsernameDTO;
+import com.main.app.dto.User.UserDto;
+import com.main.app.model.User.User;
+import com.main.app.service.User.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/users")
@@ -17,11 +24,21 @@ public class UserController {
     private final UserService userService;
 
     @PatchMapping("/username")
-    public ResponseEntity<User> updateUsername(@RequestBody @Valid UpdateUsernameDTO updateDTO) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentUserEmail = authentication.getName();
+    public ResponseEntity<Map<String,Object>> updateUsername(@RequestBody @Valid UpdateUsernameDTO dto) {
+        var me = SecurityUtils.currentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
-        User updatedUser = userService.updateUsername(currentUserEmail, updateDTO.getNewUsername());
-        return ResponseEntity.ok(updatedUser);
+        var updated = userService.updateUsernameById(me.id(), dto.getNewUsername());
+
+        return ResponseEntity.ok(Map.of(
+                "id", updated.getUserId(),
+                "username", updated.getUserName()
+        ));
+    }
+    @GetMapping("/all")
+    public ResponseEntity<PaginatedResponse<UserDto>> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getAllUsers(page, size));
     }
 }

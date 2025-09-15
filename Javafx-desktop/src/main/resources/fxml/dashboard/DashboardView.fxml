@@ -93,6 +93,10 @@
                                       prefHeight="40.0" styleClass="nav-btn"
                                       text="إدارة الأماكن" toggleGroup="$sideNav"/>
 
+                        <ToggleButton fx:id="logsBtn" maxWidth="Infinity" onAction="#handleLogs"
+                                      prefHeight="40.0" styleClass="nav-btn"
+                                      text="إدارة السجلات" toggleGroup="$sideNav"/>
+
                         <ToggleButton fx:id="mapBtn" maxWidth="Infinity" onAction="#handleMapView"
                                       prefHeight="40.0" styleClass="nav-btn" toggleGroup="$sideNav">
                             <graphic>

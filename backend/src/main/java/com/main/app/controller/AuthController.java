@@ -1,16 +1,15 @@
 package com.main.app.controller;
 
-import com.main.app.Enum.Role;
 import com.main.app.Exceptions.DuplicateEmailException;
 import com.main.app.Exceptions.DuplicateUsernameException;
-import com.main.app.Exceptions.LockedUserException;
-import com.main.app.dto.AuthRequest;
-import com.main.app.model.User;
-import com.main.app.dto.AuthResponse;
-import com.main.app.dto.RegisterRequest;
-import com.main.app.repository.UserRepository;
-import com.main.app.service.AuthService;
-import com.main.app.service.JwtService;
+import com.main.app.config.SecurityUtils;
+import com.main.app.dto.Security.AuthRequest;
+import com.main.app.model.User.User;
+import com.main.app.dto.Security.AuthResponse;
+import com.main.app.dto.User.RegisterRequest;
+import com.main.app.repository.User.UserRepository;
+import com.main.app.service.Security.AuthService;
+import com.main.app.service.Security.JwtService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +17,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -91,21 +89,16 @@ public ResponseEntity<AuthResponse> register(@Valid @RequestBody RegisterRequest
                 .build();
     }
     @GetMapping("/me")
-    public ResponseEntity<Map<String, Object>> me(Authentication auth) {
-        if (auth == null || !auth.isAuthenticated()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
+    public ResponseEntity<Map<String, Object>> me() {
 
-
-        User user = userRepository.findByUserEmail(auth.getName())
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
-
+        var me = SecurityUtils.currentUser()
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED));
 
         return ResponseEntity.ok(Map.of(
-                "id", user.getUserId(),
-                "username", user.getUserName(),
-                "email", user.getUserEmail(),
-                "role", user.getUserRole()
+                "id",       me.id(),
+                "username", me.name(),
+                "email",    me.email(),
+                "role",     me.role()
         ));
     }
 

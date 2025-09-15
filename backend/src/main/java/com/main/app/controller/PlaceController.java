@@ -2,22 +2,17 @@ package com.main.app.controller;
 
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
-import com.main.app.Exceptions.PlaceNotFoundException;
-import com.main.app.dto.PlaceDto;
-import com.main.app.model.Place;
-import com.main.app.model.PlaceFeature;
-import com.main.app.repository.PlaceFeatureRepository;
-import com.main.app.repository.PlaceRepository;
-import com.main.app.service.PlaceService;
+import com.main.app.dto.PaginatedResponse;
+import com.main.app.dto.Place.PlaceDto;
+import com.main.app.model.Place.Place;
+import com.main.app.service.Place.PlaceService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -26,11 +21,6 @@ public class PlaceController {
 
     @Autowired
     private PlaceService placeService;
-
-    @GetMapping("/all")
-    public ResponseEntity <List<PlaceDto>> getAllPlaces(){
-        return ResponseEntity.ok(placeService.getAllPlaces());
-    }
 
     @GetMapping("{id}")
     public ResponseEntity<PlaceDto> getPlaceById(@PathVariable Long id){
@@ -73,15 +63,19 @@ public class PlaceController {
         return ResponseEntity.ok(accessibilityType);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<PaginatedResponse<PlaceDto>> getAllPlaces(
+            @RequestParam(required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(placeService.getAllPlaces(page, size));
+    }
+
     @GetMapping("category")
-    public ResponseEntity<List<PlaceDto>> getPlaceCategory(@RequestParam Category category){
-        List<Place> places = placeService.getPlaceCategory(category);
-        List<PlaceDto> dtos = places.stream().map(placeService::convertToDto)
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok(dtos);
-
-
+    public ResponseEntity<PaginatedResponse<PlaceDto>> getPlaceCategory(
+            @RequestParam Category category,
+            @RequestParam( required = false, defaultValue = "0") int page,
+            @RequestParam( required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(placeService.getPlaceCategory(category, page, size));
     }
 
 

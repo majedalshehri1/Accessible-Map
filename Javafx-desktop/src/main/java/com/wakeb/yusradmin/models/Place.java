@@ -2,9 +2,13 @@ package com.wakeb.yusradmin.models;
 
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
 import com.wakeb.yusradmin.utils.CATEGORY;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 
 import java.util.Arrays;
 
+
+@NoArgsConstructor
 public class Place {
     public long id;
     public String placeName;

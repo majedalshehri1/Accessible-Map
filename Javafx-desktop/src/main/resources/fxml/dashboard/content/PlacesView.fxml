@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.geometry.Insets?>
 
+<?import javafx.scene.control.Pagination?>
 <BorderPane stylesheets="@../../../css/places.css" nodeOrientation="RIGHT_TO_LEFT"
             xmlns="http://javafx.com/javafx/24.0.1"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -45,6 +46,10 @@
                     </FlowPane>
                 </content>
             </ScrollPane>
+            <Pagination fx:id="pagination"
+                        styleClass="pagination-control"
+                        maxPageIndicatorCount="5"
+                        VBox.vgrow="NEVER"/>
         </VBox>
     </center>
 </BorderPane>

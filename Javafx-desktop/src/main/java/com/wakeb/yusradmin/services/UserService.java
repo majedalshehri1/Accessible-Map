@@ -1,10 +1,12 @@
-// com.wakeb.yusradmin.services.UserService.java
 package com.wakeb.yusradmin.services;
 
+import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.User;
 import java.util.List;
 
 public interface UserService {
+    PageResponse<User> list(int page, int size) throws Exception;
+    PageResponse<User> search(String query, int page, int size) throws Exception;
     List<User> list() throws Exception;
     List<User> search(String email) throws Exception;
     User update(User user) throws Exception;
