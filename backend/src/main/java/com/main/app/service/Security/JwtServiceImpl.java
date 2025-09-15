@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
+import java.time.Duration;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,7 @@ public class JwtServiceImpl implements JwtService {
 
     private final TokenRepository tokenRepository;
     private final BootId bootId;
+    private static final long ACCESS_TTL_MS = Duration.ofHours(2).toMillis();
 
     @Value("${jwt.secret}")
     private String secret;
@@ -42,7 +44,7 @@ public class JwtServiceImpl implements JwtService {
 
     @Override
     public String generateAccessToken(User user) {
-        return generateToken(new HashMap<>(), user, TokenType.ACCESS, 15 * 60 * 1000);
+        return generateToken(new HashMap<>(), user, TokenType.ACCESS, ACCESS_TTL_MS);
     }
 
     @Override
