@@ -12,6 +12,7 @@ import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,6 +40,13 @@ public class GlobalExceptionHandler {
         pd.setTitle("Internal Server Error");
         return pd;
     }
+    @ExceptionHandler(ResponseStatusException.class)
+    public ProblemDetail handleResponseStatus(ResponseStatusException ex) {
+        ProblemDetail pd = ProblemDetail.forStatusAndDetail(ex.getStatusCode(), ex.getReason());
+        pd.setTitle("Error");
+        return pd;
+    }
+
     @ExceptionHandler(DuplicateEmailException.class)
     public ProblemDetail handleDuplicateEmail(DuplicateEmailException ex) {
         ProblemDetail pd = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
@@ -113,6 +121,14 @@ public class GlobalExceptionHandler {
         pd.setDetail("قيمة أو معامل طلب غير صحيح.");
         return pd;
     }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String,String>> handleIntegrity(org.springframework.dao.DataIntegrityViolationException ex) {
+        Map<String,String> body = Map.of("message", " user already submitted a survey");
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+    }
+
+
     }
 
 
