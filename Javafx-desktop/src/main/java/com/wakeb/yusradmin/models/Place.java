@@ -4,7 +4,6 @@ import com.wakeb.yusradmin.utils.AccessibilityFeatures;
 import com.wakeb.yusradmin.utils.CATEGORY;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 public class Place {

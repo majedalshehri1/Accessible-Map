@@ -2,12 +2,12 @@ package com.wakeb.yusradmin.dto;
 
 public class PlaceUpdateDto {
     public long id;
-    public String placeName;
+    public String name;
     public String category;
 
-    public PlaceUpdateDto(long id, String placeName, String category) {
+    public PlaceUpdateDto(long id, String name, String category) {
         this.id = id;
-        this.placeName = placeName;
+        this.name = name;
         this.category = category;
     }
 
@@ -19,12 +19,12 @@ public class PlaceUpdateDto {
         this.id = id;
     }
 
-    public String getPlaceName() {
-        return placeName;
+    public String getName() {
+        return name;
     }
 
-    public void setPlaceName(String placeName) {
-        this.placeName = placeName;
+    public void setName(String name) {
+        this.name = name;
     }
 
     public String getCategory() {
