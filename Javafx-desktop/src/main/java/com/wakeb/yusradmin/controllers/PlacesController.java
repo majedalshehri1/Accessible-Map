@@ -283,15 +283,14 @@ public class PlacesController {
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
                 String placeName = name.getText().trim();
-                String placeCategory = category.getSelectionModel().getSelectedItem().getValue();
-                PlaceUpdateDto dto = new PlaceUpdateDto(place.getId(), placeName, placeCategory);
-                return dto;
+                CATEGORY selectedCategory = category.getValue();
+                return new PlaceUpdateDto(placeName, selectedCategory);
             }
             return null;
         });
 
         dialog.showAndWait().ifPresent(placeUpdateDto -> {
-            Task<Place> task = placeService.updatePlaceById(placeUpdateDto);
+            Task<Place> task = placeService.updatePlaceById(place.getId(), placeUpdateDto);
             showLoading(true);
 
             task.setOnSucceeded(e -> {

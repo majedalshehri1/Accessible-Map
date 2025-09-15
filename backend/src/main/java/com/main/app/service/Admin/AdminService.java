@@ -1,6 +1,7 @@
 package com.main.app.service.Admin;
 
 import com.main.app.dto.Place.PlaceDto;
+import com.main.app.dto.Place.PlaceUpdatedDto;
 import com.main.app.dto.Place.TopPlaceDto;
 import com.main.app.dto.Review.ReviewRequestDTO;
 import com.main.app.dto.User.UserDto;
@@ -10,6 +11,7 @@ import com.main.app.model.User.User;
 import com.main.app.repository.Place.PlaceRepository;
 import com.main.app.repository.Review.ReviewRepository;
 import com.main.app.repository.User.UserRepository;
+import com.main.app.service.Place.PlaceService;
 import com.main.app.service.Review.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +20,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+
+import static org.springframework.data.jpa.domain.AbstractPersistable_.id;
 
 @Service
 public class AdminService {
@@ -32,8 +36,14 @@ public class AdminService {
     private PlaceRepository placeRepository;
 
     @Autowired
+    private final PlaceService placeService;
+
+    @Autowired
     private ReviewService reviewService;
 
+    public AdminService(PlaceService placeService) {
+        this.placeService = placeService;
+    }
 
 
     public Review adminUpdateReview(Long reviewId , ReviewRequestDTO dto){
@@ -45,17 +55,15 @@ public class AdminService {
         return reviewRepository.save(r);
     }
 
-    public Place adminUpdatePlace(Long placeId , PlaceDto dto){
-        Place place =  placeRepository.findById(placeId)
-                .orElseThrow(() -> new RuntimeException("Place not found"));
-         place.setPlaceName(dto.getPlaceName());
-         place.setLongitude(dto.getLongitude());
-         place.setLatitude(dto.getLatitude());
-         place.setPlaceCategory(dto.getCategory());
+    public Place adminUpdatePlace(Long id, PlaceUpdatedDto dto) {
+        Place place = placeService.getPlaceOrThrow(id);
 
+        place.setPlaceName(dto.getPlaceName());
+        place.setPlaceCategory(dto.getCategory());
 
-        return placeRepository.save(place);
+        return placeService.updatePlace(place);
     }
+
 
     public User adminUpdateUser(Long userId , UserDto dto){
         User user = userRepository.findById(userId)

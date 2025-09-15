@@ -1,6 +1,7 @@
 package com.main.app.controller;
 
 import com.main.app.dto.*;
+import com.main.app.dto.Place.PlaceUpdatedDto;
 import com.main.app.model.Place.Place;
 import com.main.app.model.User.User;
 import com.main.app.Enum.EntityType;
@@ -93,10 +94,13 @@ public class AdminController {
     }
 
     @PutMapping("/update/place/{id}")
-    public ResponseEntity<PlaceDto> updatePlace(@PathVariable Long id, @RequestBody PlaceDto dto) {
+    public ResponseEntity<PlaceDto> updatePlace(@PathVariable Long id,
+                                                @RequestBody PlaceUpdatedDto dto) {
         var saved = adminService.adminUpdatePlace(id, dto);
         return ResponseEntity.ok(placeService.convertToDto(saved));
     }
+
+
 
     @DeleteMapping("delete/place/{id}")
     public ResponseEntity<String> deletePlace(@PathVariable Long id) {
