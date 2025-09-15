@@ -1,6 +1,6 @@
-package com.main.app.repository;
+package com.main.app.repository.Survey;
 
-import com.main.app.model.Survey;
+import com.main.app.model.Survey.Survey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,5 +1,6 @@
-package com.main.app.model;
+package com.main.app.model.Survey;
 
+import com.main.app.model.User.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

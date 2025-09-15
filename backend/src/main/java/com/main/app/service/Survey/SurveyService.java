@@ -1,11 +1,11 @@
-package com.main.app.service;
+package com.main.app.service.Survey;
 
 import com.main.app.dto.SurveyRequestDTO;
 import com.main.app.dto.SurveyResponseDTO;
-import com.main.app.model.Survey;
-import com.main.app.model.User;
-import com.main.app.repository.SurveyRepository;
-import com.main.app.repository.UserRepository;
+import com.main.app.model.Survey.Survey;
+import com.main.app.model.User.User;
+import com.main.app.repository.Survey.SurveyRepository;
+import com.main.app.repository.User.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
