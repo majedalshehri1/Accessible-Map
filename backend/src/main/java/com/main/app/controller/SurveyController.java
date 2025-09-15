@@ -1,7 +1,7 @@
 package com.main.app.controller;
 
-import com.main.app.dto.SurveyRequestDTO;
-import com.main.app.dto.SurveyResponseDTO;
+import com.main.app.dto.Survey.SurveyRequestDTO;
+import com.main.app.dto.Survey.SurveyResponseDTO;
 import com.main.app.service.Survey.SurveyService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

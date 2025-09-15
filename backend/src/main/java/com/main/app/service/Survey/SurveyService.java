@@ -1,7 +1,7 @@
 package com.main.app.service.Survey;
 
-import com.main.app.dto.SurveyRequestDTO;
-import com.main.app.dto.SurveyResponseDTO;
+import com.main.app.dto.Survey.SurveyRequestDTO;
+import com.main.app.dto.Survey.SurveyResponseDTO;
 import com.main.app.model.Survey.Survey;
 import com.main.app.model.User.User;
 import com.main.app.repository.Survey.SurveyRepository;
@@ -36,7 +36,12 @@ public class SurveyService {
         if (req.getRating() == null) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "rating is required");
         }
-
+        if (surveyRepository.existsByUser_UserId(req.getUserId())) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "already submitted a survey"
+            );
+        }
         User user = userRepository.findById(req.getUserId())
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
 

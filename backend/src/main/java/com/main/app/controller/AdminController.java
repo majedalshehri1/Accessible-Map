@@ -1,6 +1,6 @@
 package com.main.app.controller;
 
-import com.main.app.dto.*;
+import com.main.app.dto.Survey.SurveyResponseDTO;
 import com.main.app.model.Place.Place;
 import com.main.app.model.User.User;
 import com.main.app.Enum.EntityType;
