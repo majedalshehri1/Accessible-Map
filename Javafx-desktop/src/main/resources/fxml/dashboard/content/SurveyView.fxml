@@ -6,31 +6,42 @@
 
 <BorderPane xmlns="http://javafx.com/javafx/21.0.3"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="com.wakeb.yusradmin.controllers.SurveyController">
+            fx:controller="com.wakeb.yusradmin.controllers.SurveyController"
+            stylesheets="@../../../css/places.css">
 
     <top>
-        <HBox spacing="10" padding="10">
+        <HBox spacing="10">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
             <Label text="Surveys" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnRefresh" text="Refresh"/>
-            <CheckBox fx:id="chkShowUnreadOnly" text="Show unread only"/>
+            <Button fx:id="btnRefresh" styleClass="card-button" text="Refresh"/>
+            <ToggleButton  fx:id="btnShowUnreadOnly" styleClass="card-button" text="Show unread only"/>
         </HBox>
     </top>
 
     <center>
-        <VBox spacing="8" padding="10">
-            <TableView fx:id="table" prefHeight="600">
+        <VBox spacing="8">
+            <padding>
+                <Insets top="10" right="10" bottom="10" left="10"/>
+            </padding>
+
+            <TableView fx:id="table" prefHeight="600" editable="true">
                 <columns>
                     <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
-                    <TableColumn fx:id="colUserId" text="User ID" prefWidth="120"/>
-                    <TableColumn fx:id="colRating" text="Rating" prefWidth="90"/>
-                    <TableColumn fx:id="colDescription" text="Description" prefWidth="520"/>
-                    <TableColumn fx:id="colRead" text="Read?" prefWidth="90"/>
-                    <TableColumn fx:id="colActions" text="Actions" prefWidth="220"/>
+                    <TableColumn fx:id="colUserId" text="رقم هوية المستخدم" prefWidth="120"/>
+                    <TableColumn fx:id="colUserName" text="اسم المستخدم" prefWidth="160"/>
+                    <TableColumn fx:id="colRating" text="التقييم" prefWidth="90"/>
+                    <TableColumn fx:id="colDescription" text="الوصف" prefWidth="520"/>
+                    <TableColumn fx:id="colRead" text="تم القراءة" prefWidth="90"/>
+                    <TableColumn fx:id="colActions" text="الإجراء" prefWidth="220"/>
                 </columns>
             </TableView>
-            <HBox spacing="10">
-                <Label fx:id="lblStatus" text="" />
+
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <Label fx:id="lblStatus" text=""/>
                 <Region HBox.hgrow="ALWAYS"/>
                 <ProgressIndicator fx:id="spinner" visible="false" prefWidth="24" prefHeight="24"/>
             </HBox>

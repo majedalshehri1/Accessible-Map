@@ -30,6 +30,7 @@ public class MainController {
     @FXML private ToggleButton usersBtn;
     @FXML private ToggleButton reviewsBtn;
     @FXML private ToggleButton placesBtn;
+    @FXML private ToggleButton surveyBtn;
     @FXML private ToggleButton mapBtn;
 
     // Logout button

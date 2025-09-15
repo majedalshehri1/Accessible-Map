@@ -34,7 +34,10 @@ public class SurveyService {
             Long userId = toLong(m.get("userId"));
             String description = (String) m.getOrDefault("description", "");
             Integer rating = toInt(m.get("rating"));
-            rows.add(new SurveyRow(id, userId, description, rating));
+            String userName = (String) (m.get("userName") != null ? m.get("userName") : m.get("username"));
+            SurveyRow row = new SurveyRow(id, userId, description, rating);
+            row.setUserName(userName != null ? userName : "");
+            rows.add(row);
         }
         return rows;
     }

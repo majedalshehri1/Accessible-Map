@@ -55,6 +55,7 @@ public class SurveyService {
         dto.setUserId(s.getUser().getUserId());
         dto.setDescription(s.getDescription());
         dto.setRating(s.getRating());
+        dto.setUserName(s.getUser().getUserName());
         return dto;
     }
     public void deleteSurvey(Long id) {

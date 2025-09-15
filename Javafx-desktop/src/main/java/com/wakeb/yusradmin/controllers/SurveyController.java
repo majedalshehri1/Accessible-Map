@@ -21,46 +21,53 @@ public class SurveyController {
     @FXML private TableView<SurveyRow> table;
     @FXML private TableColumn<SurveyRow, Long> colId;
     @FXML private TableColumn<SurveyRow, Long> colUserId;
+    @FXML private TableColumn<SurveyRow, String> colUserName;
     @FXML private TableColumn<SurveyRow, Integer> colRating;
     @FXML private TableColumn<SurveyRow, String> colDescription;
     @FXML private TableColumn<SurveyRow, Boolean> colRead;
     @FXML private TableColumn<SurveyRow, Void> colActions;
 
     @FXML private Button btnRefresh;
-    @FXML private CheckBox chkShowUnreadOnly;
+    @FXML private ToggleButton btnShowUnreadOnly;
     @FXML private Label lblStatus;
     @FXML private ProgressIndicator spinner;
 
     private final ObservableList<SurveyRow> masterData = FXCollections.observableArrayList();
     private final ObservableList<SurveyRow> filteredData = FXCollections.observableArrayList();
 
-    // TODO: set your API base URL here (same you use in the app elsewhere)
-    private final SurveyService api = new SurveyService("http://localhost:8080"); // <- change if needed
+    // Use your actual backend base URL
+    private final SurveyService api = new SurveyService("http://localhost:8081");
 
     @FXML
     private void initialize() {
-        // Setup columns
+        // table editable to allow checkbox edits
+        table.setEditable(true);
+
+        // columns
         colId.setCellValueFactory(new PropertyValueFactory<>("id"));
         colUserId.setCellValueFactory(new PropertyValueFactory<>("userId"));
+        colUserName.setCellValueFactory(new PropertyValueFactory<>("userName"));
         colRating.setCellValueFactory(new PropertyValueFactory<>("rating"));
         colDescription.setCellValueFactory(new PropertyValueFactory<>("description"));
 
-        colRead.setCellValueFactory(param -> Bindings.createObjectBinding(param.getValue()::isRead));
-        colRead.setCellFactory(tc -> {
-            CheckBoxTableCell<SurveyRow, Boolean> cell = new CheckBoxTableCell<>();
-            cell.setEditable(false);
-            return cell;
-        });
+        // READ? column: editable checkbox bound to readProperty()
+        colRead.setEditable(true);
+        colRead.setCellValueFactory(cd -> cd.getValue().readProperty());
+        colRead.setCellFactory(CheckBoxTableCell.forTableColumn(colRead)); // toggles model automatically
 
+        // Actions column: ONLY Delete now
         addActionsColumn();
 
         table.setItems(filteredData);
 
         // filter toggle
-        chkShowUnreadOnly.selectedProperty().addListener((obs, was, isNow) -> refilter());
+        btnShowUnreadOnly.selectedProperty().addListener((obs, was, isNow) -> refilter());
 
         // refresh button
         btnRefresh.setOnAction(e -> loadData());
+
+        // green highlight for read rows
+        setupRowHighlighting();
 
         // initial load
         loadData();
@@ -68,22 +75,10 @@ public class SurveyController {
 
     private void addActionsColumn() {
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button btnMarkRead = new Button("Mark as read");
             private final Button btnDelete = new Button("Delete");
-            private final HBox box = new HBox(8, btnMarkRead, btnDelete);
+            private final HBox box = new HBox(8, btnDelete);
 
             {
-                btnMarkRead.setOnAction(e -> {
-                    SurveyRow row = getTableView().getItems().get(getIndex());
-                    if (row != null) {
-                        row.setRead(true);
-                        // If later you add backend endpoint, call it here (PUT).
-                        table.refresh();
-                        refilter();
-                        setStatus("Survey " + row.getId() + " marked as read (local).");
-                    }
-                });
-
                 btnDelete.setOnAction(e -> {
                     SurveyRow row = getTableView().getItems().get(getIndex());
                     if (row == null) return;
@@ -103,11 +98,7 @@ public class SurveyController {
             @Override
             protected void updateItem(Void item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(box);
-                }
+                setGraphic(empty ? null : box);
             }
         });
     }
@@ -122,6 +113,16 @@ public class SurveyController {
         };
         task.setOnSucceeded(e -> {
             List<SurveyRow> items = task.getValue();
+
+            // attach listeners so UI updates when read is toggled
+            for (SurveyRow r : items) {
+                r.readProperty().addListener((obs, oldV, newV) -> {
+                    // update filter + repaint row when checkbox toggled
+                    refilter();
+                    table.refresh();
+                });
+            }
+
             masterData.setAll(items);
             refilter();
             spinner.setVisible(false);
@@ -159,7 +160,7 @@ public class SurveyController {
     }
 
     private void refilter() {
-        boolean unreadOnly = chkShowUnreadOnly.isSelected();
+        boolean unreadOnly = btnShowUnreadOnly.isSelected();
         if (!unreadOnly) {
             filteredData.setAll(masterData);
         } else {
@@ -167,7 +168,10 @@ public class SurveyController {
                     .filter(s -> !s.isRead())
                     .collect(Collectors.toList()));
         }
-        // Visual cue for read rows (optional)
+        table.refresh();
+    }
+
+    private void setupRowHighlighting() {
         table.setRowFactory(tv -> new TableRow<>() {
             @Override protected void updateItem(SurveyRow item, boolean empty) {
                 super.updateItem(item, empty);
@@ -175,7 +179,7 @@ public class SurveyController {
                     setStyle("");
                 } else {
                     setStyle(item.isRead()
-                            ? "-fx-opacity: 0.6; -fx-background-color: -fx-background;"
+                            ? "-fx-background-color: rgba(46,204,113,0.20);" // light transparent green
                             : "");
                 }
             }
