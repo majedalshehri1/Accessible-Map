@@ -25,6 +25,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -187,6 +188,16 @@ public class AdminController {
     public ResponseEntity<List<SurveyResponseDTO>>  getAllSurveys() {
         return ResponseEntity.ok(surveyService.getAllSurvey());
     }
+
+//    @PutMapping("/api/admin/survey/{id}/read")
+//    public ResponseEntity<Void> setSurveyRead(
+//            @PathVariable Long id,
+//            @RequestBody Map<String, Boolean> body) {
+//        boolean read = Boolean.TRUE.equals(body.get("read"));
+//        surveyService.updateReadStatus(id, read);
+//        return ResponseEntity.ok().build();
+//    }
+
 
     @DeleteMapping("/survey/delete/{id}")
     public ResponseEntity<String> deleteSurvey(@PathVariable Long id) {

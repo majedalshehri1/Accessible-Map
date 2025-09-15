@@ -9,6 +9,8 @@ public class SurveyResponseDTO {
     private String userName;
     private String description;
     private Integer rating;
+//    private Boolean read;
+//
 
 
 }

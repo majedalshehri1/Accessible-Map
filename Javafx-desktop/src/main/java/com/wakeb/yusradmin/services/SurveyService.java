@@ -37,6 +37,8 @@ public class SurveyService {
             String userName = (String) (m.get("userName") != null ? m.get("userName") : m.get("username"));
             SurveyRow row = new SurveyRow(id, userId, description, rating);
             row.setUserName(userName != null ? userName : "");
+            Object r = m.get("read");
+            if (r instanceof Boolean) row.setRead((Boolean) r);
             rows.add(row);
         }
         return rows;
@@ -57,5 +59,11 @@ public class SurveyService {
         if (o == null) return null;
         if (o instanceof Number) return ((Number) o).intValue();
         try { return Integer.parseInt(o.toString()); } catch (Exception e) { return null; }
+    }
+
+    public void updateRead(Long id, boolean read) throws Exception {
+        api.put("/api/admin/survey/" + id + "/read",
+                java.util.Map.of("read", read),
+                null);
     }
 }

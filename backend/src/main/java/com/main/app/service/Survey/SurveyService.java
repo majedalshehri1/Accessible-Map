@@ -6,6 +6,7 @@ import com.main.app.model.Survey.Survey;
 import com.main.app.model.User.User;
 import com.main.app.repository.Survey.SurveyRepository;
 import com.main.app.repository.User.UserRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -61,9 +62,25 @@ public class SurveyService {
         dto.setDescription(s.getDescription());
         dto.setRating(s.getRating());
         dto.setUserName(s.getUser().getUserName());
+//        dto.setRead(s.isRead());
         return dto;
     }
     public void deleteSurvey(Long id) {
         surveyRepository.deleteById(id);
+    }
+
+//    @Transactional
+//    public void updateReadStatus(Long id, boolean read) {
+//        Survey s = getSurveyById(id);
+//        s.setRead(read);
+//        surveyRepository.save(s);
+//    }
+
+    public boolean hasUserSubmittedSurvey(Long userId) {
+        if (userId == null) {
+            throw new org.springframework.web.server.ResponseStatusException(
+                    org.springframework.http.HttpStatus.BAD_REQUEST, "userId is required");
+        }
+        return surveyRepository.existsByUser_UserId(userId);
     }
 }
