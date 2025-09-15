@@ -2,30 +2,33 @@ package com.wakeb.yusradmin.models;
 
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
 import com.wakeb.yusradmin.utils.CATEGORY;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
-
-@NoArgsConstructor
 public class Place {
-    public long id;
-    public String placeName;
-    public String longitude;
-    public String latitude;
-    public CATEGORY category;
-    public AccessibilityFeatures[] accessibilityFeatures;
-    public String imageUrl;
+    private long id;
+    private String placeName;
+    private String longitude;
+    private String latitude;
+    private CATEGORY category;
+    private AccessibilityFeatures[] accessibilityFeatures;
 
-    public Place(long id, String placeName, String longitude, String latitude, CATEGORY category, AccessibilityFeatures[] accessibilityFeatures, String imageUrl) {
+    private List<String> imageUrls = new ArrayList<>();
+
+    public Place() {}
+
+    public Place(long id, String placeName, String longitude, String latitude,
+                 CATEGORY category, AccessibilityFeatures[] accessibilityFeatures,
+                 List<String> imageUrls) {
         this.id = id;
         this.placeName = placeName;
         this.longitude = longitude;
         this.latitude = latitude;
         this.category = category;
         this.accessibilityFeatures = accessibilityFeatures;
-        this.imageUrl = imageUrl;
+        this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
     }
 
     public long getId() {
@@ -76,24 +79,34 @@ public class Place {
         this.accessibilityFeatures = accessibilityFeatures;
     }
 
-    public String getImageUrl() {
-        return imageUrl;
+    // --- Multiple Image URLs ---
+    public List<String> getImageUrls() {
+        return imageUrls;
     }
+
+    public void setImageUrls(List<String> imageUrls) {
+        this.imageUrls = imageUrls != null ? imageUrls : new ArrayList<>();
+    }
+
+    /**
+     * Convenience method to get the first image (for display in cards).
+     */
+    public String getFirstImageUrl() {
+        if (imageUrls != null && !imageUrls.isEmpty()) {
+            return imageUrls.get(0);
+        }
+        return null;
+    }
+
 
     public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+        if (imageUrl != null && !imageUrl.isBlank()) {
+            if (this.imageUrls == null) {
+                this.imageUrls = new ArrayList<>();
+            }
+            this.imageUrls.clear();
+            this.imageUrls.add(imageUrl);
+        }
 
-    @Override
-    public String toString() {
-        return "Place{" +
-                "id=" + id +
-                ", placeName='" + placeName + '\'' +
-                ", longitude='" + longitude + '\'' +
-                ", latitude='" + latitude + '\'' +
-                ", category='" + category + '\'' +
-                ", accessibilityFeatures=" + Arrays.toString(accessibilityFeatures) +
-                ", imageUrl='" + imageUrl + '\'' +
-                '}';
     }
-}
+    }

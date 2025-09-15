@@ -1,14 +1,10 @@
 package com.wakeb.yusradmin.util.place;
 
 import com.wakeb.yusradmin.models.Place;
-import javafx.scene.control.Hyperlink;
 import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
-
-import java.util.function.Consumer;
 
 public class ImageCell extends TableCell<Place, Void> {
     private final ImageView imageView = new ImageView();
@@ -20,17 +16,21 @@ public class ImageCell extends TableCell<Place, Void> {
     protected void updateItem(Void unused, boolean empty) {
         super.updateItem(unused, empty);
 
-        if (empty || getCurrentPlace() == null || !getCurrentPlace().getImageUrl().startsWith("https")) {
+        Place current = getCurrentPlace();
+        String firstImageUrl = (current != null) ? current.getFirstImageUrl() : null;
+
+        if (empty || firstImageUrl == null || !firstImageUrl.startsWith("http")) {
             setText(null);
             setGraphic(null);
             return;
         }
 
-        Image image = new Image(getCurrentPlace().imageUrl);
+        Image image = new Image(firstImageUrl, 100, 0, true, true, true);
         imageView.setImage(image);
         imageView.setFitWidth(100);
         imageView.setPreserveRatio(true);
         imageView.setSmooth(true);
+
         setGraphic(imageView);
         setText(null);
     }
