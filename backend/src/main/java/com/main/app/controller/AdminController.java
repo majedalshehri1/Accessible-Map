@@ -189,14 +189,14 @@ public class AdminController {
         return ResponseEntity.ok(surveyService.getAllSurvey());
     }
 
-//    @PutMapping("/api/admin/survey/{id}/read")
-//    public ResponseEntity<Void> setSurveyRead(
-//            @PathVariable Long id,
-//            @RequestBody Map<String, Boolean> body) {
-//        boolean read = Boolean.TRUE.equals(body.get("read"));
-//        surveyService.updateReadStatus(id, read);
-//        return ResponseEntity.ok().build();
-//    }
+    @PutMapping("/survey/{id}/read")
+    public ResponseEntity<Void> setSurveyRead(
+            @PathVariable Long id,
+            @RequestBody Map<String, Boolean> body) {
+        boolean read = Boolean.TRUE.equals(body.get("read"));
+        surveyService.updateReadStatus(id, read);
+        return ResponseEntity.ok().build();
+    }
 
 
     @DeleteMapping("/survey/delete/{id}")

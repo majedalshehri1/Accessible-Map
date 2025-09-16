@@ -37,7 +37,7 @@ public class Survey {
     @Min(0)
     private Integer rating;
 
-//    @Column(name = "is_read", nullable = false)
-//    private boolean read = false;
+    @Column(name = "is_read", nullable = false)
+    private boolean read = false;
 
 }

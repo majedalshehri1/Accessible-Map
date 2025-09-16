@@ -18,15 +18,13 @@ public class SurveyService {
 
     // GET /api/admin/survey/all
     public List<SurveyRow> fetchAll() throws Exception {
-        // We don't have the frontend DTO class for SurveyResponseDTO,
-        // so parse into a generic List<Map> then map fields safely.
+
         List<Map<String, Object>> raw = api.get(
                 "/api/admin/survey/all",
                 new TypeReference<List<Map<String, Object>>>() {}
         );
         List<SurveyRow> rows = new ArrayList<>();
         for (Map<String, Object> m : raw) {
-            // backend DTO uses Lombok @Data with field "Id" but getter "getId()" → JSON "id"
             Long id = toLong(m.get("id"));
             if (id == null && m.containsKey("Id")) { // just in case
                 id = toLong(m.get("Id"));

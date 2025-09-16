@@ -108,18 +108,35 @@ public class SurveyController {
         setStatus("Loading...");
         Task<List<SurveyRow>> task = new Task<>() {
             @Override protected List<SurveyRow> call() throws Exception {
+                // fetchAll() should already set row.setRead(...) from backend JSON if available
                 return api.fetchAll();
             }
         };
         task.setOnSucceeded(e -> {
             List<SurveyRow> items = task.getValue();
 
-            // attach listeners so UI updates when read is toggled
+            // When checkbox toggles: refilter/refresh + push to backend (optimistic, with rollback)
             for (SurveyRow r : items) {
                 r.readProperty().addListener((obs, oldV, newV) -> {
-                    // update filter + repaint row when checkbox toggled
+                    // Immediate UI response
                     refilter();
                     table.refresh();
+
+                    // Push to backend
+                    Task<Void> push = new Task<>() {
+                        @Override protected Void call() throws Exception {
+                            api.updateRead(r.getId(), newV);  // <-- requires this method in SurveyService
+                            return null;
+                        }
+                    };
+                    push.setOnFailed(ev -> {
+                        // Roll back UI if server update failed
+                        r.setRead(oldV);
+                        refilter();
+                        table.refresh();
+                        setStatus("Failed to update read: " + push.getException().getMessage());
+                    });
+                    new Thread(push, "survey-update-read-" + r.getId()).start();
                 });
             }
 
