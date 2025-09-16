@@ -27,6 +27,17 @@ public class ReviewService {
             }
         };
     }
+    public Task<PageResponse<ReviewResponseDTO>> getReviewByPlaceNameAsync(String placeName, int page, int size) {
+        return new Task<>() {
+            @Override
+            protected PageResponse<ReviewResponseDTO> call() throws Exception {
+                return api.get(
+                        "/admin/findReviewName?placeName="+ placeName + "&page=" + page + "&size=" + size,
+                        new TypeReference<PageResponse<ReviewResponseDTO>>() {}
+                );
+            }
+        };
+    }
 
     /** GET /api/admin/all/reviews (all reviews without pagination) */
     public Task<List<ReviewResponseDTO>> getAllReviewsAsync() {
