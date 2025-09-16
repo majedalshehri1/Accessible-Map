@@ -81,6 +81,7 @@ public class PlacesController {
 
     // ====== تحميل الأماكن من الخدمة ======
     // PlacesController.java - Fix pagination handling
+
     // PlacesController.java - Update loadPlaces method
     private void loadPlaces() {
         showLoading(true);
