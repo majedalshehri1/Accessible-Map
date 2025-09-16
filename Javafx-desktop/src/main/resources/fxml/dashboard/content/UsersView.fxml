@@ -41,18 +41,6 @@
                     <TableColumn fx:id="colActions"  text="إجراءات"   prefWidth="220" styleClass="table-column-header"/>
                 </columns>
             </TableView>
-            <Pagination fx:id="pagination"
-                        styleClass="pagination-control"
-                        maxPageIndicatorCount="5"
-                        VBox.vgrow="NEVER"/>
-
-<!--            <HBox spacing="10" style="-fx-padding: 10;">-->
-<!--                <children>-->
-<!--                    <Button fx:id="prevBtn" text="السابق" onAction="#prevPage"/>-->
-<!--                    <Label fx:id="pageInfo" text="صفحة 1/1"/>-->
-<!--                    <Button fx:id="nextBtn" text="التالي" onAction="#nextPage"/>-->
-<!--                </children>-->
-<!--            </HBox>-->
 
             <HBox spacing="10" style="-fx-padding: 10;">
                 <children>

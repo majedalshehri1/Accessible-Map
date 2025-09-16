@@ -16,6 +16,7 @@ import javafx.scene.control.*;
 public class UsersController {
 
     @FXML private TextField searchField;
+    @FXML private Button searchButton;
     @FXML private TableView<User> table;
     @FXML private TableColumn<User, Long>   colId;
     @FXML private TableColumn<User, String> colName;
@@ -50,9 +51,7 @@ public class UsersController {
         table.setItems(data);
         table.setPlaceholder(new Label("جاري التحميل..."));
 
-        colActions.setCellFactory(tc -> new UserActionCell(
-                this::onBlockToggle, this::onEdit, this::onDelete
-        ));
+        colActions.setCellFactory(tc -> new UserActionCell(this::onBlockToggle, this::onEdit, this::onDelete));
 
         table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colActions.setMinWidth(240);
@@ -60,39 +59,26 @@ public class UsersController {
         colActions.setMaxWidth(240);
 
         searchField.setOnAction(e -> refresh());
+        if (searchButton != null) searchButton.setOnAction(e -> refresh());
     }
 
-    @FXML
-    private void prevPage() {
-        if (currentPage > 0) loadPage(currentPage - 1);
-    }
-
-    @FXML
-    private void nextPage() {
-        if (currentPage + 1 < totalPages) loadPage(currentPage + 1);
-    }
+    @FXML private void prevPage() { if (currentPage > 0) loadPage(currentPage - 1); }
+    @FXML private void nextPage() { if (currentPage + 1 < totalPages) loadPage(currentPage + 1); }
 
     private void loadPage(int page) {
         if (service == null) return;
 
         String q = searchField.getText();
-        if (q != null && !q.isBlank()) {
-            // when searching, delegate to refresh()
-            refresh();
-            return;
-        }
+        if (q != null && !q.isBlank()) { refresh(); return; }
 
         Task<PageResponse<User>> task = new Task<>() {
-            @Override
-            protected PageResponse<User> call() throws Exception {
-                return service.list(page, pageSize);
-            }
+            @Override protected PageResponse<User> call() throws Exception { return service.list(page, pageSize); }
         };
 
         task.setOnSucceeded(e -> {
             PageResponse<User> p = task.getValue();
-            currentPage = p.currentPage;      // field access (your PageResponse has public fields)
-            totalPages = Math.max(p.totalPages, 1);
+            currentPage = p.currentPage;
+            totalPages  = Math.max(p.totalPages, 1);
             data.setAll(p.content);
             updatePagingUI(true);
         });
@@ -120,14 +106,11 @@ public class UsersController {
 
     public void refresh() {
         if (service == null) return;
-
         String q = searchField.getText();
+
         if (q != null && !q.isBlank()) {
             Task<PageResponse<User>> task = new Task<>() {
-                @Override
-                protected PageResponse<User> call() throws Exception {
-                    return service.search(q, 0, pageSize); // always reset to page 0
-                }
+                @Override protected PageResponse<User> call() throws Exception { return service.search(q, 0, pageSize); }
             };
 
             task.setOnSucceeded(e -> {
@@ -135,9 +118,8 @@ public class UsersController {
                 if (p != null) {
                     data.setAll(p.content);
                     currentPage = p.currentPage;
-                    totalPages = Math.max(p.totalPages, 1);
-                    pageInfo.setText("نتائج: " + p.totalElements +
-                            " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
+                    totalPages  = Math.max(p.totalPages, 1);
+                    pageInfo.setText("نتائج: " + p.totalElements + " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
                     prevBtn.setDisable(currentPage == 0);
                     nextBtn.setDisable(currentPage + 1 >= totalPages);
                 } else {
@@ -158,8 +140,7 @@ public class UsersController {
     private void onBlockToggle(User u) {
         Task<Void> t = new Task<>() {
             @Override protected Void call() throws Exception {
-                if (u.isBlocked()) service.unblock(u.getId());
-                else service.block(u.getId());
+                if (u.isBlocked()) service.unblock(u.getId()); else service.block(u.getId());
                 return null;
             }
         };
@@ -171,8 +152,8 @@ public class UsersController {
     private void onEdit(User u) {
         TextInputDialog dlg = new TextInputDialog(u.getUserName());
         dlg.setTitle("تعديل المستخدم");
-        dlg.setHeaderText(null);                 // بدون هيدر
-        dlg.setGraphic(null);                    // بدون أيقونة افتراضية
+        dlg.setHeaderText(null);
+        dlg.setGraphic(null);
         dlg.setContentText("الاسم الجديد");
 
         DialogPane pane = dlg.getDialogPane();
@@ -183,22 +164,16 @@ public class UsersController {
         if (table.getScene() != null) dlg.initOwner(table.getScene().getWindow());
 
         Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
-        okBtn.setText("حفظ");
-        okBtn.getStyleClass().addAll("button-primary");
-
+        okBtn.setText("حفظ"); okBtn.getStyleClass().addAll("button-primary");
         Button cancelBtn = (Button) pane.lookupButton(ButtonType.CANCEL);
-        cancelBtn.setText("إلغاء");
-        cancelBtn.getStyleClass().addAll("button-secondary");
+        cancelBtn.setText("إلغاء"); cancelBtn.getStyleClass().addAll("button-secondary");
 
         dlg.getEditor().setPromptText("أدخل الاسم");
 
         dlg.showAndWait().ifPresent(name -> {
             u.setUserName(name);
             Task<Void> t = new Task<>() {
-                @Override protected Void call() throws Exception {
-                    service.update(u);
-                    return null;
-                }
+                @Override protected Void call() throws Exception { service.update(u); return null; }
             };
             t.setOnSucceeded(e -> loadPage(currentPage));
             t.setOnFailed(e -> FXUtil.error("Update Failed", t.getException().getMessage()));
@@ -209,15 +184,9 @@ public class UsersController {
     private void onDelete(User u) {
         if (!FXUtil.confirm("Confirm Delete", "Delete user \"" + u.getUserName() + "\"?")) return;
         Task<Void> t = new Task<>() {
-            @Override protected Void call() throws Exception {
-                service.delete(u.getId());
-                return null;
-            }
+            @Override protected Void call() throws Exception { service.delete(u.getId()); return null; }
         };
-        t.setOnSucceeded(e -> {
-            if (data.size() == 1 && currentPage > 0) loadPage(currentPage - 1);
-            else loadPage(currentPage);
-        });
+        t.setOnSucceeded(e -> { if (data.size() == 1 && currentPage > 0) loadPage(currentPage - 1); else loadPage(currentPage); });
         t.setOnFailed(e -> FXUtil.error("Delete Failed", t.getException().getMessage()));
         new Thread(t, "delete-user").start();
     }

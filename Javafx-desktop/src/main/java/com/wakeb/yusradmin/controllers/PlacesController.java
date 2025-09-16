@@ -72,16 +72,16 @@ public class PlacesController {
             currentPage = newVal.intValue();
             loadPlaces();
         });
-        searchButton.setOnAction(e -> loadPlaces());
-        filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
-
-        // أول تحميل
-        loadPlaces();
+        searchButton.setOnAction(e -> { currentPage = 0; loadPlaces(); });
+        filterComboBox.valueProperty().addListener((obs, o, n) -> { currentPage = 0; loadPlaces(); });
+        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = newVal.intValue();
+            loadPlaces();
+        });
     }
 
     // ====== تحميل الأماكن من الخدمة ======
     // PlacesController.java - Fix pagination handling
-
     // PlacesController.java - Update loadPlaces method
     private void loadPlaces() {
         showLoading(true);
@@ -90,49 +90,37 @@ public class PlacesController {
 
         try {
             if (q != null && !q.isBlank()) {
-                Task<PageResponse<Place>> searchTask = placeService.searchPlaces(q, currentPage, pageSize);
-                HelperFunc(searchTask);
-            } else if (cat != null) {
-                Task<PageResponse<Place>> categoryTask = placeService.getPlacesByCategory(cat, currentPage, pageSize);
-                HelperFunc(categoryTask);
+                currentPage = 0;
+                Task<PageResponse<Place>> t = placeService.searchPlaces(q.trim(), currentPage, pageSize);
+                wire(t);
+            }
+            else if (cat != null && cat != CATEGORY.ALL) {
+                Task<PageResponse<Place>> t = placeService.getPlacesByCategory(cat, currentPage, pageSize);
+                wire(t);
             } else {
-                Task<PageResponse<Place>> allTask = placeService.getAllPlaces(currentPage, pageSize);
-                allTask.setOnSucceeded(ev -> {
-                    PageResponse<Place> resp = allTask.getValue();
-                    if (resp != null) {
-                        places.setAll(resp.getContent());
-                        renderCards();
-                        pagination.setPageCount(resp.getTotalPages());
-                    }
-                    showLoading(false);
-                });
-                allTask.setOnFailed(ev -> {
-                    handleErrors(allTask.getException());
-                    showLoading(false);
-                });
-                new Thread(allTask).start();
+                Task<PageResponse<Place>> t = placeService.getAllPlaces(currentPage, pageSize);
+                wire(t);
             }
         } catch (Exception e) {
             handleErrors(e);
             showLoading(false);
         }
     }
-
-    private void HelperFunc(Task<PageResponse<Place>> categoryTask) {
-        categoryTask.setOnSucceeded(ev -> {
-            PageResponse<Place> result = categoryTask.getValue();
-            if (result != null) {
-                places.setAll(result.content);
+    private void wire(Task<PageResponse<Place>> task) {
+        task.setOnSucceeded(ev -> {
+            PageResponse<Place> resp = task.getValue();
+            if (resp != null) {
+                places.setAll(resp.getContent());           // استخدم getters لو عندك
                 renderCards();
-                pagination.setPageCount(result.totalPages);
+                pagination.setPageCount(Math.max(resp.getTotalPages(), 1));
             }
             showLoading(false);
         });
-        categoryTask.setOnFailed(ev -> {
-            handleErrors(categoryTask.getException());
+        task.setOnFailed(ev -> {
+            handleErrors(task.getException());
             showLoading(false);
         });
-        new Thread(categoryTask).start();
+        new Thread(task).start();
     }
 
     @FXML
@@ -166,7 +154,7 @@ public class PlacesController {
         Label name = new Label(p.getPlaceName());
         name.getStyleClass().add("card-title");
 
-       Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
+        Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
         meta.getStyleClass().add("card-meta");
 
         // الخدمات كبادجات

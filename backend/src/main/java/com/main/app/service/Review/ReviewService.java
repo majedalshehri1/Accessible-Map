@@ -6,6 +6,7 @@ import com.main.app.Enum.EntityType;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
 import com.main.app.dto.PaginatedResponse;
+import com.main.app.dto.Place.PlaceDto;
 import com.main.app.dto.Place.PlaceWithAccessibilityDTO;
 import com.main.app.dto.Review.ReviewRequestDTO;
 import com.main.app.dto.Review.ReviewResponseDTO;
@@ -102,6 +103,24 @@ public class ReviewService {
                 reviewPage.getTotalElements(),
                 reviewPage.getTotalPages(),
                 reviewPage.isLast()
+        );
+    }
+
+    public PaginatedResponse<ReviewResponseDTO> searchByPlaceName(String placeName, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Review> p = reviewRepository.findByPlace_PlaceNameContainingIgnoreCase(placeName, pageable);
+
+        List<ReviewResponseDTO> reviewResponseDTOS = p.getContent().stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+
+        return new PaginatedResponse<>(
+                reviewResponseDTOS,
+                p.getNumber(),
+                p.getSize(),
+                p.getTotalElements(),
+                p.getTotalPages(),
+                p.isLast()
         );
     }
 

@@ -19,7 +19,6 @@ public class PlaceService {
     }
 
     // === Get all places (ADMIN) ===
-
     public Task<PageResponse<Place>> getAllPlaces(int page, int size) {
         return new Task<>() {
             @Override
@@ -72,10 +71,18 @@ public class PlaceService {
                 }
 
                 try {
+                    if (category == CATEGORY.ALL) {
+                        return api.get(
+                                "/admin/all/places?page=" + page + "&size=" + size,
+                                new TypeReference<PageResponse<Place>>() {}
+                        );
+                    }
+
                     return api.get(
                             "/place/category?category=" + category.getValue() + "&page=" + page + "&size=" + size,
                             new TypeReference<PageResponse<Place>>() {}
                     );
+
                 } catch (RuntimeException e) {
                     throw e;
                 } catch (Exception e) {
@@ -84,6 +91,7 @@ public class PlaceService {
             }
         };
     }
+
 
     // === Search places with pagination ===
     public Task<PageResponse<Place>> searchPlaces(String query, int page, int size) {
