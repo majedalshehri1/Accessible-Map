@@ -94,15 +94,15 @@ public class PlaceService {
 
 
     // === Search places with pagination ===
-    public Task<PageResponse<Place>> searchPlaces(String query, int page, int size) {
+    public Task<List<Place>> searchPlaces(String query) {
         return new Task<>() {
             @Override
-            protected PageResponse<Place> call() throws Exception {
+            protected List<Place> call() throws Exception {
                 try {
                     String encodedQuery = URLEncoder.encode(query, StandardCharsets.UTF_8);
                     return api.get(
-                            "/admin/all/places?page=" + page + "&size=" + size + "&search=" + encodedQuery,
-                            new TypeReference<PageResponse<Place>>() {}
+                            "/place/search?search=" + encodedQuery,
+                            new TypeReference<List<Place>>() {}
                     );
                 } catch (RuntimeException e) {
                     throw e;
@@ -112,6 +112,7 @@ public class PlaceService {
             }
         };
     }
+
 
     // === Delete a place by ID ===
     public Task<Void> deletePlaceById(long id) {

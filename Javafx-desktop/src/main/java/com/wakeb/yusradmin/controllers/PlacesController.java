@@ -68,16 +68,27 @@ public class PlacesController {
                 setText(empty || item == null ? null : item.getLabel());
             }
         });
+
+        // pagination
         pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
             currentPage = newVal.intValue();
             loadPlaces();
         });
-        searchButton.setOnAction(e -> { currentPage = 0; loadPlaces(); });
-        filterComboBox.valueProperty().addListener((obs, o, n) -> { currentPage = 0; loadPlaces(); });
-        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
-            currentPage = newVal.intValue();
+
+        // search
+        searchButton.setOnAction(e -> {
+            currentPage = 0;
             loadPlaces();
         });
+
+        // filter
+        filterComboBox.valueProperty().addListener((obs, o, n) -> {
+            currentPage = 0;
+            loadPlaces();
+        });
+
+        // ✅ Initial load so data shows immediately
+        loadPlaces();
     }
 
     // ====== تحميل الأماكن من الخدمة ======
@@ -90,14 +101,30 @@ public class PlacesController {
 
         try {
             if (q != null && !q.isBlank()) {
-                currentPage = 0;
-                Task<PageResponse<Place>> t = placeService.searchPlaces(q.trim(), currentPage, pageSize);
-                wire(t);
-            }
-            else if (cat != null && cat != CATEGORY.ALL) {
+                // 🔎 Search
+                Task<List<Place>> t = placeService.searchPlaces(q.trim());
+                t.setOnSucceeded(ev -> {
+                    List<Place> result = t.getValue();
+                    if (result != null) {
+                        places.setAll(result);
+                        renderCards();
+                        pagination.setPageCount(1); // search = no pagination
+                    }
+                    showLoading(false);
+                });
+                t.setOnFailed(ev -> {
+                    handleErrors(t.getException());
+                    showLoading(false);
+                });
+                new Thread(t).start();
+
+            } else if (cat != null && cat != CATEGORY.ALL) {
+                // 🏷️ Category filter
                 Task<PageResponse<Place>> t = placeService.getPlacesByCategory(cat, currentPage, pageSize);
                 wire(t);
+
             } else {
+                // 📋 Default = all places
                 Task<PageResponse<Place>> t = placeService.getAllPlaces(currentPage, pageSize);
                 wire(t);
             }
@@ -106,6 +133,7 @@ public class PlacesController {
             showLoading(false);
         }
     }
+
     private void wire(Task<PageResponse<Place>> task) {
         task.setOnSucceeded(ev -> {
             PageResponse<Place> resp = task.getValue();
