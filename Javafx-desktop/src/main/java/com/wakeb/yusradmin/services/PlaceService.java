@@ -124,11 +124,10 @@ public class PlaceService {
     }
 
     // === Update a place by ID ===
-    public Task<Place> updatePlaceById(PlaceUpdateDto placeUpdateDto) {
+    public Task<Place> updatePlaceById(long placeId, PlaceUpdateDto placeUpdateDto) {
         return new Task<>() {
             @Override
             protected Place call() throws Exception {
-                long placeId = placeUpdateDto.getId();
                 if (placeId < 0) throw new IllegalArgumentException("Place id cannot be negative");
 
                 try {

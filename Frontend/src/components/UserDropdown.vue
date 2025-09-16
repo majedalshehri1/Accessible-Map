@@ -1,65 +1,87 @@
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { Home as HomeIcon, Plus as PlusIcon, User as UserIcon, LogOut as LogOutIcon } from 'lucide-vue-next'
-import { useAuthStore } from '@/stores/authStore'
+  import { ref, computed, onMounted, onUnmounted } from "vue"
+  import {
+    Home as HomeIcon,
+    Plus as PlusIcon,
+    User as UserIcon,
+    LogOut as LogOutIcon,
+  } from "lucide-vue-next"
+  import { useAuthStore } from "@/stores/authStore"
+  import {
+    Dialog,
+    DialogTrigger,
+    DialogContent,
+    DialogHeader,
+    DialogFooter,
+    DialogTitle,
+    DialogClose,
+  } from "@/components/ui/dialog"
 
-const props = defineProps({
-  user: {
-    type: Object,
-    required: false,
-    default: null
+  const props = defineProps({
+    user: {
+      type: Object,
+      required: false,
+      default: null,
+    },
+  })
+
+  const emit = defineEmits(["logout", "menu-click"])
+
+  const auth = useAuthStore()
+
+  const currentUser = computed(() => auth.user || props.user || null)
+
+  const userInitial = computed(() => {
+    const nameOrEmail =
+      currentUser.value?.username ||
+      currentUser.value?.name ||
+      currentUser.value?.email ||
+      "U"
+    return String(nameOrEmail).charAt(0).toUpperCase()
+  })
+
+  const displayName = computed(
+    () => currentUser.value?.username || currentUser.value?.name || "مستخدم"
+  )
+  const displayEmail = computed(() => currentUser.value?.email || "")
+
+  const isOpen = ref(false)
+  const dropdownRef = ref(null)
+
+  const toggleDropdown = () => {
+    if (!currentUser.value) return
+    isOpen.value = !isOpen.value
   }
-})
+  const closeDropdown = () => {
+    isOpen.value = false
+  }
 
-const emit = defineEmits(['logout', 'menu-click'])
-
-const auth = useAuthStore()
-
-const currentUser = computed(() => auth.user || props.user || null)
-
-const userInitial = computed(() => {
-  const nameOrEmail = currentUser.value?.username || currentUser.value?.name || currentUser.value?.email || 'U'
-  return String(nameOrEmail).charAt(0).toUpperCase()
-})
-
-const displayName = computed(() => currentUser.value?.username || currentUser.value?.name || 'مستخدم')
-const displayEmail = computed(() => currentUser.value?.email || '')
-
-const isOpen = ref(false)
-const dropdownRef = ref(null)
-
-const toggleDropdown = () => {
-  if (!currentUser.value) return
-  isOpen.value = !isOpen.value
-}
-const closeDropdown = () => { isOpen.value = false }
-
-const handleLogout = () => {
-  closeDropdown()
-  auth.logout()
-  emit('logout')
-}
-
-const handleMenuClick = (action) => {
-  closeDropdown()
-  emit('menu-click', action)
-}
-
-// Close dropdown on outside click
-const handleClickOutside = (event) => {
-  if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+  const handleLogout = () => {
     closeDropdown()
+    auth.logout()
+    emit("logout")
   }
-}
 
-onMounted(() => {
-  document.addEventListener('click', handleClickOutside)
-  if (!auth.user) auth.restore?.()
-})
+  const handleMenuClick = (action) => {
+    closeDropdown()
+    emit("menu-click", action)
+  }
 
-onUnmounted(() => {
-  document.removeEventListener('click', handleClickOutside)
-})
+  // Close dropdown on outside click
+  const handleClickOutside = (event) => {
+    if (dropdownRef.value && !dropdownRef.value.contains(event.target)) {
+      closeDropdown()
+    }
+  }
+
+  onMounted(() => {
+    document.addEventListener("click", handleClickOutside)
+    if (!auth.user) auth.restore?.()
+  })
+
+  onUnmounted(() => {
+    document.removeEventListener("click", handleClickOutside)
+  })
 </script>
 
 <template>
@@ -81,14 +103,22 @@ onUnmounted(() => {
     >
       <div class="px-4 py-3 border-b border-gray-100">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-700 rounded-full font-bold text-lg relative">
+          <div
+            class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-700 rounded-full font-bold text-lg relative"
+          >
             {{ userInitial }}
             <!-- Online Status -->
-            <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
+            <div
+              class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"
+            ></div>
           </div>
           <div class="flex-1 min-w-0">
-            <p class="font-semibold text-gray-900 truncate">{{ displayName }}</p>
-            <p class="text-sm text-gray-500 truncate" v-if="displayEmail">{{ displayEmail }}</p>
+            <p class="font-semibold text-gray-900 truncate">
+              {{ displayName }}
+            </p>
+            <p class="text-sm text-gray-500 truncate" v-if="displayEmail">
+              {{ displayEmail }}
+            </p>
           </div>
         </div>
       </div>
@@ -100,7 +130,9 @@ onUnmounted(() => {
           @click="handleMenuClick('home')"
           class="flex items-center w-full px-4 py-3 text-right hover:bg-gray-50 transition-colors group"
         >
-          <div class="w-8 h-8 flex items-center justify-center bg-blue-50 rounded-lg ml-3 group-hover:bg-blue-100 transition-colors">
+          <div
+            class="w-8 h-8 flex items-center justify-center bg-blue-50 rounded-lg ml-3 group-hover:bg-blue-100 transition-colors"
+          >
             <HomeIcon class="w-4 h-4 text-blue-600" />
           </div>
           <span class="text-gray-700 font-medium">الرئيسية</span>
@@ -111,7 +143,9 @@ onUnmounted(() => {
           @click="handleMenuClick('profile')"
           class="flex items-center w-full px-4 py-3 text-right hover:bg-gray-50 transition-colors group"
         >
-          <div class="w-8 h-8 flex items-center justify-center bg-purple-50 rounded-lg ml-3 group-hover:bg-purple-100 transition-colors">
+          <div
+            class="w-8 h-8 flex items-center justify-center bg-purple-50 rounded-lg ml-3 group-hover:bg-purple-100 transition-colors"
+          >
             <UserIcon class="w-4 h-4 text-purple-600" />
           </div>
           <span class="text-gray-700 font-medium">الملف الشخصي</span>
@@ -122,18 +156,33 @@ onUnmounted(() => {
           @click="handleMenuClick('add-location')"
           class="flex items-center w-full px-4 py-3 text-right hover:bg-gray-50 transition-colors group"
         >
-          <div class="w-8 h-8 flex items-center justify-center bg-green-50 rounded-lg ml-3 group-hover:bg-green-100 transition-colors">
+          <div
+            class="w-8 h-8 flex items-center justify-center bg-green-50 rounded-lg ml-3 group-hover:bg-green-100 transition-colors"
+          >
             <PlusIcon class="w-4 h-4 text-green-600" />
           </div>
           <span class="text-gray-700 font-medium">إضافة مكان جديد</span>
         </button>
+
+        <!-- Add survey
+        <button
+          @click="openSurveyDialog"
+          class="flex items-center w-full px-4 py-3 text-right hover:bg-gray-50 transition-colors group"
+        >
+          <div class="w-8 h-8 flex items-center justify-center bg-green-50 rounded-lg ml-3 group-hover:bg-green-100 transition-colors">
+            <PlusIcon class="w-4 h-4 text-green-600" />
+          </div>
+          <span class="text-gray-700 font-medium">قييم تجربتك</span>
+        </button> -->
 
         <!-- Logout -->
         <button
           @click="handleLogout"
           class="flex items-center w-full px-4 py-3 text-right hover:bg-red-50 transition-colors group"
         >
-          <div class="w-8 h-8 flex items-center justify-center bg-red-50 rounded-lg ml-3 group-hover:bg-red-100 transition-colors">
+          <div
+            class="w-8 h-8 flex items-center justify-center bg-red-50 rounded-lg ml-3 group-hover:bg-red-100 transition-colors"
+          >
             <LogOutIcon class="w-4 h-4 text-red-600" />
           </div>
           <span class="text-red-600 font-medium">تسجيل الخروج</span>
@@ -142,6 +191,10 @@ onUnmounted(() => {
     </div>
 
     <!-- Backdrop -->
-    <div v-if="isOpen" @click="closeDropdown" class="fixed inset-0 z-[999]"></div>
+    <div
+      v-if="isOpen"
+      @click="closeDropdown"
+      class="fixed inset-0 z-[999]"
+    ></div>
   </div>
 </template>

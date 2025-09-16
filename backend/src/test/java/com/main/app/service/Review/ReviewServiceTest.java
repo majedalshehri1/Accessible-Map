@@ -26,7 +26,7 @@ import static org.mockito.Mockito.*;
 public class ReviewServiceTest {
 
     @InjectMocks
-    private ReviewService reviewService; // نختبر الكلاس الحقيقي
+    private ReviewService reviewService;
 
     @Mock
     private ReviewRepository reviewRepository;
@@ -79,7 +79,6 @@ public class ReviewServiceTest {
         assertThat(result.getUserName()).isEqualTo("Majed");
         assertThat(result.getPlaceName()).isEqualTo("Test Place");
 
-        // Verify (تأكد إن save و writeLog انطلبوا مرة وحدة)
         verify(reviewRepository, times(1)).save(any(Review.class));
         verify(adminLogService, times(1)).writeLog(
                 any(), any(), any(), any(), any(), any()

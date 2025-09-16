@@ -25,11 +25,11 @@ public class Place {
 
     @NotNull
     @Column(name = "longitude", nullable = false, length = Integer.MAX_VALUE)
-    private String longitude;
+    private Double longitude;
 
     @NotNull
     @Column(name = "latitude", nullable = false, length = Integer.MAX_VALUE)
-    private String latitude;
+    private Double latitude;
 
     @NotNull
     @Enumerated(EnumType.STRING)
