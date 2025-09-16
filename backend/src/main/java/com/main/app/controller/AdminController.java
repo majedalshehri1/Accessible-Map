@@ -81,6 +81,14 @@ public class AdminController {
     public ReviewResponseDTO getReviewById(@RequestParam long reviewId) {
         return reviewService.getReviewById(reviewId);
     }
+    @GetMapping("/findReviewName")
+    public ResponseEntity<PaginatedResponse<ReviewResponseDTO>> getReviewByPlaceName(
+            @RequestParam String placeName,
+     @RequestParam( required = false, defaultValue = "0") int page,
+    @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.searchByPlaceName(placeName,page,size));
+
+    }
 
     @PutMapping("/update/review/{id}")
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long id, @RequestBody ReviewRequestDTO dto) {

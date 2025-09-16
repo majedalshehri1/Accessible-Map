@@ -36,4 +36,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
            GROUP BY p.placeCategory
            """)
     List<Object[]> countReviewsByCategory();
+
+    Page<Review> findByPlace_PlaceNameContainingIgnoreCase(String placeName, Pageable pageable);
 }
