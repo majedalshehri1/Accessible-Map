@@ -22,10 +22,9 @@ public class SurveyController {
         SurveyResponseDTO created = surveyService.createSurvey(body);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
-    @GetMapping("/exists")
-    public ResponseEntity<Boolean> hasSurvey(@RequestParam Long userId) {
-        boolean exists = surveyService.hasUserSubmittedSurvey(userId);
-        return ResponseEntity.ok(exists);
+    @GetMapping("/exists/{userId}")
+    public ResponseEntity<Boolean> hasSurvey(@PathVariable("userId") Long userId) {
+        return ResponseEntity.ok(surveyService.hasUserSubmittedSurvey(userId));
     }
 
 }
