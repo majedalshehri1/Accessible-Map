@@ -26,28 +26,8 @@ const isOpen = ref(false);
 const rating = ref(null);
 const feedback = ref("");
 const isSubmitting = ref(false);
-const hasSubmittedSurvey = ref(null);
 
 const authStore = useAuthStore();
-
-onMounted(async () => {
-  const userId = authStore.user?.id;
-  if (!userId) {
-    console.warn("⚠️ No userId in authStore");
-    hasSubmittedSurvey.value = null;
-    return;
-  }
-
-  const result = await surveyService.getIsExisting(userId);
-  console.log("🔍 [Survey.vue] getIsExisting result:", result);
-
-  if (result === null) {
-    toast.error("حدث خطأ أثناء التحقق من حالة الاستبيان");
-    hasSubmittedSurvey.value = false;
-  } else {
-    hasSubmittedSurvey.value = result;
-  }
-});
 
 const submitSurvey = async () => {
   if (rating.value === null) {
@@ -56,7 +36,6 @@ const submitSurvey = async () => {
   }
 
   isSubmitting.value = true;
-
   try {
     await surveyService.postSurveyResponses({
       rating: rating.value,
@@ -64,33 +43,43 @@ const submitSurvey = async () => {
       userId: authStore.user?.id,
     });
 
-    toast.success("تم إرسال الاستبيان بنجاح");
+    toast.success("تم إرسال الاستبيان بنجاح ✅");
+    // reset form
     rating.value = null;
     feedback.value = "";
     isOpen.value = false;
-    hasSubmittedSurvey.value = true;
   } catch (err) {
-    if (err.response?.status === 409) {
+    if (err.status === 409) {
       toast.error("لقد قمت بالفعل بإرسال استبيان سابقًا");
-      hasSubmittedSurvey.value = true;
     } else {
       toast.error("خطأ في إرسال الاستبيان");
     }
-    console.error("Error submitting survey:", err);
+    console.error("❌ Error submitting survey:", err);
   } finally {
     isSubmitting.value = false;
   }
 };
+
+onMounted(async () => {
+  const userId = authStore.user?.id;
+  console.log("userId:", userId);
+  if (userId) {
+    try {
+      const response = await surveyService.getIsExisting(userId);
+      console.log("getIsExisting response:", response.data); // This will be true/false
+    } catch (err) {
+      if (err.response && err.response.status === 400) {
+        console.log("userId is required (400 Bad Request)");
+      } else {
+        console.log("Error in getIsExisting:", err);
+      }
+    }
+  }
+});
 </script>
 
 <template>
-  <Button
-    v-if="hasSubmittedSurvey === false"
-    @click="isOpen = true"
-    variant="outline"
-  >
-    أضف تجربتك معنا
-  </Button>
+  <Button @click="isOpen = true" variant="outline"> أضف تجربتك معنا </Button>
 
   <Dialog v-model:open="isOpen">
     <DialogContent dir="rtl" class="sm:max-w-lg">
@@ -132,7 +121,6 @@ const submitSurvey = async () => {
           ></textarea>
         </div>
       </div>
-
       <DialogFooter>
         <Button
           @click="submitSurvey"

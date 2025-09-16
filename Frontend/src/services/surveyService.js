@@ -2,7 +2,8 @@ import axiosClient from "@/apis/axiosClient";
 
 export default {
   getIsExisting(userId) {
-    return axiosClient.get("/survey/exists/".userId);
+    console.log(userId);
+    return axiosClient.get(`/survey/exists/${userId}`);
   },
 
   postSurveyResponses(surveyData) {
