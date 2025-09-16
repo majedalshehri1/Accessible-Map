@@ -13,5 +13,6 @@ public class PlaceUpdateDto {
     public PlaceUpdateDto(String placeName, CATEGORY category) {
         this.placeName = placeName;
         this.category = category;
+
     }
 }

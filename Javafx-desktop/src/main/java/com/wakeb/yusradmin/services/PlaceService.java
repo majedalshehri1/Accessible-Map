@@ -19,6 +19,7 @@ public class PlaceService {
     }
 
     // === Get all places (ADMIN) ===
+
     public Task<PageResponse<Place>> getAllPlaces(int page, int size) {
         return new Task<>() {
             @Override
