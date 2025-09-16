@@ -81,7 +81,6 @@ public class PlacesController {
 
     // ====== تحميل الأماكن من الخدمة ======
     // PlacesController.java - Fix pagination handling
-
     // PlacesController.java - Update loadPlaces method
     private void loadPlaces() {
         showLoading(true);
@@ -166,7 +165,7 @@ public class PlacesController {
         Label name = new Label(p.getPlaceName());
         name.getStyleClass().add("card-title");
 
-       Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
+        Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
         meta.getStyleClass().add("card-meta");
 
         // الخدمات كبادجات
