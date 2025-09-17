@@ -85,8 +85,8 @@ class PlaceServiceTest {
         place = new Place();
         place.setId(1L);
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
 
         PlaceImage image = new PlaceImage();
@@ -102,8 +102,8 @@ class PlaceServiceTest {
 
         placeDto = new PlaceDto();
         placeDto.setPlaceName("Test Place");
-        placeDto.setLatitude("40.7128");
-        placeDto.setLongitude("-74.0060");
+        placeDto.setLatitude(40.7128);
+        placeDto.setLongitude(-74.0060);
         placeDto.setCategory(Category.RESTAURANT);
         placeDto.setImageUrls(List.of("http://example.com/image.jpg"));
         placeDto.setAccessibilityFeatures(List.of("ELEVATORS"));

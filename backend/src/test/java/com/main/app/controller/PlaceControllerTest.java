@@ -46,15 +46,15 @@ class PlaceControllerTest {
         place = new Place();
         place.setId(1L);
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
 
         placeDto = new PlaceDto();
         placeDto.setId(1L);
         placeDto.setPlaceName("Test Place");
-        placeDto.setLatitude("40.7128");
-        placeDto.setLongitude("-74.0060");
+        placeDto.setLatitude(40.7128);
+        placeDto.setLongitude(-74.0060);
         placeDto.setCategory(Category.RESTAURANT);
 
         authUser = new AuthUser(1L, "testuser", "test@example.com", USER);

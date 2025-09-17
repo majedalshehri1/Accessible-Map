@@ -30,8 +30,8 @@ class PlaceImageRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         Place savedPlace = placeRepository.save(place);
 
@@ -53,8 +53,8 @@ class PlaceImageRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         Place savedPlace = placeRepository.save(place);
 
@@ -77,8 +77,8 @@ class PlaceImageRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         Place savedPlace = placeRepository.save(place);
 
@@ -107,8 +107,8 @@ class PlaceImageRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         Place savedPlace = placeRepository.save(place);
 

@@ -28,8 +28,8 @@ class PlaceRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Restaurant");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         placeRepository.save(place);
 
@@ -57,8 +57,8 @@ class PlaceRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Restaurant");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         placeRepository.save(place);
 
@@ -86,8 +86,8 @@ class PlaceRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Restaurant");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         placeRepository.save(place);
 
@@ -112,20 +112,20 @@ class PlaceRepositoryTest {
         // Given
         Place place1 = new Place();
         place1.setPlaceName("Restaurant 1");
-        place1.setLatitude("40.7128");
-        place1.setLongitude("-74.0060");
+        place1.setLatitude(40.7128);
+        place1.setLongitude(-74.0060);
         place1.setPlaceCategory(Category.RESTAURANT);
 
         Place place2 = new Place();
         place2.setPlaceName("Restaurant 2");
-        place2.setLatitude("40.7129");
-        place2.setLongitude("-74.0061");
+        place2.setLatitude(40.7129);
+        place2.setLongitude(-74.0061);
         place2.setPlaceCategory(Category.RESTAURANT);
 
         Place place3 = new Place();
         place3.setPlaceName("Cafe");
-        place3.setLatitude("40.7130");
-        place3.setLongitude("-74.0062");
+        place3.setLatitude(40.7130);
+        place3.setLongitude(-74.0062);
         place3.setPlaceCategory(Category.COFFEE);
 
         placeRepository.saveAll(List.of(place1, place2, place3));
@@ -164,8 +164,8 @@ class PlaceRepositoryTest {
         for (int i = 1; i <= 15; i++) {
             Place place = new Place();
             place.setPlaceName("Place " + i);
-            place.setLatitude("40.712" + i);
-            place.setLongitude("-74.006" + i);
+            place.setLatitude(40.712 + i);
+            place.setLongitude(-74.006 + i);
             place.setPlaceCategory(Category.RESTAURANT);
             placeRepository.save(place);
         }
@@ -189,8 +189,8 @@ class PlaceRepositoryTest {
         for (int i = 1; i <= 15; i++) {
             Place place = new Place();
             place.setPlaceName("Restaurant " + i);
-            place.setLatitude("40.712" + i);
-            place.setLongitude("-74.006" + i);
+            place.setLatitude(40.712 + i);
+            place.setLongitude(-74.006 + i);
             place.setPlaceCategory(Category.RESTAURANT);
             placeRepository.save(place);
         }
@@ -213,8 +213,8 @@ class PlaceRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("Test Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         Place savedPlace = placeRepository.save(place);
 
@@ -241,8 +241,8 @@ class PlaceRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("New Place");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
 
         // When
@@ -259,8 +259,8 @@ class PlaceRepositoryTest {
         // Given
         Place place = new Place();
         place.setPlaceName("To be deleted");
-        place.setLatitude("40.7128");
-        place.setLongitude("-74.0060");
+        place.setLatitude(40.7128);
+        place.setLongitude(-74.0060);
         place.setPlaceCategory(Category.RESTAURANT);
         Place savedPlace = placeRepository.save(place);
 
