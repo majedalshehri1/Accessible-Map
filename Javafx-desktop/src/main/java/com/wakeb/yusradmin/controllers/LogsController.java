@@ -5,6 +5,7 @@ import com.wakeb.yusradmin.dto.AdminLogDto;
 import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.services.AdminLogService;
 import com.wakeb.yusradmin.util.FXUtil;
+import com.wakeb.yusradmin.utils.LogFilter;
 import javafx.beans.property.SimpleLongProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
@@ -31,18 +32,27 @@ public class LogsController {
 
     @FXML private Button prevBtn, nextBtn;
     @FXML private Label pageInfo;
+    @FXML private ComboBox<LogFilter> entityFilter;
 
     private final ObservableList<AdminLogDto> data = FXCollections.observableArrayList();
     private final AdminLogService service = new AdminLogService();
 
     private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private int currentPage = 0;
-    private int pageSize = 7;
+    private int pageSize = 13;
     private int totalPages;
 
     @FXML
     private void initialize() {
         table.setItems(data);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_ALL_COLUMNS);
+        colTime.setMinWidth(140);   colTime.setPrefWidth(140);   colTime.setMaxWidth(180);
+        colEntity.setMinWidth(110); colEntity.setPrefWidth(120); colEntity.setMaxWidth(160);
+        colAction.setMinWidth(100); colAction.setPrefWidth(110); colAction.setMaxWidth(150);
+        colEntityId.setMinWidth(100); colEntityId.setPrefWidth(110); colEntityId.setMaxWidth(150);
+        colActor.setMinWidth(150);  colActor.setPrefWidth(180);  colActor.setMaxWidth(220);
+        colDesc.setMinWidth(300); colDesc.setPrefWidth(400);     colDesc.setMaxWidth(Double.MAX_VALUE);
+
         table.setPlaceholder(new Label("جاري التحميل..."));
 
         colEntityId.setCellValueFactory(c ->
@@ -58,6 +68,10 @@ public class LogsController {
             String txt = (inst == null) ? "" : fmt.format(inst.atZone(ZoneId.systemDefault()));
             return new SimpleStringProperty(txt);
         });
+
+        entityFilter.setItems(FXCollections.observableArrayList(LogFilter.values()));
+        entityFilter.getSelectionModel().select(LogFilter.ALL);
+        entityFilter.valueProperty().addListener((observable, oldValue, newValue) -> loadPage(0));
 
         loadPage(0);
     }
@@ -82,7 +96,10 @@ public class LogsController {
         statusLabel.setText("جاري التحميل...");
         updatePagingUI(false);
 
-        Task<PageResponse<AdminLogDto>> t = service.pageAsync(page, pageSize);
+        String selectedType = (entityFilter.getValue() == null) ? null :
+                entityFilter.getValue().getValue();
+
+        Task<PageResponse<AdminLogDto>> t = service.pageAsync(page, pageSize , selectedType);
         t.setOnSucceeded(e -> {
             loading.setVisible(false);
             PageResponse<AdminLogDto> p = t.getValue();
@@ -99,7 +116,7 @@ public class LogsController {
             currentPage = p.currentPage;
             totalPages  = Math.max(p.totalPages, 1);
 
-            statusLabel.setText("عدد السجلات في الصفحة: " + data.size());
+            statusLabel.setText("عدد السجلات  في الصفحة: " + data.size());
             updatePagingUI(true);
         });
         t.setOnFailed(e -> {

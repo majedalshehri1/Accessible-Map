@@ -1,0 +1,43 @@
+package com.main.app.model.Survey;
+
+import com.main.app.model.User.User;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "survey",
+        uniqueConstraints = @UniqueConstraint(columnNames = "user_id")
+)
+public class Survey {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Long id;
+
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
+    private User user;
+
+    @Column(name = "description")
+    private String description;
+
+
+    @Column(name = "rating")
+    @Max(10)
+    @Min(0)
+    private Integer rating;
+
+    @Column(name = "is_read", nullable = false)
+    private boolean read = false;
+
+}

@@ -1,5 +1,10 @@
 package com.main.app.controller;
 
+import com.main.app.dto.*;
+import com.main.app.dto.Place.PlaceUpdatedDto;
+import com.main.app.dto.Survey.SurveyResponseDTO;
+import com.main.app.model.Place.Place;
+import com.main.app.model.User.User;
 import com.main.app.Enum.EntityType;
 import com.main.app.dto.Admin.AdminLogDto;
 import com.main.app.dto.PaginatedResponse;
@@ -8,20 +13,19 @@ import com.main.app.dto.Place.TopPlaceDto;
 import com.main.app.dto.Review.ReviewRequestDTO;
 import com.main.app.dto.Review.ReviewResponseDTO;
 import com.main.app.dto.User.UserDto;
-import com.main.app.model.Place.Place;
-import com.main.app.model.User.User;
 import com.main.app.service.Admin.AdminLogService;
 import com.main.app.service.Admin.AdminService;
 import com.main.app.service.Place.PlaceService;
 import com.main.app.service.Review.ReviewService;
+import com.main.app.service.Survey.SurveyService;
 import com.main.app.service.User.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,6 +38,8 @@ public class AdminController {
     private final PlaceService placeService;
     private final AdminService adminService;
     private final UserService userService;
+    private final SurveyService surveyService;
+
     private final AdminLogService adminLogService;
 
 
@@ -75,6 +81,14 @@ public class AdminController {
     public ReviewResponseDTO getReviewById(@RequestParam long reviewId) {
         return reviewService.getReviewById(reviewId);
     }
+    @GetMapping("/findReviewName")
+    public ResponseEntity<PaginatedResponse<ReviewResponseDTO>> getReviewByPlaceName(
+            @RequestParam String placeName,
+     @RequestParam( required = false, defaultValue = "0") int page,
+    @RequestParam(required = false, defaultValue = "10") int size) {
+        return ResponseEntity.ok(reviewService.searchByPlaceName(placeName,page,size));
+
+    }
 
     @PutMapping("/update/review/{id}")
     public ResponseEntity<ReviewResponseDTO> updateReview(@PathVariable Long id, @RequestBody ReviewRequestDTO dto) {
@@ -90,10 +104,13 @@ public class AdminController {
     }
 
     @PutMapping("/update/place/{id}")
-    public ResponseEntity<PlaceDto> updatePlace(@PathVariable Long id, @RequestBody PlaceDto dto) {
+    public ResponseEntity<PlaceDto> updatePlace(@PathVariable Long id,
+                                                @RequestBody PlaceUpdatedDto dto) {
         var saved = adminService.adminUpdatePlace(id, dto);
         return ResponseEntity.ok(placeService.convertToDto(saved));
     }
+
+
 
     @DeleteMapping("delete/place/{id}")
     public ResponseEntity<String> deletePlace(@PathVariable Long id) {
@@ -163,8 +180,8 @@ public class AdminController {
 
     @GetMapping("/all/places")
     public ResponseEntity<PaginatedResponse<PlaceDto>> getAllPlaces(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
+            @RequestParam( required = false, defaultValue = "0") int page,
+            @RequestParam(required = false, defaultValue = "10") int size) {
         return ResponseEntity.ok(placeService.getAllPlaces(page, size));
     }
 
@@ -173,6 +190,27 @@ public class AdminController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(userService.findOnlyUsers(page, size));
+    }
+
+    @GetMapping("/survey/all")
+    public ResponseEntity<List<SurveyResponseDTO>>  getAllSurveys() {
+        return ResponseEntity.ok(surveyService.getAllSurvey());
+    }
+
+    @PutMapping("/survey/{id}/read")
+    public ResponseEntity<Void> setSurveyRead(
+            @PathVariable Long id,
+            @RequestBody Map<String, Boolean> body) {
+        boolean read = Boolean.TRUE.equals(body.get("read"));
+        surveyService.updateReadStatus(id, read);
+        return ResponseEntity.ok().build();
+    }
+
+
+    @DeleteMapping("/survey/delete/{id}")
+    public ResponseEntity<String> deleteSurvey(@PathVariable Long id) {
+        surveyService.deleteSurvey(id);
+        return ResponseEntity.ok("Survey deleted successfully");
     }
 
 

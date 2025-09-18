@@ -1,6 +1,7 @@
 package com.main.app.service.Security;
 
 
+import com.main.app.Exceptions.InvalidCredntialsException;
 import com.main.app.dto.Security.AuthRequest;
 import com.main.app.dto.Security.AuthResponse;
 import com.main.app.model.User.User;
@@ -28,11 +29,12 @@ public class AuthService {
         );
 
         User user = userRepository.findByUserEmail(req.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(InvalidCredntialsException::new);
 
         if (Boolean.TRUE.equals(user.getIsBlocked())) {
             throw new LockedUserException("User is blocked");
         }
+
 
         String jwt = jwtService.generateAccessToken(user);
         ResponseCookie cookie = buildJwtCookie(jwt);

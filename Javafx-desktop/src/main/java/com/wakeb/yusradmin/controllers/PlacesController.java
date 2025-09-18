@@ -1,9 +1,7 @@
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.dto.PlaceUpdateDto;
-import com.wakeb.yusradmin.models.Place;
-import com.wakeb.yusradmin.models.PlaceDto;
-import com.wakeb.yusradmin.models.ReviewRequestDTO;
+import com.wakeb.yusradmin.models.*;
 import com.wakeb.yusradmin.services.PlaceService;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.utils.AccessibilityFeatures;
@@ -34,9 +32,15 @@ public class PlacesController {
     @FXML private Button searchButton;
     @FXML private ComboBox<CATEGORY> filterComboBox;
 
+
     // شبكة الكروت
     @FXML private FlowPane cardsPane;
     @FXML private ScrollPane cardsScroll;
+
+    @FXML private Pagination pagination;
+
+    private int currentPage = 0;
+    private int pageSize = 12;
 
     // ====== بيانات وخدمات ======
     private PlaceService placeService;
@@ -65,44 +69,92 @@ public class PlacesController {
             }
         });
 
-        searchButton.setOnAction(e -> loadPlaces());
-        filterComboBox.valueProperty().addListener((obs, o, n) -> loadPlaces());
+        // pagination
+        pagination.currentPageIndexProperty().addListener((obs, oldVal, newVal) -> {
+            currentPage = newVal.intValue();
+            loadPlaces();
+        });
 
-        // أول تحميل
+        // search
+        searchButton.setOnAction(e -> {
+            currentPage = 0;
+            loadPlaces();
+        });
+
+        // filter
+        filterComboBox.valueProperty().addListener((obs, o, n) -> {
+            currentPage = 0;
+            loadPlaces();
+        });
+
+        // ✅ Initial load so data shows immediately
         loadPlaces();
     }
 
     // ====== تحميل الأماكن من الخدمة ======
+    // PlacesController.java - Fix pagination handling
+    // PlacesController.java - Update loadPlaces method
     private void loadPlaces() {
-        Task<List<Place>> fetchTask;
-        String q = searchField.getText();
-
-        if (q != null && !q.isBlank()) {
-            fetchTask = placeService.getPlacesByName(q);
-        } else if (filterComboBox.getValue() != null &&
-                filterComboBox.getValue() != CATEGORY.ALL) {
-            fetchTask = placeService.getPlacesByCategory(filterComboBox.getValue());
-        } else {
-            fetchTask = placeService.getAllPlaces();
-        }
-
         showLoading(true);
+        String q = searchField.getText();
+        CATEGORY cat = filterComboBox.getValue();
 
-        fetchTask.setOnSucceeded(ev -> {
+        try {
+            if (q != null && !q.isBlank()) {
+                // 🔎 Search
+                Task<List<Place>> t = placeService.searchPlaces(q.trim());
+                t.setOnSucceeded(ev -> {
+                    List<Place> result = t.getValue();
+                    if (result != null) {
+                        places.setAll(result);
+                        renderCards();
+                        pagination.setPageCount(1); // search = no pagination
+                    }
+                    showLoading(false);
+                });
+                t.setOnFailed(ev -> {
+                    handleErrors(t.getException());
+                    showLoading(false);
+                });
+                new Thread(t).start();
+
+            } else if (cat != null && cat != CATEGORY.ALL) {
+                // 🏷️ Category filter
+                Task<PageResponse<Place>> t = placeService.getPlacesByCategory(cat, currentPage, pageSize);
+                wire(t);
+
+            } else {
+                // 📋 Default = all places
+                Task<PageResponse<Place>> t = placeService.getAllPlaces(currentPage, pageSize);
+                wire(t);
+            }
+        } catch (Exception e) {
+            handleErrors(e);
             showLoading(false);
-            places.setAll(fetchTask.getValue());
-            renderCards();
-        });
+        }
+    }
 
-        fetchTask.setOnFailed(ev -> {
+    private void wire(Task<PageResponse<Place>> task) {
+        task.setOnSucceeded(ev -> {
+            PageResponse<Place> resp = task.getValue();
+            if (resp != null) {
+                places.setAll(resp.getContent());           // استخدم getters لو عندك
+                renderCards();
+                pagination.setPageCount(Math.max(resp.getTotalPages(), 1));
+            }
             showLoading(false);
-            Throwable ex = fetchTask.getException();
-            handleErrors(ex);
         });
+        task.setOnFailed(ev -> {
+            handleErrors(task.getException());
+            showLoading(false);
+        });
+        new Thread(task).start();
+    }
 
-        Thread t = new Thread(fetchTask, "load-places");
-        t.setDaemon(true);
-        t.start();
+    @FXML
+    private void handlePageChange() {
+        currentPage = pagination.getCurrentPageIndex();
+        loadPlaces();
     }
 
     private void renderCards() {
@@ -113,15 +165,15 @@ public class PlacesController {
     }
 
     private Node buildPlaceCard(Place p) {
-        // الصورة
         ImageView img = new ImageView();
         img.setFitWidth(CARD_WIDTH);
         img.setFitHeight(IMAGE_HEIGHT);
         img.setPreserveRatio(false);
         img.setSmooth(true);
 
-        if (p.getImageUrl() != null && !p.getImageUrl().isBlank()) {
-            Image image = new Image(p.getImageUrl(), CARD_WIDTH, IMAGE_HEIGHT, false, true, true);
+        String firstImageUrl = p.getFirstImageUrl();
+        if (firstImageUrl != null && !firstImageUrl.isBlank()) {
+            Image image = new Image(firstImageUrl, CARD_WIDTH, IMAGE_HEIGHT, false, true, true);
             img.setImage(image);
         } else {
             img.setStyle("-fx-background-color: #eceff1;");
@@ -130,7 +182,7 @@ public class PlacesController {
         Label name = new Label(p.getPlaceName());
         name.getStyleClass().add("card-title");
 
-       Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
+        Label meta = new Label(p.getCategory() != null ? p.getCategory().getLabel() : "");
         meta.getStyleClass().add("card-meta");
 
         // الخدمات كبادجات
@@ -248,15 +300,14 @@ public class PlacesController {
         dialog.setResultConverter(btn -> {
             if (btn == ButtonType.OK) {
                 String placeName = name.getText().trim();
-                String placeCategory = category.getSelectionModel().getSelectedItem().getValue();
-                PlaceUpdateDto dto = new PlaceUpdateDto(place.getId(), placeName, placeCategory);
-                return dto;
+                CATEGORY selectedCategory = category.getValue();
+                return new PlaceUpdateDto(placeName, selectedCategory);
             }
             return null;
         });
 
         dialog.showAndWait().ifPresent(placeUpdateDto -> {
-            Task<Place> task = placeService.updatePlaceById(placeUpdateDto);
+            Task<Place> task = placeService.updatePlaceById(place.getId(), placeUpdateDto);
             showLoading(true);
 
             task.setOnSucceeded(e -> {
@@ -288,13 +339,23 @@ public class PlacesController {
 
     // ====== مساعدات ======
     private void handleErrors(Throwable error) {
+        // Always print full stack trace for debugging
+        if (error != null) {
+            System.err.println("=== Exception occurred ===");
+            error.printStackTrace();
+        }
+
+        // Determine user-friendly message
         String msg;
         if (error instanceof SecurityException) msg = "Authentication required. Please login.";
         else if (error instanceof IllegalArgumentException) msg = "Invalid request. Please try again.";
-        else if (error instanceof IOException) msg = "Network Error. Please try again.";
-        else msg = "unknown error. Please try again.";
+        else if (error instanceof IOException) msg = "Network error. Please check your connection.";
+        else msg = "Unknown error occurred: " + (error != null && error.getMessage() != null ? error.getMessage() : "");
+
+        // Show alert
         FXUtil.error("Error", msg);
     }
+
 
     private void showLoading(boolean loading) {
         if (loading) {

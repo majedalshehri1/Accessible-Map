@@ -1,0 +1,16 @@
+package com.main.app.dto.Survey;
+
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+
+public class SurveyResponseDTO {
+    private Long Id;
+    private Long userId;
+    private String userName;
+    private String description;
+    private Integer rating;
+    private Boolean read;
+
+}

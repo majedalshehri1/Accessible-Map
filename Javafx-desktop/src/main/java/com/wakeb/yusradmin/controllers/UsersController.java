@@ -1,10 +1,8 @@
-// com.wakeb.yusradmin.controllers.UsersController.java
 package com.wakeb.yusradmin.controllers;
 
 import com.wakeb.yusradmin.models.PageResponse;
 import com.wakeb.yusradmin.models.User;
 import com.wakeb.yusradmin.services.UserService;
-import com.wakeb.yusradmin.services.UserServiceHTTP;
 import com.wakeb.yusradmin.util.FXUtil;
 import com.wakeb.yusradmin.util.UserActionCell;
 import javafx.beans.property.SimpleLongProperty;
@@ -15,11 +13,10 @@ import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 
-import java.util.List;
-
 public class UsersController {
 
     @FXML private TextField searchField;
+    @FXML private Button searchButton;
     @FXML private TableView<User> table;
     @FXML private TableColumn<User, Long>   colId;
     @FXML private TableColumn<User, String> colName;
@@ -33,7 +30,7 @@ public class UsersController {
 
     private int currentPage = 0;
     private int pageSize = 11;
-    private int totalPages = 2;
+    private int totalPages;
 
     private final ObservableList<User> data = FXCollections.observableArrayList();
     private UserService service;
@@ -54,67 +51,42 @@ public class UsersController {
         table.setItems(data);
         table.setPlaceholder(new Label("جاري التحميل..."));
 
-        colActions.setCellFactory(tc -> new UserActionCell(
-                this::onBlockToggle, this::onEdit, this::onDelete
-        ));
+        colActions.setCellFactory(tc -> new UserActionCell(this::onBlockToggle, this::onEdit, this::onDelete));
 
-        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+        table.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY_FLEX_LAST_COLUMN);
         colActions.setMinWidth(240);
         colActions.setPrefWidth(240);
         colActions.setMaxWidth(240);
 
         searchField.setOnAction(e -> refresh());
+        if (searchButton != null) searchButton.setOnAction(e -> refresh());
     }
 
-
-    @FXML
-    private void prevPage() {
-        if (currentPage > 0) loadPage(currentPage - 1);
-    }
-
-    @FXML
-    private void nextPage() {
-        if (currentPage + 1 < totalPages) loadPage(currentPage + 1);
-    }
+    @FXML private void prevPage() { if (currentPage > 0) loadPage(currentPage - 1); }
+    @FXML private void nextPage() { if (currentPage + 1 < totalPages) loadPage(currentPage + 1); }
 
     private void loadPage(int page) {
         if (service == null) return;
 
         String q = searchField.getText();
-        if (q != null && !q.isBlank()) {
-            refresh();
-            return;
-        }
+        if (q != null && !q.isBlank()) { refresh(); return; }
 
-        Task<Void> task = new Task<>() {
-            PageResponse<User> p;
-
-            @Override protected Void call() throws Exception {
-                if (service instanceof UserServiceHTTP sHttp) {
-                    p = sHttp.page(page, pageSize);
-                } else {
-                    List<User> all = service.list();
-                    p = new PageResponse<>();
-                    p.content = all;
-                    p.currentPage = 0; p.pageSize = all.size();
-                    p.totalElements = all.size();
-                    p.totalPages = 1;
-                }
-                return null;
-            }
-
-            @Override protected void succeeded() {
-                currentPage = p.currentPage;
-                totalPages  = Math.max(p.totalPages, 1);
-                data.setAll(p.content);
-                updatePagingUI(true);
-            }
-
-            @Override protected void failed() {
-                FXUtil.error("Load Users Failed", getException().getMessage());
-                updatePagingUI(false);
-            }
+        Task<PageResponse<User>> task = new Task<>() {
+            @Override protected PageResponse<User> call() throws Exception { return service.list(page, pageSize); }
         };
+
+        task.setOnSucceeded(e -> {
+            PageResponse<User> p = task.getValue();
+            currentPage = p.currentPage;
+            totalPages  = Math.max(p.totalPages, 1);
+            data.setAll(p.content);
+            updatePagingUI(true);
+        });
+
+        task.setOnFailed(e -> {
+            FXUtil.error("Load Users Failed", task.getException().getMessage());
+            updatePagingUI(false);
+        });
 
         updatePagingUI(false);
         new Thread(task, "users-page").start();
@@ -132,38 +104,47 @@ public class UsersController {
         nextBtn.setDisable(currentPage + 1 >= totalPages);
     }
 
-
     public void refresh() {
         if (service == null) return;
-
         String q = searchField.getText();
+
         if (q != null && !q.isBlank()) {
-            Task<List<User>> task = new Task<>() {
-                @Override protected List<User> call() throws Exception { return service.search(q); }
+            Task<PageResponse<User>> task = new Task<>() {
+                @Override protected PageResponse<User> call() throws Exception { return service.search(q, 0, pageSize); }
             };
+
             task.setOnSucceeded(e -> {
-                data.setAll(task.getValue());
-                pageInfo.setText("نتائج: " + data.size());
-                prevBtn.setDisable(true);
-                nextBtn.setDisable(true);
+                PageResponse<User> p = task.getValue();
+                if (p != null) {
+                    data.setAll(p.content);
+                    currentPage = p.currentPage;
+                    totalPages  = Math.max(p.totalPages, 1);
+                    pageInfo.setText("نتائج: " + p.totalElements + " (صفحة " + (currentPage + 1) + " / " + totalPages + ")");
+                    prevBtn.setDisable(currentPage == 0);
+                    nextBtn.setDisable(currentPage + 1 >= totalPages);
+                } else {
+                    data.clear();
+                    pageInfo.setText("لا توجد نتائج");
+                    prevBtn.setDisable(true);
+                    nextBtn.setDisable(true);
+                }
             });
-            task.setOnFailed(e -> FXUtil.error("Load Users Failed", task.getException().getMessage()));
-            new Thread(task, "users-search").start();
+
+            task.setOnFailed(e -> FXUtil.error("Search Users Failed", task.getException().getMessage()));
+            new Thread(task, "users-search-refresh").start();
         } else {
             loadPage(0);
         }
     }
 
-
     private void onBlockToggle(User u) {
         Task<Void> t = new Task<>() {
             @Override protected Void call() throws Exception {
-                if (u.isBlocked()) service.unblock(u.getId());
-                else service.block(u.getId());
+                if (u.isBlocked()) service.unblock(u.getId()); else service.block(u.getId());
                 return null;
             }
         };
-        t.setOnSucceeded(e -> loadPage(currentPage)); // نرجّع نفس الصفحة
+        t.setOnSucceeded(e -> refresh());
         t.setOnFailed(e -> FXUtil.error("Block/Unblock Failed", t.getException().getMessage()));
         new Thread(t, "block-toggle").start();
     }
@@ -183,22 +164,16 @@ public class UsersController {
         if (table.getScene() != null) dlg.initOwner(table.getScene().getWindow());
 
         Button okBtn = (Button) pane.lookupButton(ButtonType.OK);
-        okBtn.setText("حفظ");
-        okBtn.getStyleClass().addAll("button-primary");
-
+        okBtn.setText("حفظ"); okBtn.getStyleClass().addAll("button-primary");
         Button cancelBtn = (Button) pane.lookupButton(ButtonType.CANCEL);
-        cancelBtn.setText("إلغاء");
-        cancelBtn.getStyleClass().addAll("button-secondary");
+        cancelBtn.setText("إلغاء"); cancelBtn.getStyleClass().addAll("button-secondary");
 
         dlg.getEditor().setPromptText("أدخل الاسم");
 
         dlg.showAndWait().ifPresent(name -> {
             u.setUserName(name);
             Task<Void> t = new Task<>() {
-                @Override protected Void call() throws Exception {
-                    service.update(u);
-                    return null;
-                }
+                @Override protected Void call() throws Exception { service.update(u); return null; }
             };
             t.setOnSucceeded(e -> loadPage(currentPage));
             t.setOnFailed(e -> FXUtil.error("Update Failed", t.getException().getMessage()));
@@ -209,15 +184,9 @@ public class UsersController {
     private void onDelete(User u) {
         if (!FXUtil.confirm("Confirm Delete", "Delete user \"" + u.getUserName() + "\"?")) return;
         Task<Void> t = new Task<>() {
-            @Override protected Void call() throws Exception {
-                service.delete(u.getId());
-                return null;
-            }
+            @Override protected Void call() throws Exception { service.delete(u.getId()); return null; }
         };
-        t.setOnSucceeded(e -> {
-            if (data.size() == 1 && currentPage > 0) loadPage(currentPage - 1);
-            else loadPage(currentPage);
-        });
+        t.setOnSucceeded(e -> { if (data.size() == 1 && currentPage > 0) loadPage(currentPage - 1); else loadPage(currentPage); });
         t.setOnFailed(e -> FXUtil.error("Delete Failed", t.getException().getMessage()));
         new Thread(t, "delete-user").start();
     }

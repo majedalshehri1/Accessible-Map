@@ -3,15 +3,15 @@ import api from "@/apis/axiosClient";
 
 export const useAuthStore = defineStore("auth", {
   state: () => ({
-    user: null,    
+    user: null,
     loading: false,
     error: null,
   }),
 
   actions: {
-    
     async register({ username, email, password }) {
-      this.loading = true; this.error = null;
+      this.loading = true;
+      this.error = null;
       try {
         await api.post("/auth/register", { username, email, password });
         await this.refreshProfile();
@@ -28,16 +28,20 @@ export const useAuthStore = defineStore("auth", {
     },
 
     async login({ email, password, username }) {
-      this.loading = true; this.error = null;
+      this.loading = true;
+      this.error = null;
       try {
-        const body = username ? { username, email, password } : { email, password };
+        const body = username
+          ? { username, email, password }
+          : { email, password };
         await api.post("/auth/login", body);
         await this.refreshProfile();
         return this.user;
       } catch (err) {
-        this.error = err.response?.status === 401
-          ? "بيانات الدخول غير صحيحة"
-          : "تعذّر تسجيل الدخول";
+        this.error =
+          err.response?.status === 401
+            ? "بيانات الدخول غير صحيحة"
+            : "تعذّر تسجيل الدخول";
         throw err;
       } finally {
         this.loading = false;
@@ -51,18 +55,17 @@ export const useAuthStore = defineStore("auth", {
       } catch {
         this.user = null;
       }
-      
     },
     async updateUsername(newUsername) {
-      this.loading = true; 
+      this.loading = true;
       this.error = null;
       try {
         // (PATCH /api/users/username) like in the backend newUsername
         await api.patch("/users/username", { newUsername });
-        
-        // after successful update, refresh profile 
+
+        // after successful update, refresh profile
         await this.refreshProfile();
-        
+
         return this.user;
       } catch (err) {
         this.error = "تعذّر تحديث الاسم";

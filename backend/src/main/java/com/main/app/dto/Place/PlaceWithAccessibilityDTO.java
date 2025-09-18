@@ -10,8 +10,8 @@ import java.util.List;
 public class PlaceWithAccessibilityDTO {
     private Long id;
     private String placeName;
-    private String longitude;
-    private String latitude;
+    private Double longitude;
+    private Double latitude;
     private Category placeCategory;
     private List<AccessibillityType> availableFeatures;
     private Double averageRating;

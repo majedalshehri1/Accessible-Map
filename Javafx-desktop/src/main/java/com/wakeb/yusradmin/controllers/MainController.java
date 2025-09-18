@@ -30,6 +30,7 @@ public class MainController {
     @FXML private ToggleButton usersBtn;
     @FXML private ToggleButton reviewsBtn;
     @FXML private ToggleButton placesBtn;
+    @FXML private ToggleButton surveyBtn;
     @FXML private ToggleButton mapBtn;
     @FXML private ToggleButton logsBtn;
 
@@ -87,6 +88,7 @@ public class MainController {
     @FXML private void handleUsers()     { navigationManager.navigateToView(SceneType.USERS); }
     @FXML private void handleReviews()   { navigationManager.navigateToView(SceneType.REVIEWS); }
     @FXML private void handlePlaces()    { navigationManager.navigateToView(SceneType.PLACES); }
+    @FXML private void handleSurvey()    { navigationManager.navigateToView(SceneType.SURVEY); }
     @FXML private void handleMapView() {navigationManager.navigateToView(SceneType.MAP);}
     @FXML private void handleLogs() {navigationManager.navigateToView(SceneType.LOGS);}
 

@@ -164,6 +164,7 @@ public class NavigationManager {
         fxmlPaths.put(SceneType.USERS, "/fxml/dashboard/content/UsersView.fxml");
         fxmlPaths.put(SceneType.REVIEWS, "/fxml/dashboard/content/ReviewsView.fxml");
         fxmlPaths.put(SceneType.PLACES, "/fxml/dashboard/content/PlacesView.fxml");
+        fxmlPaths.put(SceneType.SURVEY, "/fxml/dashboard/content/SurveyView.fxml");
         fxmlPaths.put(SceneType.MAP, "/fxml/dashboard/content/MapView.fxml");
         fxmlPaths.put(SceneType.LOGS, "/fxml/dashboard/content/Logs.fxml");
 
@@ -173,6 +174,7 @@ public class NavigationManager {
         cssPaths.put(SceneType.OVERVIEWS, "/css/main.css");
         cssPaths.put(SceneType.USERS, "/css/main.css");
         cssPaths.put(SceneType.REVIEWS, "/css/places.css");
+        cssPaths.put(SceneType.SURVEY, "/css/places.css");
         cssPaths.put(SceneType.MAP, "/css/main.css");
         cssPaths.put(SceneType.PLACES, "/css/places.css");
         cssPaths.put(SceneType.LOGS, "/css/main.css");

@@ -1,8 +1,13 @@
 package com.main.app.dto;
 
-import lombok.Data;
+import lombok.*;
+
 import java.util.List;
 
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class PaginatedResponse<T> {
     private List<T> content;
@@ -12,12 +17,4 @@ public class PaginatedResponse<T> {
     private int totalPages;
     private boolean last;
 
-    public PaginatedResponse(List<T> content, int currentPage, int pageSize, long totalElements, int totalPages, boolean last) {
-        this.content = content;
-        this.currentPage = currentPage;
-        this.pageSize = pageSize;
-        this.totalElements = totalElements;
-        this.totalPages = totalPages;
-        this.last = last;
-    }
 }

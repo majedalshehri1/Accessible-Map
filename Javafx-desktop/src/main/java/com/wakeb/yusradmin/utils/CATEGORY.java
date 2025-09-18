@@ -16,11 +16,11 @@ public enum CATEGORY {
         this.label = label;
     }
 
-    public String getValue() {
+     public String getValue() {
         return value;
     }
 
-    public String getLabel() {
+     public String getLabel() {
         return label;
     }
 
