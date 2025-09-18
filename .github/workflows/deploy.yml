@@ -27,7 +27,7 @@ jobs:
           java-version: '21'
 
       - name: Build JAR (skip tests)
-        run: mvn -B -DskipTests package
+        run:  ./mvn -B package -DskipTests
         working-directory: ./backend
 
       - name: Configure AWS credentials
