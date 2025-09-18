@@ -528,6 +528,17 @@
     -fx-padding: 10px 16px;
     -fx-background-radius: 8px;
 }
+.toolbar > .button.card-button {
+    -fx-background-radius: 8px;
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
+    }
+.card-button:hover {
+    -fx-background-color: derive(#007bff, -10%);
+}
 
 .button:hover { -fx-opacity: .97; }
 .button:pressed { -fx-opacity: .92; }
@@ -625,10 +636,11 @@
 .data-table .column-header-background,
 .data-table .filler {
     -fx-background-color: transparent;
+}
+
 .toolbar {
     -fx-spacing: 12;
     -fx-alignment: CENTER_LEFT;
-}
 }
 /* ====== ستايل Alerts ====== */
 .custom-alert {
@@ -698,7 +710,7 @@
     -fx-padding: 10px 8px;
 }
 
-.card-button {
+.button.card-button {   /* نفس العنصر عنده الكلاسين */
     -fx-background-radius: 8px;
     -fx-background-color: #007bff;
     -fx-text-fill: white;
@@ -706,8 +718,7 @@
     -fx-font-size: 12px;
     -fx-font-weight: bold;
 }
-
-.card-button:hover {
+.button.card-button:hover {
     -fx-background-color: derive(#007bff, -10%);
 }
 .card-button__delete {
@@ -729,4 +740,12 @@
 
 .card-button__secondary:hover {
     -fx-background-color: derive(white, -10%);
+}
+.card-button {
+    -fx-background-radius: 8px;
+    -fx-background-color: #007bff;
+    -fx-text-fill: white;
+    -fx-padding: 4px 8px;
+    -fx-font-size: 12px;
+    -fx-font-weight: bold;
 }
