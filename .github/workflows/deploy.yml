@@ -57,7 +57,7 @@ jobs:
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy backend ${GITHUB_SHA}" \
-            --parameters '{
+            --parameters
               "commands": [
                 "sudo yum install -y docker || true",
                 "sudo systemctl enable docker || true",
