@@ -79,8 +79,8 @@ const submitReview = async () => {
                 </Button>
             </div>
 
-            <form @submit.prevent="submitReview" class="space-y-4">
-                <div>
+            <form @submit.prevent="submitReview" class="space-y-6">
+                <div class="space-y-2">
                     <Label>التقييم</Label>
                     <div class="flex gap-1 mt-1.5">
                         <Star v-for="star in 5" :key="star" @click="setRating(star)" @mouseenter="setHoverRating(star)"
@@ -90,10 +90,10 @@ const submitReview = async () => {
                     </div>
                 </div>
 
-                <div>
+                <div class="space-y-2">
                     <Label for="comment">التعليق</Label>
                     <Textarea id="comment" v-model="form.comment" placeholder="شاركنا تجربتك..." rows="4" required
-                        :disabled="isLoading" />
+                        :disabled="isLoading" class="resize-none"/>
                 </div>
 
                 <div class="flex gap-2 pt-2">

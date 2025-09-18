@@ -33,6 +33,7 @@ const renderStars = (rating) => {
 };
 
 const formatArabicNumber = (number) => {
+  const numberFormated = number.toFixed(1)
   return number.toLocaleString("ar-EG");
 };
 </script>
@@ -53,7 +54,7 @@ const formatArabicNumber = (number) => {
         />
       </div>
       <p class="text-sm text-zinc-400">
-        بناء على {{ formatArabicNumber(reviewsCount) }} تقييم
+        بناء على <span class="text-foreground font-medium text-base">{{ formatArabicNumber(reviewsCount) }}</span> تقييم
       </p>
 
       <Button

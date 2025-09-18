@@ -8,7 +8,10 @@ import com.main.app.Exceptions.BadRequestException;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
 import com.main.app.dto.PaginatedResponse;
+import com.main.app.dto.Place.DetailPlaceDto;
+import com.main.app.dto.Place.MinimalPlaceDto;
 import com.main.app.dto.Place.PlaceDto;
+import com.main.app.dto.Place.PlaceWithStatsDTO;
 import com.main.app.dto.Review.ReviewResponseDTO;
 import com.main.app.model.Place.Place;
 import com.main.app.model.Place.PlaceFeature;
@@ -27,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,8 +49,6 @@ public class PlaceService {
     @Autowired
     private PlaceImageRepository placeImageRepository;
 
-
-
     @Autowired
     private AdminLogService adminLogService;
     @Autowired
@@ -56,6 +58,52 @@ public class PlaceService {
     public Place getPlaceOrThrow(Long id) {
         return placeRepository.findById(id)
                 .orElseThrow(() -> new PlaceNotFoundException(id));
+    }
+
+    @Transactional(readOnly = true)
+    public DetailPlaceDto getPlaceDetails(Long placeId) {
+        PlaceWithStatsDTO stats = placeRepository.findStatsByPlaceId(placeId);
+
+        Place place = placeRepository.findById(placeId)
+                .orElseThrow(() -> new RuntimeException("Place not found"));
+
+        // Features as strings
+        List<AccessibillityType> features = place.getPlaceFeatures().stream()
+                .filter(PlaceFeature::getIsAvaliable)
+                .map(PlaceFeature::getAccessibillityType)
+                .toList();
+
+
+        List<String> images = place.getImages().stream()
+                .map(PlaceImage::getImageUrl)
+                .toList();
+
+        // Reviews
+        List<Review> reviews = reviewRepository.findByPlaceId(place.getId());
+        List<ReviewResponseDTO> reviewDtos = reviews.stream().map(review -> {
+            ReviewResponseDTO r = new ReviewResponseDTO();
+            r.setId(review.getId());
+            r.setPlaceName(place.getPlaceName());
+            r.setPlaceCategory(place.getPlaceCategory());
+            r.setUserName(review.getUser().getUserName());
+            r.setDescription(review.getDescription());
+            r.setRating(review.getRating());
+            r.setReviewDate(review.getReviewDate());
+            return r;
+        }).toList();
+
+        DetailPlaceDto response = new DetailPlaceDto();
+        response.setId(place.getId());
+        response.setPlaceName(place.getPlaceName());
+        response.setPlaceCategory(place.getPlaceCategory());
+        response.setReviews(reviewDtos);
+        response.setLatitude(place.getLatitude());
+        response.setLongitude(place.getLongitude());
+        response.setFeatures(features);
+        response.setImages(images);
+        response.setAvgRating(stats.getAvgRating());
+        response.setReviewsCount(stats.getReviewCount());
+        return response;
     }
 
     public PlaceDto convertToDto(Place place) {
@@ -224,7 +272,39 @@ public class PlaceService {
         return placeRepository.countPlacesByCategory();
     }
 
+    public List<MinimalPlaceDto> getMinimalWithinBoundsPlaces
+            (Double n, Double s, Double e, Double w, Double zoomLevel, String placeName, Category category) {
+            // handle zoom case where lower than 11 so it will not try to get most places at once
+            if (zoomLevel <= 11) {
+                return Collections.emptyList();
+            }
 
+            List<Place> places;
+
+            boolean doesPlaceNameExists = placeName != null && !placeName.isEmpty();
+            boolean doesCategoryExists = category != null;
+
+            if (doesPlaceNameExists && doesCategoryExists) {
+                places = placeRepository.findWithinBoundsByNameAndCategory(n, s, e, w, placeName, category.name());
+            } else if (doesPlaceNameExists) {
+                places = placeRepository.findWithinBoundsByName(n, s, e, w, placeName);
+            } else if (doesCategoryExists) {
+                places = placeRepository.findWithinBoundsByCategory(n, s, e, w, category.name());
+            } else {
+                places = placeRepository.findWithinDistance(n, s, e, w);
+            }
+            return places.stream().map(this::convertToMinimalDto).collect(Collectors.toList());
+        }
+
+    private MinimalPlaceDto convertToMinimalDto(Place place) {
+        MinimalPlaceDto dto = new MinimalPlaceDto();
+        dto.setId(place.getId());
+        dto.setPlaceName(place.getPlaceName());
+        dto.setLatitude(place.getLatitude());
+        dto.setLongitude(place.getLongitude());
+        dto.setCategory(place.getPlaceCategory());
+        return dto;
+    }
     }
 
 

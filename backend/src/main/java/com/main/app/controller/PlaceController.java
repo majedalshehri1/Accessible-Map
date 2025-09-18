@@ -3,6 +3,8 @@ package com.main.app.controller;
 import com.main.app.Enum.AccessibillityType;
 import com.main.app.Enum.Category;
 import com.main.app.dto.PaginatedResponse;
+import com.main.app.dto.Place.DetailPlaceDto;
+import com.main.app.dto.Place.MinimalPlaceDto;
 import com.main.app.dto.Place.PlaceDto;
 import com.main.app.model.Place.Place;
 import com.main.app.service.Place.PlaceService;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
@@ -23,9 +26,9 @@ public class PlaceController {
     private PlaceService placeService;
 
     @GetMapping("{id}")
-    public ResponseEntity<PlaceDto> getPlaceById(@PathVariable Long id){
-        Place place = placeService.getPlaceOrThrow(id);
-        return ResponseEntity.ok(placeService.convertToDto(place));
+    public ResponseEntity<DetailPlaceDto>  getPlaceById(@PathVariable Long id){
+        DetailPlaceDto place = placeService.getPlaceDetails(id);
+        return ResponseEntity.ok(place);
     }
 
     @PostMapping("/create")
@@ -70,6 +73,23 @@ public class PlaceController {
         return ResponseEntity.ok(placeService.getAllPlaces(page, size));
     }
 
+    // this GET request is highly unlikely to hit an HTTP 414 error
+    // the URL is very short and does not approach the character limits that typically cause this error
+    // n -> north, s -> south, etc
+    @GetMapping("/within-bounds")
+    public ResponseEntity<List<MinimalPlaceDto>> getWithinBounds(
+            @RequestParam Double n,
+            @RequestParam Double s,
+            @RequestParam Double e,
+            @RequestParam Double w,
+            @RequestParam Double zoom,
+            @RequestParam(required = false) String query,
+            @RequestParam(required = false) Category category
+            ) {
+
+        return ResponseEntity.ok(placeService.getMinimalWithinBoundsPlaces(n, s, e, w, zoom,  query, category));
+    }
+
     @GetMapping("category")
     public ResponseEntity<PaginatedResponse<PlaceDto>> getPlaceCategory(
             @RequestParam Category category,
@@ -77,7 +97,6 @@ public class PlaceController {
             @RequestParam( required = false, defaultValue = "10") int size) {
         return ResponseEntity.ok(placeService.getPlaceCategory(category, page, size));
     }
-
 
 
 }

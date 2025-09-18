@@ -1,15 +1,20 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import L from "leaflet";
+import { onMounted, ref, watch, onUnmounted } from "vue";
 
-import { useGeolocation } from "@vueuse/core";
-import { usePlacesStore } from "@/stores/placeStore";
-import { storeToRefs } from "pinia";
+import L from "leaflet";
+import { useGeolocation, useDebounceFn } from "@vueuse/core";
 import { toast } from "vue-sonner";
 
-const placesStore = usePlacesStore();
-const { places } = storeToRefs(placesStore);
-const { openPlaceDetails, fetchAllPlaces } = placesStore;
+import { usePlaceQueryParams } from "@/stores/placeQueryParamsStore";
+import { usePlaces } from "@/composables/place/usePlaces";
+import { getMarkerHtml } from "@/utils/customMarkerFactory";
+
+const { updateBounds } = usePlaceQueryParams();
+const {data: places, isPending, error} = usePlaces()
+
+console.log(places, isPending, error);
+
+const emit = defineEmits(["onNewPlaceSelected"])
 
 const map = ref();
 const mapContainer = ref();
@@ -19,11 +24,13 @@ const markers = ref([]);
 const { coords } = useGeolocation();
 
 const handleMarkerClick = (place) => {
-  map.value.setView([place.lat, place.lng], 16, {
+  console.log(place);
+  
+  map.value.setView([place.latitude, place.longitude], 16, {
     animate: true,
     duration: 0.5,
   });
-  openPlaceDetails(place);
+  emit("onNewPlaceSelected", place.id)
 };
 
 const clearMarkers = () => {
@@ -34,14 +41,38 @@ const clearMarkers = () => {
 const addMarkersToMap = () => {
   clearMarkers(); // clear existing markers
 
-  places.value.forEach((place) => {
-    const marker = L.marker([place.lat, place.lng])
+  places.value.data.forEach(async (place) => {
+    const markerHtml = await getMarkerHtml(place.category);
+    const icon = L.divIcon({
+      className: "custom-marker",
+      html: markerHtml,
+      iconSize: [40, 40],
+      iconAnchor: [20, 40],
+    })
+
+    const marker = L.marker([place.latitude, place.longitude], { icon })
       .addTo(map.value)
       .on("click", () => handleMarkerClick(place));
 
     markers.value.push(marker);
   });
 };
+
+const handleMapChange = useDebounceFn(() => {
+    const bounds = map.value.getBounds();
+    const newBounds = {
+      north: bounds.getNorth(),
+      south: bounds.getSouth(),
+      east: bounds.getEast(),
+      west: bounds.getWest(),
+      zoom: map.value.getZoom()
+    };
+
+    updateBounds(newBounds)
+
+    console.log(newBounds);
+    
+  }, 300);
 
 onMounted(async () => {
   map.value = L.map(mapContainer.value).setView(
@@ -55,10 +86,12 @@ onMounted(async () => {
       '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
   }).addTo(map.value);
 
-  toast.promise(fetchAllPlaces, {
-    loading: "تحميل...",
-    error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة",
-  });
+  // toast.promise(fetchAllPlaces, {
+  //   loading: "تحميل...",
+  //   error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة",
+  // });
+
+  map.value.on("zoomend moveend", handleMapChange)
 });
 
 watch(places, () => {
@@ -79,8 +112,48 @@ watch(
   },
   { once: true }
 );
+
+watch(
+  isPending,
+  (pending) => {
+    if (pending) {
+      toast('تحميل...', { id: 'loading-places' });
+    } else {
+      toast.dismiss('loading-places');
+    }
+  },
+  { immediate: true },
+);
+
+watch(error, (err) => {
+  if (err) {
+    toast.error("حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة");
+  }
+});
+
+onUnmounted(() => {
+  map.value.off("zoomend moveend", handleMapChange)
+})
 </script>
 
 <template>
   <div ref="mapContainer" class="w-full h-full"></div>
 </template>
+
+<style lang="css">
+
+  .custom-marker svg {
+    stroke-width: 3px;
+  }
+
+  .custom-marker > div::before {
+    content: "";
+    display: inline-block;
+    position: absolute;
+    bottom: -48%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: white;
+  }
+</style>
