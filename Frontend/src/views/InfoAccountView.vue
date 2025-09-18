@@ -108,8 +108,12 @@ const fetchUserReviews = async () => {
   isReviewsLoading.value = true;
   try {
     const { data } = await reviewService.getReviewsByUserId(auth.user.id);
-    userReviews.value = data;
-    totalReviews.value = data.length;
+
+    userReviews.value = data.content;
+    totalReviews.value = data.content.length;
+    // debug
+    console.log("Fetched user reviews:", data);
+    console.log("Total reviews:", data.length);
   } catch (e) {
     console.error("Error fetching user reviews:", e);
     userReviews.value = [];
@@ -313,10 +317,10 @@ const closeConfirmDialog = () => {
                     >
                       تعديل الاسم
                     </Button>
+                    <p class="text-sm text-slate-600">إجمالي التقييمات</p>
                     <p class="text-2xl font-bold text-blue-600">
                       {{ totalReviews }}
                     </p>
-                    <p class="text-sm text-slate-600">إجمالي التقييمات</p>
                   </div>
                 </div>
 
