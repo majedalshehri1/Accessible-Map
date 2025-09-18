@@ -27,7 +27,7 @@ jobs:
           java-version: '21'
 
       - name: Build JAR (skip tests)
-        run:  mvn -B -DskipTests package
+        run: mvn -B -DskipTests package
         working-directory: backend
 
       - name: Configure AWS credentials
@@ -57,6 +57,5 @@ jobs:
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy backend ${GITHUB_SHA}" \
-            ----parameters commands="sudo yum install -y docker || true","sudo systemctl enable docker || true","sudo systemctl start docker || true","aws ecr get-login-password --region '${{ env.AWS_REGION }}' | sudo docker login --username AWS --password-stdin '${ECR_REGISTRY}'","sudo docker stop '${CONTAINER_NAME}' || true","sudo docker rm '${CONTAINER_NAME}' || true","sudo docker pull '${ECR_REGISTRY}'/'${{ env.ECR_REPOSITORY }}':'${{ env.IMAGE_TAG }}'","sudo docker run -d --name '${CONTAINER_NAME}' -p 8081:8081 --restart=always -e SPRING_DATASOURCE_URL='${{ secrets.SPRING_DATASOURCE_URL }}' -e SPRING_DATASOURCE_USERNAME='${{ secrets.SPRING_DATASOURCE_USERNAME }}' -e SPRING_DATASOURCE_PASSWORD='${{ secrets.SPRING_DATASOURCE_PASSWORD }}' -e JWT_SECRET='${{ secrets.JWT_SECRET }}' '${ECR_REGISTRY}'/'${{ env.ECR_REPOSITORY }}':'${{ env.IMAGE_TAG }}'"
-              \
+            --parameters "{\"commands\":[\"sudo yum install -y docker || true\",\"sudo systemctl enable docker || true\",\"sudo systemctl start docker || true\",\"aws ecr get-login-password --region ${AWS_REGION} | sudo docker login --username AWS --password-stdin ${ECR_REGISTRY}\",\"sudo docker stop ${CONTAINER_NAME} || true\",\"sudo docker rm ${CONTAINER_NAME} || true\",\"sudo docker pull ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}\",\"sudo docker run -d --name ${CONTAINER_NAME} -p 8081:8081 --restart=always -e SPRING_DATASOURCE_URL='${{ secrets.SPRING_DATASOURCE_URL }}' -e SPRING_DATASOURCE_USERNAME='${{ secrets.SPRING_DATASOURCE_USERNAME }}' -e SPRING_DATASOURCE_PASSWORD='${{ secrets.SPRING_DATASOURCE_PASSWORD }}' -e JWT_SECRET='${{ secrets.JWT_SECRET }}' ${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}\"]}" \
             --region "${{ env.AWS_REGION }}"
