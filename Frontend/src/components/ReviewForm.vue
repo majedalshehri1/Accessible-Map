@@ -10,7 +10,6 @@ import { useAuthStore } from '@/stores/authStore'
 import { storeToRefs } from 'pinia'
 
 const placesStore = usePlacesStore();
-const { selectedPlace } = storeToRefs(placesStore);
 const { createPlaceReview } = placesStore;
 
 const authStore = useAuthStore();
@@ -22,6 +21,12 @@ const form = ref({
     rating: 0,
     comment: ''
 })
+
+const props = defineProps({
+  placeId: {
+    required: true,
+  },
+});
 
 const hoverRating = ref(0)
 const isLoading = ref(false)
@@ -44,7 +49,7 @@ const submitReview = async () => {
 
     try {
         await createPlaceReview({
-            placeId: selectedPlace.value.id,
+            placeId: props.placeId,
             rating: form.value.rating,
             description: form.value.comment,
             userId: user.value.id
