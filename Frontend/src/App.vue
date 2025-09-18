@@ -7,5 +7,5 @@ import 'vue-sonner/style.css' // vue-sonner v2 requires this import
 
 <template>
   <RouterView />
-  <Toaster richColors position="top-right" :visibleToasts="1"/>
+  <Toaster dir="rtl" richColors position="top-right" :visibleToasts="1"/>
 </template>

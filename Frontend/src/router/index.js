@@ -13,9 +13,6 @@ import { storeToRefs } from 'pinia'
 
 const HomeView = () => import("@/views/HomeView.vue")
 
-// simulate if user is authenticated
-const isAuth = () => true;
-
 const routes = [
   {
     path: '/',

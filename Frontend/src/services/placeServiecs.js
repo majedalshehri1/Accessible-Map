@@ -1,8 +1,24 @@
 import axiosClient from "@/apis/axiosClient";
 
 export default {
-    getAllPlaces() {
-        return axiosClient.get("/place/all");
+    getPlacesWithinBounds(bounds, query, category) {
+        const searchParams = new URLSearchParams();
+        const { north, south, east, west, zoom } = bounds
+        searchParams.set("n", north);
+        searchParams.set("s", south);
+        searchParams.set("e", east);
+        searchParams.set("w", west);
+        searchParams.set("zoom", zoom);
+
+        if (query) {
+            searchParams.set("query", query);
+        }
+
+        if (category) {
+            searchParams.set("category", category)
+        }
+
+        return axiosClient.get(`/place/within-bounds?${searchParams.toString()}`);
     },
     getPlaceById(id) {
         return axiosClient.get(`/place/${id}`);

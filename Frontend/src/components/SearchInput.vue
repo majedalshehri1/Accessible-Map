@@ -1,19 +1,10 @@
 <template>
   <div class="relative flex-1">
-    <SearchIcon
-      class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4"
-    />
-    <Input
-      v-model="searchValue"
-      placeholder="بحث..."
-      class="h-auto py-1.5 pl-8 pr-10 ring-blue-300"
-      @input="handleInput"
-    />
-    <button
-      v-if="showCloseButton"
-      @click="handleClose"
-      class="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-    >
+    <SearchIcon class="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground w-4 h-4" />
+    <Input v-model="searchValue" placeholder="بحث..." class="h-auto py-1.5 pl-8 pr-10 ring-blue-300"
+      @input="handleInput" />
+    <button v-if="showCloseButton" @click="handleClose"
+      class="absolute left-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors">
       <X class="w-4 h-4" />
     </button>
   </div>
@@ -21,8 +12,12 @@
 
 <script setup>
 import { Search as SearchIcon, X } from "lucide-vue-next";
-import { ref, watchEffect } from "vue";
+import { ref } from "vue";
 import Input from "./ui/input/Input.vue";
+import { useDebounceFn } from "@vueuse/core";
+import { usePlaceQueryParams } from "@/stores/placeQueryParamsStore";
+
+const { updateQuery } = usePlaceQueryParams();
 
 const props = defineProps({
   showCloseButton: {
@@ -39,19 +34,16 @@ const props = defineProps({
   },
 });
 
-watchEffect(() => {
-  console.log(props.isDisabled);
-});
-
 const emit = defineEmits(["update:modelValue", "close", "search"]);
 
 const searchValue = ref(props.modelValue);
 
-const handleInput = (event) => {
+const handleInput = useDebounceFn((event) => {
   searchValue.value = event.target.value;
   emit("update:modelValue", searchValue.value);
   emit("search", searchValue.value);
-};
+  updateQuery(searchValue.value)
+}, 300);
 
 const handleClose = () => {
   searchValue.value = "";

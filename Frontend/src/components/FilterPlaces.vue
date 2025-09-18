@@ -1,20 +1,17 @@
 <script setup>
+import { ref } from 'vue';
 import { CheckCircle, Coffee, Hospital, ShoppingBag, Trees, Utensils } from 'lucide-vue-next';
 
+import { usePlaceQueryParams } from '@/stores/placeQueryParamsStore';
 import Button from './ui/button/Button.vue';
-import { ref } from 'vue';
-import { toast } from 'vue-sonner';
-import placeServiecs from '@/services/placeServiecs';
-import { usePlacesStore } from '@/stores/placeStore';
-import { storeToRefs } from 'pinia';
+import { usePlaces } from '@/composables/place/usePlaces';
 
-const placesStore = usePlacesStore();
-const { isLoadingPlaces } = storeToRefs(placesStore);
-const { fetchAllPlaces, fetchPlacesByCategory } = usePlacesStore();
+usePlaces()
+const { updateCategory }  = usePlaceQueryParams();
 
 const categories = [
     {
-        id: 0, label: "الكل", value: "all"
+        id: 0, label: "الكل", value: ""
     },
     {
         id: 1, label: "المطاعم", icon: Utensils, value: "RESTAURANT"
@@ -33,22 +30,11 @@ const categories = [
     },
 ]
 
-const handleFetch = async (category) => {
-    if (category.value === "all") {
-        await fetchAllPlaces();
-        currentSelectedFilter.value = categories[0];
-        return;
-    } else {
-        await fetchPlacesByCategory(category.value);
-        currentSelectedFilter.value = category;
-    }
-}
-
 const handleClick = (category) => {
-    toast.promise(() => handleFetch(category), {
-        loading: "تحميل...",
-        error: (err) => "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة"
-    })
+    console.log(category);
+    
+    updateCategory(category.value);
+    currentSelectedFilter.value = category
 }
 
 const currentSelectedFilter = ref(categories[0])
@@ -58,7 +44,7 @@ const currentSelectedFilter = ref(categories[0])
 <template>
     <div
         class="absolute top-6 left-1/2 -translate-x-1/2 flex flex-wrap gap-2 max-w-64 sm:max-w-72 md:max-w-lg mx-auto z-[800]">
-        <Button v-for="category in categories" :key="category.id" @click="handleClick(category)" :disabled="isLoadingPlaces"
+        <Button v-for="category in categories" :key="category.id" @click="handleClick(category)"
             :variant="currentSelectedFilter.id === category.id ? '' : 'outline'" size="sm"
             class="relative flex-[1_1_0%]"
             :class="currentSelectedFilter.id === category.id && 'bg-blue-600 hover:bg-blue-700 ring-blue-300'">

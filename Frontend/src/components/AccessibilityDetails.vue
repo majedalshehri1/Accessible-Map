@@ -21,8 +21,6 @@ const props = defineProps({
 
 const placeFeatures = props.placeFeatures;
 
-console.log(placeFeatures);
-
 const accessibilityItems = [
     { key: 'ELEVATORS', label: 'مصاعد', icon: Building2, isAvalibale: false },
     { key: 'PARKING', label: 'مواقف مخصصة', icon: Car, isAvalibale: false },

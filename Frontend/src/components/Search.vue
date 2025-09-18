@@ -1,21 +1,13 @@
 <script setup>
 import { Search as SearchIcon } from 'lucide-vue-next'
 import { ref, watch, onBeforeUnmount } from 'vue'
-import { toast } from 'vue-sonner'
+
 import SearchInput from './SearchInput.vue'
 import Button from './ui/button/Button.vue'
-import { usePlacesStore } from '@/stores/placeStore'
-import { storeToRefs } from 'pinia'
 
-const placesStore = usePlacesStore();
-const { places, isLoadingPlaces } = storeToRefs(placesStore);
-const { fetchAllPlaces, searchPlaceByQuery } = placesStore;
 
 const isOpen = ref(false)
 const searchQuery = ref('')
-const debounceDelay = 500
-let debounceTimeout = null
-let controller = null
 
 const openSearch = () => {
     isOpen.value = true
@@ -25,47 +17,6 @@ const closeSearch = () => {
     isOpen.value = false
 }
 
-const handleSearch = (query) => {
-    if (query.length === 0) {
-        if (controller) {
-            controller.abort();
-        }
-        return fetchAllPlaces();
-    }
-
-    if (controller) {
-        controller.abort();
-    }
-
-    controller = new AbortController();
-
-    return searchPlaceByQuery(query, controller);
-}
-
-watch(searchQuery, (newQuery) => {
-    if (debounceTimeout) {
-        clearTimeout(debounceTimeout);
-    }
-
-    debounceTimeout = setTimeout(() => {
-        toast.promise(() => handleSearch(newQuery), {
-            loading: "تحميل...",
-            success: 'تم البحث بنجاح!',
-            error: (err) => {
-                if (err.name !== 'AbortError') {
-                    return "حدث خطأ اثناء تحميل الأماكن. يرجى اعادة التجربة";
-                }
-                return;
-            },
-        });
-    }, debounceDelay);
-});
-
-// Cleanup on unmount
-onBeforeUnmount(() => {
-    if (debounceTimeout) clearTimeout(debounceTimeout)
-    if (controller) controller.abort()
-})
 </script>
 
 <template>
