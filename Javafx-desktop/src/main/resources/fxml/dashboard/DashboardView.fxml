@@ -95,7 +95,7 @@
 
                         <ToggleButton fx:id="surveyBtn" maxWidth="Infinity" onAction="#handleSurvey"
                                       prefHeight="40.0" styleClass="nav-btn"
-                                      text="إدارة آراء المستخدمين" toggleGroup="$sideNav"/>
+                                      text="إدارة استطلاعات المستخدمين" toggleGroup="$sideNav"/>
 
                         <ToggleButton fx:id="logsBtn" maxWidth="Infinity" onAction="#handleLogs"
                                       prefHeight="40.0" styleClass="nav-btn"

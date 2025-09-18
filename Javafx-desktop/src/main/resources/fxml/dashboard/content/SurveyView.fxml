@@ -7,7 +7,8 @@
 <BorderPane xmlns="http://javafx.com/javafx/21.0.3"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.wakeb.yusradmin.controllers.SurveyController"
-            stylesheets="@../../../css/places.css">
+            stylesheets="@../../../css/places.css"
+            nodeOrientation="RIGHT_TO_LEFT">
 
     <top>
         <HBox spacing="10">
@@ -15,10 +16,10 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
 
-            <Label text="Surveys" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
+            <Label text="استطلاعات المستخدمين" style="-fx-font-size: 20px; -fx-font-weight: bold;"/>
             <Region HBox.hgrow="ALWAYS"/>
-            <Button fx:id="btnRefresh" styleClass="card-button" text="Refresh"/>
-            <ToggleButton  fx:id="btnShowUnreadOnly" styleClass="card-button" text="Show unread only"/>
+            <Button fx:id="btnRefresh" styleClass="card-button" text="تحديث"/>
+            <ToggleButton  fx:id="btnShowUnreadOnly" styleClass="card-button" text="إظهار الغير مقروءة فقط"/>
         </HBox>
     </top>
 
@@ -28,15 +29,15 @@
                 <Insets top="10" right="10" bottom="10" left="10"/>
             </padding>
 
-            <TableView fx:id="table" prefHeight="600" editable="true">
+            <TableView fx:id="table" VBox.vgrow="ALWAYS" styleClass="data-table">
                 <columns>
-                    <TableColumn fx:id="colId" text="ID" prefWidth="80"/>
-                    <TableColumn fx:id="colUserId" text="رقم هوية المستخدم" prefWidth="120"/>
-                    <TableColumn fx:id="colUserName" text="اسم المستخدم" prefWidth="160"/>
-                    <TableColumn fx:id="colRating" text="التقييم" prefWidth="90"/>
-                    <TableColumn fx:id="colDescription" text="الوصف" prefWidth="520"/>
-                    <TableColumn fx:id="colRead" text="تم القراءة" prefWidth="90"/>
-                    <TableColumn fx:id="colActions" text="الإجراء" prefWidth="220"/>
+                    <TableColumn fx:id="colId" text="ID" prefWidth="80" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colUserId" text="رقم هوية المستخدم" prefWidth="120" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colUserName" text="اسم المستخدم" prefWidth="160" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colRating" text="التقييم" prefWidth="90" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colDescription" text="الوصف" prefWidth="520" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colRead" text="تم القراءة" prefWidth="90" styleClass="table-column-header"/>
+                    <TableColumn fx:id="colActions" text="الإجراء" prefWidth="220" styleClass="table-column-header"/>
                 </columns>
             </TableView>
 
