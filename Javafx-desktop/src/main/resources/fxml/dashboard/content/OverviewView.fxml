@@ -25,12 +25,12 @@
             <VBox alignment="TOP_RIGHT" nodeOrientation="RIGHT_TO_LEFT" spacing="12" styleClass="overview-root">
 
                 <!-- Header -->
-                <HBox alignment="CENTER_RIGHT" prefHeight="60">
+                <HBox alignment="CENTER_RIGHT" prefHeight="60" styleClass="toolbar" spacing="10">
                     <Label prefHeight="126.0" prefWidth="1020.0" styleClass="title" text="نظرة عامة">
                         <HBox.margin><Insets left="30.0" /></HBox.margin>
                     </Label>
                     <Region HBox.hgrow="ALWAYS" />
-                    <Button onAction="#refreshData" prefHeight="38.0" prefWidth="114.0" styleClass="button" text="تحديث">
+                    <Button onAction="#refreshData" prefHeight="38.0" prefWidth="114.0" styleClass="card-button" text="تحديث">
                         <HBox.margin><Insets right="20.0" /></HBox.margin>
                     </Button>
                 </HBox>
