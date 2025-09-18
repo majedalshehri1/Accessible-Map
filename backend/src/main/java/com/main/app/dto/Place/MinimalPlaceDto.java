@@ -8,7 +8,7 @@ import lombok.Data;
 public class MinimalPlaceDto {
     private long id ;
     @NotBlank private String placeName;
-    @NotBlank private String longitude;
-    @NotBlank private String latitude;
+    @NotBlank private Double longitude;
+    @NotBlank private Double latitude;
     private Category category;
 }

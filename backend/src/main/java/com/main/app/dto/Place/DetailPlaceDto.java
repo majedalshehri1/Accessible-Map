@@ -12,8 +12,8 @@ public class DetailPlaceDto {
     Long id;
     String placeName;
     Category placeCategory;
-    String latitude;
-    String longitude;
+    Double latitude;
+    Double longitude;
     List<AccessibillityType> features;
     List<String> images;
     List<ReviewResponseDTO> reviews;
