@@ -57,7 +57,7 @@ jobs:
             --instance-ids "${{ secrets.EC2_INSTANCE_ID }}" \
             --document-name "AWS-RunShellScript" \
             --comment "Deploy backend ${GITHUB_SHA}" \
-            --parameters '{ "commands": [
+            --parameters "commands": [
                 "sudo yum install -y docker || true",
                 "sudo systemctl enable docker || true",
                 "sudo systemctl start docker || true",
@@ -72,5 +72,5 @@ jobs:
                   -e JWT_SECRET='${{ secrets.JWT_SECRET }}' \
                   '${ECR_REGISTRY}'/'${{ env.ECR_REPOSITORY }}':'${{ env.IMAGE_TAG }}'"
               ]
-            }' \
+              \
             --region "${{ env.AWS_REGION }}"
