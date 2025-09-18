@@ -106,6 +106,7 @@ watch(error, (err) => {
                 :rating="selectedPlace.data.avgRating || 0"
                 :reviews-count="selectedPlace.data.reviewsCount || 0"
                 :reviews="selectedPlace.data.reviews || []"
+                :place-id="placeId"
               />
             </TabsContent>
           </Tabs>

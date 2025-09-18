@@ -8,7 +8,7 @@ import ReviewForm from "./ReviewForm.vue";
 import { useAuthStore } from "@/stores/authStore";
 import { storeToRefs } from "pinia";
 
-defineProps({
+const props = defineProps({
   rating: {
     type: Number,
     required: true,
@@ -19,6 +19,9 @@ defineProps({
   },
   reviews: {
     type: Array,
+    required: true,
+  },
+  placeId: {
     required: true,
   },
 });
@@ -92,7 +95,7 @@ const formatArabicNumber = (number) => {
             <!-- <span class="text-sm text-zinc-400">{{ formatDate(review.date) }}</span> -->
           </div>
         </div>
-        <p class="text-zinc-700">{{ review.comment }}</p>
+        <p class="text-zinc-700">{{ review.description }}</p>
       </div>
     </div>
 
@@ -101,6 +104,7 @@ const formatArabicNumber = (number) => {
       v-if="showReviewForm"
       @close="showReviewForm = false"
       @submit="showReviewForm = false"
+      :place-id="props.placeId"
     />
   </div>
 </template>

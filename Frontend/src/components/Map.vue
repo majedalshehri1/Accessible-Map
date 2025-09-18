@@ -143,7 +143,7 @@ onUnmounted(() => {
 <style lang="css">
 
   .custom-marker svg {
-    stroke-width: 3px;
+    stroke-width: 2px;
   }
 
   .custom-marker > div::before {
