@@ -5,6 +5,7 @@ import com.main.app.Enum.Category;
 import com.main.app.config.AuthUser;
 import com.main.app.config.SecurityUtils;
 import com.main.app.dto.PaginatedResponse;
+import com.main.app.dto.Place.DetailPlaceDto;
 import com.main.app.dto.Place.PlaceDto;
 import com.main.app.model.Place.Place;
 import com.main.app.service.Place.PlaceService;
@@ -65,7 +66,7 @@ class PlaceControllerTest {
         when(placeService.getPlaceOrThrow(1L)).thenReturn(place);
         when(placeService.convertToDto(place)).thenReturn(placeDto);
 
-        ResponseEntity<PlaceDto> response = placeController.getPlaceById(1L);
+        ResponseEntity<DetailPlaceDto> response = placeController.getPlaceById(1L);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());

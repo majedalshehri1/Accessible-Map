@@ -13,8 +13,8 @@ import java.util.List;
 public class PlaceDto {
     private long id ;
     @NotBlank private String placeName;
-    @NotBlank private Double longitude;
-    @NotBlank private Double latitude;
+     private Double longitude;
+     private Double latitude;
     private Category category;
     private List<ReviewResponseDTO> reviews;
     private List<String> accessibilityFeatures = new ArrayList<>();
