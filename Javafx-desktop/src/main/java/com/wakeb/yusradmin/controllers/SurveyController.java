@@ -1,6 +1,6 @@
 package com.wakeb.yusradmin.controllers;
 
-import com.wakeb.yusradmin.models.SurveyRow;
+import com.wakeb.yusradmin.models.*;
 import com.wakeb.yusradmin.services.SurveyService;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
@@ -8,6 +8,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.CheckBoxTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -75,18 +76,22 @@ public class SurveyController {
 
     private void addActionsColumn() {
         colActions.setCellFactory(col -> new TableCell<>() {
-            private final Button btnDelete = new Button("Delete");
+            private final Button btnDelete = new Button("حذف");
             private final HBox box = new HBox(8, btnDelete);
 
             {
+                btnDelete.getStyleClass().add("card-button");
+                btnDelete.getStyleClass().add("card-button__delete"); // red styling
+                box.setAlignment(Pos.CENTER);
+
                 btnDelete.setOnAction(e -> {
                     SurveyRow row = getTableView().getItems().get(getIndex());
                     if (row == null) return;
 
                     Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-                    confirm.setTitle("Confirm Delete");
-                    confirm.setHeaderText("Delete survey ID " + row.getId() + "?");
-                    confirm.setContentText("This cannot be undone.");
+                    confirm.setTitle("تأكيد الحذف");
+                    confirm.setHeaderText("حذف الاستطلاع رقم " + row.getId() + "؟");
+                    confirm.setContentText("لا يمكن التراجع عن هذا الاجراء");
                     confirm.showAndWait().ifPresent(btn -> {
                         if (btn == ButtonType.OK) {
                             deleteSurvey(row);
@@ -105,7 +110,7 @@ public class SurveyController {
 
     private void loadData() {
         spinner.setVisible(true);
-        setStatus("Loading...");
+        setStatus("تحميل...");
         Task<List<SurveyRow>> task = new Task<>() {
             @Override protected List<SurveyRow> call() throws Exception {
                 // fetchAll() should already set row.setRead(...) from backend JSON if available
@@ -143,11 +148,11 @@ public class SurveyController {
             masterData.setAll(items);
             refilter();
             spinner.setVisible(false);
-            setStatus("Loaded " + items.size() + " surveys.");
+            setStatus("تم تحميل " + items.size() + "استطلاع");
         });
         task.setOnFailed(e -> {
             spinner.setVisible(false);
-            setStatus("Failed to load: " + task.getException().getMessage());
+            setStatus("فشل التحميل " + task.getException().getMessage());
             task.getException().printStackTrace();
         });
         new Thread(task, "surveys-load").start();
@@ -155,7 +160,7 @@ public class SurveyController {
 
     private void deleteSurvey(SurveyRow row) {
         spinner.setVisible(true);
-        setStatus("Deleting survey " + row.getId() + "...");
+        setStatus("يتم الحذف " + row.getId() + "...");
         Task<Void> task = new Task<>() {
             @Override protected Void call() throws Exception {
                 api.deleteById(row.getId());
@@ -166,11 +171,11 @@ public class SurveyController {
             masterData.removeIf(s -> s.getId().equals(row.getId()));
             refilter();
             spinner.setVisible(false);
-            setStatus("Survey " + row.getId() + " deleted.");
+            setStatus("الاستطلاع رقم " + row.getId() + " حُذف");
         });
         task.setOnFailed(e -> {
             spinner.setVisible(false);
-            setStatus("Delete failed: " + task.getException().getMessage());
+            setStatus("فشل عملية الحذف " + task.getException().getMessage());
             task.getException().printStackTrace();
         });
         new Thread(task, "surveys-delete").start();
