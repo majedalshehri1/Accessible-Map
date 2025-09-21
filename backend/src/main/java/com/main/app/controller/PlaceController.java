@@ -32,6 +32,7 @@ public class PlaceController {
         return ResponseEntity.ok(place);
     }
 
+    @PreAuthorize("hasAnyRole('USER','ADMIN')")
     @PostMapping("/create")
     public ResponseEntity<PlaceDto> createPlace(@Valid @RequestBody PlaceDto dto) {
         PlaceDto created = placeService.createPlace(dto);
