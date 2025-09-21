@@ -45,7 +45,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             chain.doFilter(request, response);
             return;
         }
-
+        String path = request.getRequestURI();
+        if (path.contains("/v3/api-docs") || path.contains("/swagger")) {
+            chain.doFilter(request, response);
+            return;
+        }
         if (!jwtService.isTokenValid(token)) {
             unauthorizedAndClearCookie(response);
             return;
