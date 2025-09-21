@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/place")
-@PreAuthorize("hasAnyRole('ADMIN','USER')")
 public class PlaceController {
 
     @Autowired
