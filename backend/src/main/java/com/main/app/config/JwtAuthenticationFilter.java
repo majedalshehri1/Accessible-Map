@@ -19,6 +19,7 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -115,7 +116,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static void unauthorizedAndClearCookie(HttpServletResponse res) throws IOException {
         ResponseCookie clear = ResponseCookie.from("jwt","")
-                .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(0).build();
+                .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(0).build();
         res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
         res.addHeader("Cache-Control", "no-store");
         res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -127,7 +128,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static void forbiddenAndClearCookie(HttpServletResponse res) throws IOException {
         ResponseCookie clear = ResponseCookie.from("jwt","")
-                .httpOnly(true).secure(false).sameSite("Lax").path("/").maxAge(0).build();
+                .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(0).build();
         res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
         res.addHeader("Cache-Control", "no-store");
         res.setStatus(HttpServletResponse.SC_FORBIDDEN);
