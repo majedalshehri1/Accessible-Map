@@ -50,7 +50,6 @@ public class AuthService {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(60L * 60 * 24 * 30)
                 .build();
     }
 }
