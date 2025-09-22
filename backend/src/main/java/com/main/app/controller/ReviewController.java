@@ -28,8 +28,13 @@ public class ReviewController {
         return ResponseEntity.ok(reviewService.createReview(reviewDTO));
     }
 
+//    @DeleteMapping("/delete/{review_id}")
+//    public ResponseEntity<ReviewResponseDTO> deleteReview(@PathVariable("review_id") Long reviewId) {
+//        reviewService.deleteReview(reviewId);
+//        return ResponseEntity.ok().build();
+//    }
     @DeleteMapping("/delete/{review_id}")
-    public ResponseEntity<ReviewResponseDTO> deleteReview(@PathVariable("review_id") Long reviewId) {
+    public ResponseEntity<Void> deleteReview(@PathVariable("review_id") Long reviewId) {
         reviewService.deleteReview(reviewId);
         return ResponseEntity.ok().build();
     }
