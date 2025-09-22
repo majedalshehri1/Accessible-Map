@@ -129,7 +129,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static void forbiddenAndClearCookie(HttpServletResponse res) throws IOException {
         ResponseCookie clear = ResponseCookie.from("jwt","")
                 .httpOnly(true).secure(true).sameSite("None").path("/").maxAge(0).build();
-        res.addHeader(HttpHeaders.SET_COOKIE, clear.toString());
+
+        String cookieWithPartitioned = clear.toString() + "; Partitioned"; // Append Partitioned attribute
+
+        res.addHeader(HttpHeaders.SET_COOKIE, cookieWithPartitioned); // Use the cookieWithPartitioned based on  (clear.toString())
         res.addHeader("Cache-Control", "no-store");
         res.setStatus(HttpServletResponse.SC_FORBIDDEN);
         res.setContentType("application/problem+json");
