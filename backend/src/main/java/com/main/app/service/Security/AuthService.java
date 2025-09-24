@@ -13,6 +13,8 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -50,6 +52,7 @@ public class AuthService {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
+                .maxAge(Duration.ofDays(30))
                 .build();
     }
 }

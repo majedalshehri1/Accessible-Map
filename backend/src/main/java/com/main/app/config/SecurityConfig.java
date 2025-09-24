@@ -66,8 +66,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/survey/create").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/api/place/**").permitAll()
                         .requestMatchers("/api/place/create").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/api/place/**").permitAll()
                         .requestMatchers("/api/reviews/**").hasAnyRole("USER", "ADMIN")
 
                         .requestMatchers("/api/auth/me").authenticated()
@@ -86,8 +86,11 @@ public class SecurityConfig {
     @Bean
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         var cfg = new CorsConfiguration();
+        cfg.setAllowedOrigins(List.of(
+                "https://accessible-map.vercel.app",
+                "http://localhost:5173"
+        ));
         cfg.setAllowCredentials(true);
-        cfg.setAllowedOriginPatterns(List.of("https://accessible-map.vercel.app", "https://api.majedalshehri.com", "http://localhost:8081/ , http://localhost:5173/"));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
         cfg.setExposedHeaders(List.of("Authorization","Access-Token","Refresh-Token","Expires-At"));
