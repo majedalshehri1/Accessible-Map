@@ -87,7 +87,7 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         var cfg = new CorsConfiguration();
         cfg.setAllowCredentials(true);
-        cfg.setAllowedOriginPatterns(List.of("https://accessible-map.vercel.app", "https://api.majedalshehri.com", "http://localhost:8081"));
+        cfg.setAllowedOriginPatterns(List.of("https://accessible-map.vercel.app", "https://api.majedalshehri.com", "http://localhost:8081/ , http://localhost:5173/"));
         cfg.setAllowedMethods(List.of("GET","POST","PUT","PATCH","DELETE","OPTIONS"));
         cfg.setAllowedHeaders(List.of("Authorization","Content-Type","Accept","Origin","X-Requested-With"));
         cfg.setExposedHeaders(List.of("Authorization","Access-Token","Refresh-Token","Expires-At"));
