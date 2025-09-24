@@ -1,90 +1,91 @@
 <script setup>
-  import { ref, onMounted } from "vue"
-  import { Button } from "@/components/ui/button"
-  import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogDescription,
-    DialogFooter,
-  } from "@/components/ui/dialog"
-  import { Label } from "@/components/ui/label"
-  import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-  } from "@/components/ui/select"
+import { ref, onMounted } from "vue";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
-  import surveyService from "@/services/surveyService"
-  import { useAuthStore } from "@/stores/authStore"
-  import { toast } from "vue-sonner"
+import surveyService from "@/services/surveyService";
+import { useAuthStore } from "@/stores/authStore";
+import { toast } from "vue-sonner";
 
-  const isOpen = ref(false)
-  const rating = ref(null)
-  const feedback = ref("")
-  const isSubmitting = ref(false)
-  const getIsExisting = ref(false)
+const isOpen = ref(false);
+const rating = ref(null);
+const feedback = ref("");
+const isSubmitting = ref(false);
+const getIsExisting = ref(false);
 
-  const authStore = useAuthStore()
+const authStore = useAuthStore();
 
-  const submitSurvey = async () => {
-    // validation submit form
-    if (rating.value === null) {
-      toast.error("الرجاء اختيار تقييم")
-      return
-    }
-
-    if (feedback.value.trim() === "") {
-      toast.error("الرجاء كتابة وصفك / اقتراحاتك")
-      return
-    }
-
-    isSubmitting.value = true
-    try {
-      await surveyService.postSurveyResponses({
-        rating: rating.value,
-        description: feedback.value,
-        userId: authStore.user?.id,
-      })
-
-      toast.success("تم إرسال الاستبيان بنجاح ✅")
-      // reset form
-      rating.value = null
-      feedback.value = ""
-      isOpen.value = false
-      getIsExisting.value = true
-    } catch (err) {
-      if (err.status === 409) {
-        toast.error("لقد قمت بالفعل بإرسال استبيان سابقًا")
-      } else {
-        toast.error("خطأ في إرسال الاستبيان")
-      }
-      console.error("❌ Error submitting survey:", err)
-    } finally {
-      isSubmitting.value = false
-    }
+const submitSurvey = async () => {
+  // validation submit form
+  if (rating.value === null) {
+    toast.error("الرجاء اختيار تقييم");
+    return;
   }
 
-  onMounted(async () => {
-    const userId = authStore.user?.id
-    if (userId) {
-      try {
-        const response = await surveyService.getIsExisting(userId)
-        // If response.data is true, user already submitted survey
-        // If false, user can submit
-        getIsExisting.value = response.data
-      } catch (err) {
-        if (err.response && err.response.status === 400) {
-          console.log("userId is required (400 Bad Request)")
-        } else {
-          console.log("Error in getIsExisting:", err)
-        }
+  if (feedback.value.trim() === "") {
+    toast.error("الرجاء كتابة وصفك / اقتراحاتك");
+    return;
+  }
+
+  isSubmitting.value = true;
+  try {
+    await surveyService.postSurveyResponses({
+      rating: rating.value,
+      description: feedback.value,
+      userId: authStore.user?.id,
+    });
+
+    toast.success("تم إرسال الاستبيان بنجاح ✅");
+    // reset form
+    rating.value = null;
+    feedback.value = "";
+    isOpen.value = false;
+    getIsExisting.value = true;
+  } catch (err) {
+    if (err.status === 409) {
+      toast.error("لقد قمت بالفعل بإرسال استبيان سابقًا");
+    } else {
+      toast.error("خطأ في إرسال الاستبيان");
+    }
+    console.error("❌ Error submitting survey:", err);
+  } finally {
+    isSubmitting.value = false;
+  }
+};
+
+// Check if user already submitted survey on component mount
+onMounted(async () => {
+  const userId = authStore.user?.id;
+  if (userId) {
+    try {
+      const response = await surveyService.getIsExisting(userId);
+      // If response.data is true, user already submitted survey
+      // If false, user can submit
+      getIsExisting.value = response.data;
+    } catch (err) {
+      if (err.response && err.response.status === 400) {
+        console.log("userId is required (400 Bad Request)");
+      } else {
+        console.log("Error in getIsExisting:", err);
       }
     }
-  })
+  }
+});
 </script>
 
 <template>
