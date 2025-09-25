@@ -46,7 +46,15 @@ public class User {
     @Builder.Default
     private Role userRole = Role.USER;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private java.util.List<com.main.app.model.Review.Review> reviews;
+
     @Column(name = "is_blocked")
     @Builder.Default
     private Boolean isBlocked = false;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private com.main.app.model.Survey.Survey survey;
 }
