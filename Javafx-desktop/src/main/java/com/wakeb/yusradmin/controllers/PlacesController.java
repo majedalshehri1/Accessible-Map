@@ -40,8 +40,8 @@ public class PlacesController {
 
     // == State ==
     private int currentPage = 0;
-    private int pageSize    = 12;
-    private int totalPages  = 1;
+    private int pageSize    = 6;
+    private int totalPages;
 
     private PlaceService placeService;
     private final ObservableList<Place> places = FXCollections.observableArrayList();
