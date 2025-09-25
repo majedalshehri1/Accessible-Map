@@ -87,7 +87,7 @@ public class SecurityConfig {
     public UrlBasedCorsConfigurationSource corsConfigurationSource() {
         var cfg = new CorsConfiguration();
         cfg.setAllowedOrigins(List.of(
-                "https://accessible-map.vercel.app",
+                "https://yusr.majedalshehri.com/",
                 "http://localhost:5173"
         ));
         cfg.setAllowCredentials(true);
