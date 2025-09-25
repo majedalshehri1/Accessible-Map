@@ -156,6 +156,7 @@ const submitForm = async () => {
     console.log("Form submitted successfully:", res.data);
 
     toast.success("تم إرسال طلب إضافة المكان بنجاح!");
+    router.push("/");
     resetForm();
   } catch (error) {
     console.error("Error submitting form:", error);
