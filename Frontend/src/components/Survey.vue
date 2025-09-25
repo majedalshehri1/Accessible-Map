@@ -62,7 +62,7 @@ const submitSurvey = async () => {
     } else {
       toast.error("خطأ في إرسال الاستبيان");
     }
-    console.error("❌ Error submitting survey:", err);
+    console.log("❌ Error submitting survey:", err);
   } finally {
     isSubmitting.value = false;
   }
